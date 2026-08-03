@@ -10,14 +10,37 @@ export function adaptarAlunoDetalhe(
 
 
   const vinculoResponsavel =
-    aluno.aluno_responsavel?.[0];
+    aluno.aluno_responsavel?.[0] ??
+    aluno.alunos_responsaveis?.[0];
 
 
 
+  const responsavelId =
+    aluno.responsavel_id ??
+    vinculoResponsavel?.responsavel_id ??
+    null;
+
+
+
+  /**
+   * API retorna:
+   *
+   * aluno_responsavel:[
+   *   {
+   *     parentesco:"Pai",
+   *     responsaveis:{
+   *       nome:"Jonas"
+   *     }
+   *   }
+   * ]
+   *
+   * então precisa acessar responsaveis
+   */
   const responsavel =
     aluno.responsavel ??
-    vinculoResponsavel?.responsavel ??
+    vinculoResponsavel?.responsaveis ??
     null;
+
 
 
 
@@ -60,10 +83,9 @@ export function adaptarAlunoDetalhe(
 
     escola:
 
+      aluno.escola ??
       aluno.escolas?.nome ??
-
       aluno.escola_id ??
-
       "Não informado",
 
 
@@ -127,6 +149,7 @@ export function adaptarAlunoDetalhe(
 
 
 
+
     // ===============================
     // RESPONSÁVEL
     // ===============================
@@ -135,6 +158,8 @@ export function adaptarAlunoDetalhe(
     responsavel:
 
       responsavel?.nome ??
+
+      responsavelId ??
 
       "Responsável não vinculado",
 
@@ -145,8 +170,6 @@ export function adaptarAlunoDetalhe(
     parentesco:
 
       vinculoResponsavel?.parentesco ??
-
-      responsavel?.parentesco ??
 
       "-",
 
@@ -206,6 +229,11 @@ export function adaptarAlunoDetalhe(
 
 
 
+
+
+    // ===============================
+    // FINANCEIRO
+    // ===============================
 
 
     mensalidade:
@@ -361,20 +389,33 @@ export function adaptarAlunoDetalhe(
 
 
         ...(vinculoResponsavel
+
           ?
+
             [
+
               {
+
                 data:
-                  aluno.created_at ?? "-",
+
+                  aluno.created_at ??
+
+                  "-",
+
 
                 evento:
-                  `Responsável vinculado ao aluno`
+
+                  "Responsável vinculado ao aluno"
+
+
               }
+
             ]
 
           :
 
             []
+
         )
 
 

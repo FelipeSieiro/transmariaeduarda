@@ -35,6 +35,7 @@ import {
 
 import {
   listarResponsaveis,
+  removerResponsavel,
   type Responsavel,
 } from "@/services/responsaveis.service";
 
@@ -287,7 +288,7 @@ export default function Responsaveis() {
 
 
                   <TableHead>
-                    Parentesco
+                    Endereço
                   </TableHead>
 
 
@@ -356,9 +357,10 @@ export default function Responsaveis() {
 
                       <TableCell>
 
-                        {responsavel.parentesco ?? "-"}
+                        {responsavel.endereco ?? "-"}
 
                       </TableCell>
+
 
 
 

@@ -53,6 +53,7 @@ import {
 
 import {
   listarAlunos,
+  removerAluno,
   type Aluno
 } from "@/services/alunos.service";
 
@@ -67,33 +68,33 @@ const TODOS = "__todos__";
 export default function Alunos() {
 
 
-  const [alunos,setAlunos] = useState<Aluno[]>([]);
+  const [alunos, setAlunos] = useState<Aluno[]>([]);
 
   const navigate = useNavigate();
 
-  const [busca,setBusca] = useState("");
+  const [busca, setBusca] = useState("");
 
-  const [status,setStatus] = useState(TODOS);
+  const [status, setStatus] = useState(TODOS);
 
-  const [ordem,setOrdem] = useState<"nome" | "id">("nome");
+  const [ordem, setOrdem] = useState<"nome" | "id">("nome");
 
-  const [pagina,setPagina] = useState(1);
-
-
-
-  useEffect(()=>{
+  const [pagina, setPagina] = useState(1);
 
 
-    async function carregar(){
 
-      try{
+  useEffect(() => {
+
+
+    async function carregar() {
+
+      try {
 
         const dados = await listarAlunos();
 
         setAlunos(dados);
 
 
-      }catch(error){
+      } catch (error) {
 
         console.error(
           "Erro ao buscar alunos",
@@ -113,13 +114,29 @@ export default function Alunos() {
     carregar();
 
 
-  },[]);
+  }, []);
+
+
+  async function excluirAluno(id: string) {
+    if (!window.confirm("Tem certeza que deseja excluir este aluno?")) {
+      return;
+    }
+
+    try {
+      await removerAluno(id);
+      setAlunos((prev) => prev.filter((aluno) => aluno.id !== id));
+      toast.success("Aluno excluído com sucesso");
+    } catch (error) {
+      console.error(error);
+      toast.error("Erro ao excluir aluno");
+    }
+  }
 
 
 
 
 
-  const filtrados = useMemo(()=>{
+  const filtrados = useMemo(() => {
 
 
     const q = busca
@@ -128,7 +145,7 @@ export default function Alunos() {
 
 
 
-    const resultado = alunos.filter((aluno)=>{
+    const resultado = alunos.filter((aluno) => {
 
 
       const pesquisa =
@@ -156,10 +173,10 @@ export default function Alunos() {
 
 
 
-    return resultado.sort((a,b)=>{
+    return resultado.sort((a, b) => {
 
 
-      if(ordem==="nome"){
+      if (ordem === "nome") {
 
         return a.nome.localeCompare(
           b.nome
@@ -177,7 +194,7 @@ export default function Alunos() {
 
 
 
-  },[
+  }, [
     alunos,
     busca,
     status,
@@ -209,15 +226,15 @@ export default function Alunos() {
 
   const visiveis =
     filtrados.slice(
-      (paginaAtual-1)*PAGE_SIZE,
-      paginaAtual*PAGE_SIZE
+      (paginaAtual - 1) * PAGE_SIZE,
+      paginaAtual * PAGE_SIZE
     );
 
 
 
 
 
-  function limpar(){
+  function limpar() {
 
 
     setBusca("");
@@ -233,176 +250,176 @@ export default function Alunos() {
 
 
 
-return (
+  return (
 
-<div className="mx-auto max-w-[1600px] space-y-6">
+    <div className="mx-auto max-w-[1600px] space-y-6">
 
 
 
-<header className="flex flex-wrap items-center justify-between gap-4">
+      <header className="flex flex-wrap items-center justify-between gap-4">
 
 
-<div>
+        <div>
 
 
-<h1 className="font-display text-3xl font-semibold">
-Alunos
-</h1>
+          <h1 className="font-display text-3xl font-semibold">
+            Alunos
+          </h1>
 
 
-<p className="text-sm text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
 
-{filtrados.length} de {alunos.length} alunos cadastrados
+            {filtrados.length} de {alunos.length} alunos cadastrados
 
-</p>
+          </p>
 
 
-</div>
+        </div>
 
 
 
 
-<div className="flex gap-2">
+        <div className="flex gap-2">
 
 
-<Button
-variant="outline"
-className="rounded-xl"
-onClick={()=>toast.success("Exportação iniciada")}
->
+          <Button
+            variant="outline"
+            className="rounded-xl"
+            onClick={() => toast.success("Exportação iniciada")}
+          >
 
-<Download className="size-4"/>
+            <Download className="size-4" />
 
-Exportar
+            Exportar
 
-</Button>
+          </Button>
 
 
 
 
-<Button
-className="rounded-xl"
-onClick={()=>navigate("/alunos/novo")}
->
+          <Button
+            className="rounded-xl"
+            onClick={() => navigate("/alunos/novo")}
+          >
 
-<Plus className="size-4"/>
+            <Plus className="size-4" />
 
-Novo aluno
+            Novo aluno
 
-</Button>
+          </Button>
 
 
-</div>
+        </div>
 
 
-</header>
+      </header>
 
 
 
 
 
 
-<SectionCard
-title="Filtros"
-description="Pesquisa por nome ou matrícula"
-action={
+      <SectionCard
+        title="Filtros"
+        description="Pesquisa por nome ou matrícula"
+        action={
 
-<Button
-variant="ghost"
-size="sm"
-onClick={limpar}
->
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={limpar}
+          >
 
-<Filter className="size-4"/>
+            <Filter className="size-4" />
 
-Limpar
+            Limpar
 
-</Button>
+          </Button>
 
-}
->
+        }
+      >
 
 
 
-<div className="grid gap-3 md:grid-cols-2">
+        <div className="grid gap-3 md:grid-cols-2">
 
 
 
-<div className="relative">
+          <div className="relative">
 
 
-<Search className="absolute left-3 top-3 size-4 text-muted-foreground"/>
+            <Search className="absolute left-3 top-3 size-4 text-muted-foreground" />
 
 
-<Input
+            <Input
 
-value={busca}
+              value={busca}
 
-onChange={(e)=>{
+              onChange={(e) => {
 
-setBusca(e.target.value);
+                setBusca(e.target.value);
 
-setPagina(1);
+                setPagina(1);
 
-}}
+              }}
 
-placeholder="Buscar aluno..."
+              placeholder="Buscar aluno..."
 
-className="pl-9 rounded-xl"
+              className="pl-9 rounded-xl"
 
-/>
+            />
 
 
-</div>
+          </div>
 
 
 
 
 
-<Select
-value={status}
-onValueChange={setStatus}
->
+          <Select
+            value={status}
+            onValueChange={setStatus}
+          >
 
 
-<SelectTrigger className="rounded-xl">
+            <SelectTrigger className="rounded-xl">
 
-<SelectValue placeholder="Status"/>
+              <SelectValue placeholder="Status" />
 
-</SelectTrigger>
+            </SelectTrigger>
 
 
 
-<SelectContent>
+            <SelectContent>
 
 
-<SelectItem value={TODOS}>
-Todos
-</SelectItem>
+              <SelectItem value={TODOS}>
+                Todos
+              </SelectItem>
 
 
-<SelectItem value="ativo">
-Ativo
-</SelectItem>
+              <SelectItem value="ativo">
+                Ativo
+              </SelectItem>
 
 
-<SelectItem value="inativo">
-Inativo
-</SelectItem>
+              <SelectItem value="inativo">
+                Inativo
+              </SelectItem>
 
 
-</SelectContent>
+            </SelectContent>
 
 
-</Select>
+          </Select>
 
 
 
-</div>
+        </div>
 
 
 
-</SectionCard>
+      </SectionCard>
 
 
 
@@ -410,311 +427,311 @@ Inativo
 
 
 
-<SectionCard
+      <SectionCard
 
-title="Lista de alunos"
+        title="Lista de alunos"
 
-description="Dados vindos da API"
+        description="Dados vindos da API"
 
-bodyClassName="p-0"
+        bodyClassName="p-0"
 
-action={
+        action={
 
 
-<Button
-variant="ghost"
-size="sm"
-onClick={()=>setOrdem(
-ordem==="nome"
-?
-"id"
-:
-"nome"
-)}
->
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setOrdem(
+              ordem === "nome"
+                ?
+                "id"
+                :
+                "nome"
+            )}
+          >
 
 
-<ArrowUpDown className="size-4"/>
+            <ArrowUpDown className="size-4" />
 
 
-Ordenar
+            Ordenar
 
-</Button>
+          </Button>
 
 
-}
+        }
 
->
+      >
 
 
 
 
-{
-visiveis.length === 0 ?
+        {
+          visiveis.length === 0 ?
 
 
-<div className="p-5">
+            <div className="p-5">
 
 
-<EmptyState
+              <EmptyState
 
-icon={GraduationCap}
+                icon={GraduationCap}
 
-title="Nenhum aluno encontrado"
+                title="Nenhum aluno encontrado"
 
-description="Cadastre um aluno para visualizar aqui."
+                description="Cadastre um aluno para visualizar aqui."
 
-action={
+                action={
 
-<Button
-variant="outline"
-onClick={limpar}
->
+                  <Button
+                    variant="outline"
+                    onClick={limpar}
+                  >
 
-<SlidersHorizontal className="size-4"/>
+                    <SlidersHorizontal className="size-4" />
 
-Limpar
+                    Limpar
 
-</Button>
+                  </Button>
 
-}
+                }
 
-/>
+              />
 
 
-</div>
+            </div>
 
 
 
-:
+            :
 
 
 
-<div className="overflow-x-auto">
+            <div className="overflow-x-auto">
 
 
-<Table>
+              <Table>
 
 
-<TableHeader>
+                <TableHeader>
 
-<TableRow>
+                  <TableRow>
 
 
-<TableHead>
-Aluno
-</TableHead>
+                    <TableHead>
+                      Aluno
+                    </TableHead>
 
 
-<TableHead>
-Matrícula
-</TableHead>
+                    <TableHead>
+                      Matrícula
+                    </TableHead>
 
 
-<TableHead>
-Série
-</TableHead>
+                    <TableHead>
+                      Série
+                    </TableHead>
 
 
-<TableHead>
-Turno
-</TableHead>
+                    <TableHead>
+                      Turno
+                    </TableHead>
 
 
-<TableHead>
-Status
-</TableHead>
+                    <TableHead>
+                      Status
+                    </TableHead>
 
 
-<TableHead/>
+                    <TableHead />
 
-</TableRow>
+                  </TableRow>
 
 
-</TableHeader>
+                </TableHeader>
 
 
 
 
-<TableBody>
+                <TableBody>
 
 
-{
-visiveis.map((aluno)=>(
+                  {
+                    visiveis.map((aluno) => (
 
 
 
-<TableRow key={aluno.id}>
+                      <TableRow key={aluno.id}>
 
 
-<TableCell>
+                        <TableCell>
 
 
-<Link
-to={`/alunos/${aluno.id}`}
-className="flex items-center gap-3"
->
+                          <Link
+                            to={`/alunos/${aluno.id}`}
+                            className="flex items-center gap-3"
+                          >
 
 
-<Avatar>
+                            <Avatar>
 
 
-<AvatarImage src={aluno.foto_url}/>
+                              <AvatarImage src={aluno.foto_url} />
 
 
-<AvatarFallback>
+                              <AvatarFallback>
 
-{aluno.nome.slice(0,2)}
+                                {aluno.nome.slice(0, 2)}
 
-</AvatarFallback>
+                              </AvatarFallback>
 
 
-</Avatar>
+                            </Avatar>
 
 
 
-<div>
+                            <div>
 
 
-<p className="font-medium">
+                              <p className="font-medium">
 
-{aluno.nome}
+                                {aluno.nome}
 
-</p>
+                              </p>
 
 
-<p className="text-xs text-muted-foreground">
+                              <p className="text-xs text-muted-foreground">
 
-{aluno.cidade ?? ""}
+                                {aluno.cidade ?? ""}
 
-</p>
+                              </p>
 
 
-</div>
+                            </div>
 
 
-</Link>
+                          </Link>
 
 
-</TableCell>
+                        </TableCell>
 
 
 
 
-<TableCell>
+                        <TableCell>
 
-{aluno.matricula}
+                          {aluno.matricula}
 
-</TableCell>
+                        </TableCell>
 
 
 
-<TableCell>
+                        <TableCell>
 
-{aluno.serie ?? "-"}
+                          {aluno.serie ?? "-"}
 
-</TableCell>
+                        </TableCell>
 
 
 
-<TableCell>
+                        <TableCell>
 
-{aluno.turno ?? "-"}
+                          {aluno.turno ?? "-"}
 
-</TableCell>
+                        </TableCell>
 
 
 
-<TableCell>
+                        <TableCell>
 
-<StatusPill status={aluno.status ?? "ativo"}/>
+                          <StatusPill status={aluno.status ?? "ativo"} />
 
-</TableCell>
+                        </TableCell>
 
 
 
 
-<TableCell>
+                        <TableCell>
 
 
-<DropdownMenu>
+                          <DropdownMenu>
 
 
-<DropdownMenuTrigger asChild>
+                            <DropdownMenuTrigger asChild>
 
 
-<Button
-variant="ghost"
-size="icon"
->
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                              >
 
 
-<MoreHorizontal className="size-4"/>
+                                <MoreHorizontal className="size-4" />
 
 
-</Button>
+                              </Button>
 
 
-</DropdownMenuTrigger>
+                            </DropdownMenuTrigger>
 
 
 
-<DropdownMenuContent>
+                            <DropdownMenuContent>
 
 
-<DropdownMenuItem>
-Visualizar
-</DropdownMenuItem>
+                              <DropdownMenuItem>
+                                Visualizar
+                              </DropdownMenuItem>
 
 
-<DropdownMenuItem>
-Editar
-</DropdownMenuItem>
+                              <DropdownMenuItem>
+                                Editar
+                              </DropdownMenuItem>
 
 
-<DropdownMenuItem>
-Excluir
-</DropdownMenuItem>
+                              {aluno.status === "ativo" && (
+                                <DropdownMenuItem
+                                  onClick={() => excluirAluno(aluno.id)}
+                                >
+                                  Excluir
+                                </DropdownMenuItem>
+                              )}
 
+                            </DropdownMenuContent>
 
-</DropdownMenuContent>
+                          </DropdownMenu>
 
+                        </TableCell>
 
-</DropdownMenu>
 
+                      </TableRow>
 
-</TableCell>
 
+                    ))
 
+                  }
 
-</TableRow>
 
+                </TableBody>
 
-))
 
-}
+              </Table>
 
 
-</TableBody>
+            </div>
 
 
-</Table>
 
+        }
 
-</div>
 
+      </SectionCard>
 
 
-}
 
+    </div>
 
-</SectionCard>
-
-
-
-</div>
-
-);
+  );
 
 
 }

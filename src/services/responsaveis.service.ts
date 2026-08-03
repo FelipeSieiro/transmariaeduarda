@@ -13,7 +13,9 @@ export interface Responsavel {
 
   email?: string;
 
-  parentesco?: string;
+  endereco?: string;
+
+  observacoes?: string;
 
 }
 
@@ -50,8 +52,9 @@ export async function criarResponsavel(
     responsavel
   );
 
+  const data = response.data.data;
 
-  return response.data.data as Responsavel;
+  return (Array.isArray(data) ? data[0] : data) as Responsavel;
 
 }
 

@@ -1,10 +1,31 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { toast } from "sonner";
+import {
+  useEffect,
+  useState
+} from "react";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { SectionCard } from "@/components/ui-kit/primitives";
+import {
+  useNavigate
+} from "react-router-dom";
+
+import {
+  toast
+} from "sonner";
+
+
+import {
+  Button
+} from "@/components/ui/button";
+
+
+import {
+  Input
+} from "@/components/ui/input";
+
+
+import {
+  SectionCard
+} from "@/components/ui-kit/primitives";
+
 
 import {
   Select,
@@ -14,15 +35,26 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+
+
 import {
   criarAluno
 } from "@/services/alunos.service";
+
 
 
 import {
   listarResponsaveis,
   type Responsavel
 } from "@/services/responsaveis.service";
+
+
+
+import {
+  listarEscolas,
+  type Escola
+} from "@/services/escolas.service";
+
 
 
 
@@ -38,6 +70,7 @@ const SERIES = [
   "7º Fundamental",
   "8º Fundamental",
   "9º Fundamental",
+
   "1º Médio",
   "2º Médio",
   "3º Médio",
@@ -46,26 +79,38 @@ const SERIES = [
 
 
 
+
 const TURMAS = Array.from(
-  { length: 26 },
-  (_, i) => String.fromCharCode(65 + i)
+  {
+    length: 26
+  },
+
+  (_, i) =>
+    String.fromCharCode(
+      65 + i
+    )
 );
+
 
 
 
 const TURNOS = [
 
   "Manhã",
+
   "Tarde",
+
   "Integral"
 
 ];
 
 
 
+
 const STATUS = [
 
   "ativo",
+
   "inativo"
 
 ];
@@ -74,8 +119,7 @@ const STATUS = [
 
 
 
-export default function NovoAluno(){
-
+export default function NovoAluno() {
 
 
   const navigate = useNavigate();
@@ -83,56 +127,120 @@ export default function NovoAluno(){
 
 
 
-  const [serie,setSerie] = useState("");
-
-  const [turma,setTurma] = useState("");
-
-
-
-
-  const [responsaveis,setResponsaveis] =
-    useState<Responsavel[]>([]);
+  const [
+    serie,
+    setSerie
+  ] = useState("");
 
 
 
-  const [responsavelId,setResponsavelId] =
-    useState("");
+
+  const [
+    turma,
+    setTurma
+  ] = useState("");
 
 
 
 
 
+  const [
+    responsaveis,
+    setResponsaveis
+  ] = useState<Responsavel[]>([]);
 
 
-  const [form,setForm] = useState({
+
+
+
+  const [
+    escolas,
+    setEscolas
+  ] = useState<Escola[]>([]);
+
+
+
+
+
+  const [
+    form,
+    setForm
+  ] = useState({
+
 
     matricula:"",
 
+
     nome:"",
+
+
+    foto_url:"",
+
 
     data_nascimento:"",
 
-    escola:"",
 
-    motorista:"",
+    data_inicio:"",
+
+
+
+    escola_id:"",
+
+
+    rota_id:"",
+
+
 
     turno:"",
 
+
+
     cidade:"",
+
 
     bairro:"",
 
+
     endereco:"",
+
 
     numero:"",
 
+
     complemento:"",
+
 
     cep:"",
 
-    mensalidade:"",
+
 
     status:"ativo"
+
+
+  });
+
+
+
+
+
+
+  const [
+    responsavelData,
+    setResponsavelData
+  ] = useState({
+
+
+    responsavel_id:"",
+
+
+    parentesco:"",
+
+
+    responsavel_financeiro:false,
+
+
+    responsavel_emergencia:false
+
 
   });
 
@@ -142,21 +250,52 @@ export default function NovoAluno(){
 
 
 
-  useEffect(()=>{
+
+  useEffect(() => {
 
 
-    async function carregarResponsaveis(){
+    async function carregarDados(){
 
 
       try{
 
 
-        const dados =
-          await listarResponsaveis();
+        const [
+
+          responsaveisData,
+
+          escolasData
+
+
+        ] = await Promise.all([
+
+
+          listarResponsaveis(),
+
+
+          listarEscolas()
+
+
+        ]);
 
 
 
-        setResponsaveis(dados);
+
+        setResponsaveis(
+
+          responsaveisData
+
+        );
+
+
+
+
+        setEscolas(
+
+          escolasData
+
+        );
+
 
 
 
@@ -168,7 +307,7 @@ export default function NovoAluno(){
 
 
         toast.error(
-          "Erro ao carregar responsáveis"
+          "Erro ao carregar dados"
         );
 
 
@@ -179,22 +318,21 @@ export default function NovoAluno(){
 
 
 
-
-    carregarResponsaveis();
-
+    carregarDados();
 
 
-  },[]);
-
-
+  }, []);
 
 
 
 
 
   function alterar(
+
     campo:string,
+
     valor:string
+
   ){
 
 
@@ -209,52 +347,103 @@ export default function NovoAluno(){
 
     }));
 
-
   }
 
 
 
 
 
+  function alterarResponsavel(
+
+    campo:string,
+
+    valor:any
+
+  ){
 
 
- async function salvar(){
+    setResponsavelData(prev=>({
 
-  try{
+
+      ...prev,
+
+
+      [campo]:valor
+
+
+    }));
+
+  }
+async function salvar(){
+
+
+  try {
+
+
+
+    if(!form.matricula){
+
+
+      toast.error(
+        "Informe a matrícula do aluno"
+      );
+
+
+      return;
+
+
+    }
+
+
+
 
 
     if(!form.nome){
+
 
       toast.error(
         "Informe o nome do aluno"
       );
 
+
       return;
 
+
     }
+
+
+
 
 
 
     if(!serie){
 
+
       toast.error(
         "Selecione a série"
       );
 
+
       return;
 
+
     }
+
+
 
 
 
 
     if(!turma){
 
+
       toast.error(
         "Selecione a turma"
       );
 
+
       return;
+
 
     }
 
@@ -262,96 +451,219 @@ export default function NovoAluno(){
 
 
 
-    const aluno = {
+
+
+    if(!form.escola_id){
+
+
+      toast.error(
+        "Selecione a escola"
+      );
+
+
+      return;
+
+
+    }
+
+
+
+
+
+
+
+    const payload = {
+
 
 
       matricula:
+
         form.matricula,
 
 
 
+
+
       nome:
+
         form.nome,
 
 
 
+
+
+      foto_url:
+
+        form.foto_url || undefined,
+
+
+
+
+
       data_nascimento:
-        form.data_nascimento || null,
+
+        form.data_nascimento || undefined,
+
+
+
+
+
+      data_inicio:
+
+        form.data_inicio || undefined,
+
+
+
+
+
+
+
+      escola_id:
+
+        form.escola_id,
+
+
 
 
 
       serie:
+
         `${serie} - Turma ${turma}`,
 
 
 
+
+
+
+
       turno:
-        form.turno,
+
+        form.turno || undefined,
+
+
+
+
 
 
 
       endereco:
-        form.endereco,
+
+        form.endereco || undefined,
+
+
 
 
 
       numero:
-        form.numero,
+
+        form.numero || undefined,
+
+
 
 
 
       complemento:
-        form.complemento,
+
+        form.complemento || undefined,
+
+
 
 
 
       bairro:
-        form.bairro,
+
+        form.bairro || undefined,
+
+
 
 
 
       cidade:
-        form.cidade,
+
+        form.cidade || undefined,
+
+
 
 
 
       cep:
-        form.cep,
+
+        form.cep || undefined,
+
+
+
+
+
+
+
+      rota_id:
+
+        form.rota_id || undefined,
+
+
+
+
 
 
 
       status:
+
         form.status,
 
 
 
-      mensalidade:
-        Number(
-          form.mensalidade || 0
-        ),
 
 
 
-      /*
-        relacionamento correto
-      */
+
+
 
       aluno_responsavel:
 
-        responsavelId
+        responsavelData.responsavel_id
 
-        ? [
+        ?
 
-            {
+        [
 
-              responsavel_id:
-                responsavelId
 
-            }
+          {
 
-          ]
 
-        : []
+            responsavel_id:
+
+              responsavelData.responsavel_id,
+
+
+
+            parentesco:
+
+              responsavelData.parentesco || undefined,
+
+
+
+            responsavel_financeiro:
+
+              responsavelData.responsavel_financeiro,
+
+
+
+            responsavel_emergencia:
+
+              responsavelData.responsavel_emergencia
+
+
+
+          }
+
+
+        ]
+
+
+        :
+
+
+        []
 
 
 
@@ -361,45 +673,80 @@ export default function NovoAluno(){
 
 
 
+
+
+
     console.log(
-      "NOVO ALUNO PAYLOAD:",
-      aluno
+
+      "PAYLOAD NOVO ALUNO",
+
+      payload
+
     );
 
 
 
 
 
-    await criarAluno(aluno);
+
+
+
+    await criarAluno(
+
+      payload
+
+    );
+
+
 
 
 
 
 
     toast.success(
+
       "Aluno cadastrado com sucesso"
+
     );
 
 
 
 
 
-    navigate("/alunos");
+
+
+    navigate(
+
+      "/alunos"
+
+    );
+
+
+
+
 
 
 
   }catch(error){
 
 
+
     console.error(
-      "ERRO CADASTRAR ALUNO:",
+
+      "ERRO CADASTRO ALUNO",
+
       error
+
     );
 
 
 
+
+
     toast.error(
+
       "Erro ao cadastrar aluno"
+
     );
 
 
@@ -407,15 +754,13 @@ export default function NovoAluno(){
 
 
 }
-
-  return (
+return (
 
 <div className="mx-auto max-w-5xl space-y-6">
 
 
-
 <h1 className="text-3xl font-semibold">
-Novo aluno
+  Novo aluno
 </h1>
 
 
@@ -424,22 +769,18 @@ Novo aluno
 
 <SectionCard
 
-title="Dados do aluno"
+title="Dados pessoais"
 
-description="Cadastro completo do aluno"
+description="Informações básicas do aluno"
 
 >
-
 
 
 <div className="grid gap-4">
 
 
 
-
-
-<div className="grid gap-4 md:grid-cols-2">
-
+<div className="grid gap-4 md:grid-cols-3">
 
 
 <Input
@@ -449,40 +790,14 @@ placeholder="Matrícula"
 value={form.matricula}
 
 onChange={
-e=>alterar(
+e =>
+alterar(
 "matricula",
 e.target.value
 )
 }
 
 />
-
-
-
-
-
-<Input
-
-type="date"
-
-value={form.data_nascimento}
-
-onChange={
-e=>alterar(
-"data_nascimento",
-e.target.value
-)
-}
-
-/>
-
-
-
-</div>
-
-
-
-
 
 
 
@@ -493,7 +808,8 @@ placeholder="Nome completo"
 value={form.nome}
 
 onChange={
-e=>alterar(
+e =>
+alterar(
 "nome",
 e.target.value
 )
@@ -503,6 +819,94 @@ e.target.value
 
 
 
+<Input
+
+placeholder="URL da foto"
+
+value={form.foto_url}
+
+onChange={
+e =>
+alterar(
+"foto_url",
+e.target.value
+)
+}
+
+/>
+
+
+</div>
+
+
+
+
+
+<div className="grid gap-4 md:grid-cols-2">
+
+
+<Input
+
+type="date"
+
+value={form.data_nascimento}
+
+onChange={
+e =>
+alterar(
+"data_nascimento",
+e.target.value
+)
+}
+
+/>
+
+
+
+
+<Input
+
+type="date"
+
+value={form.data_inicio}
+
+onChange={
+e =>
+alterar(
+"data_inicio",
+e.target.value
+)
+}
+
+/>
+
+
+</div>
+
+
+</div>
+
+
+</SectionCard>
+
+
+
+
+
+
+
+
+
+<SectionCard
+
+title="Dados escolares"
+
+description="Escola, série e turno"
+
+>
+
+
+<div className="grid gap-4">
 
 
 
@@ -524,16 +928,23 @@ onValueChange={setSerie}
 
 <SelectTrigger>
 
-<SelectValue placeholder="Selecione a série"/>
+<SelectValue
+
+placeholder="Selecione a série"
+
+/>
 
 </SelectTrigger>
+
 
 
 <SelectContent>
 
 
 {
+
 SERIES.map(item=>(
+
 
 <SelectItem
 
@@ -543,11 +954,15 @@ value={item}
 
 >
 
+
 {item}
+
 
 </SelectItem>
 
+
 ))
+
 
 }
 
@@ -556,6 +971,7 @@ value={item}
 
 
 </Select>
+
 
 
 
@@ -574,16 +990,25 @@ onValueChange={setTurma}
 
 <SelectTrigger>
 
-<SelectValue placeholder="Selecione a turma"/>
+
+<SelectValue
+
+placeholder="Selecione a turma"
+
+/>
+
 
 </SelectTrigger>
+
 
 
 <SelectContent>
 
 
 {
+
 TURMAS.map(item=>(
+
 
 <SelectItem
 
@@ -593,11 +1018,15 @@ value={item}
 
 >
 
+
 Turma {item}
+
 
 </SelectItem>
 
+
 ))
+
 
 }
 
@@ -621,16 +1050,26 @@ Turma {item}
 
 <Select
 
-value={responsavelId}
+value={form.turno}
 
-onValueChange={setResponsavelId}
+onValueChange={
+v =>
+alterar(
+"turno",
+v
+)
+}
 
 >
 
 
 <SelectTrigger>
 
-<SelectValue placeholder="Selecione o responsável"/>
+<SelectValue
+
+placeholder="Selecione o turno"
+
+/>
 
 </SelectTrigger>
 
@@ -639,27 +1078,21 @@ onValueChange={setResponsavelId}
 <SelectContent>
 
 
-
 {
-responsaveis.map(item=>(
+
+TURNOS.map(item=>(
 
 
 <SelectItem
 
-key={item.id}
+key={item}
 
-value={item.id}
+value={item}
 
 >
 
 
-{item.nome}
-
-
-{
-item.cpf &&
-` - CPF: ${item.cpf}`
-}
+{item}
 
 
 </SelectItem>
@@ -667,12 +1100,11 @@ item.cpf &&
 
 ))
 
+
 }
 
 
-
 </SelectContent>
-
 
 
 </Select>
@@ -687,11 +1119,12 @@ item.cpf &&
 
 <Select
 
-value={form.turno}
+value={form.escola_id}
 
 onValueChange={
-v=>alterar(
-"turno",
+v =>
+alterar(
+"escola_id",
 v
 )
 }
@@ -701,30 +1134,43 @@ v
 
 <SelectTrigger>
 
-<SelectValue placeholder="Turno"/>
+
+<SelectValue
+
+placeholder="Selecione a escola"
+
+/>
+
 
 </SelectTrigger>
+
 
 
 <SelectContent>
 
 
 {
-TURNOS.map(item=>(
+
+escolas.map(escola=>(
+
 
 <SelectItem
 
-key={item}
+key={escola.id}
 
-value={item}
+value={escola.id}
 
 >
 
-{item}
+
+{escola.nome}
+
 
 </SelectItem>
 
+
 ))
+
 
 }
 
@@ -739,18 +1185,16 @@ value={item}
 
 
 
-
-
-
 <Input
 
-placeholder="Escola"
+placeholder="UUID da rota"
 
-value={form.escola}
+value={form.rota_id}
 
 onChange={
-e=>alterar(
-"escola",
+e =>
+alterar(
+"rota_id",
 e.target.value
 )
 }
@@ -759,34 +1203,33 @@ e.target.value
 
 
 
+</div>
+
+
+</SectionCard>
 
 
 
 
 
-<Input
-
-placeholder="Motorista"
-
-value={form.motorista}
-
-onChange={
-e=>alterar(
-"motorista",
-e.target.value
-)
-}
-
-/>
 
 
 
 
+<SectionCard
+
+title="Endereço"
+
+description="Localização do aluno"
+
+>
+
+
+<div className="grid gap-4">
 
 
 
 <div className="grid gap-4 md:grid-cols-2">
-
 
 
 <Input
@@ -796,14 +1239,14 @@ placeholder="Cidade"
 value={form.cidade}
 
 onChange={
-e=>alterar(
+e =>
+alterar(
 "cidade",
 e.target.value
 )
 }
 
 />
-
 
 
 
@@ -815,14 +1258,14 @@ placeholder="Bairro"
 value={form.bairro}
 
 onChange={
-e=>alterar(
+e =>
+alterar(
 "bairro",
 e.target.value
 )
 }
 
 />
-
 
 
 </div>
@@ -843,14 +1286,14 @@ placeholder="Endereço"
 value={form.endereco}
 
 onChange={
-e=>alterar(
+e =>
+alterar(
 "endereco",
 e.target.value
 )
 }
 
 />
-
 
 
 
@@ -862,14 +1305,14 @@ placeholder="Número"
 value={form.numero}
 
 onChange={
-e=>alterar(
+e =>
+alterar(
 "numero",
 e.target.value
 )
 }
 
 />
-
 
 
 
@@ -881,7 +1324,8 @@ placeholder="CEP"
 value={form.cep}
 
 onChange={
-e=>alterar(
+e =>
+alterar(
 "cep",
 e.target.value
 )
@@ -890,11 +1334,8 @@ e.target.value
 />
 
 
+
 </div>
-
-
-
-
 
 
 
@@ -907,13 +1348,128 @@ placeholder="Complemento"
 value={form.complemento}
 
 onChange={
-e=>alterar(
+e =>
+alterar(
 "complemento",
 e.target.value
 )
 }
 
 />
+
+
+
+</div>
+
+
+</SectionCard>
+<SectionCard
+
+title="Responsável"
+
+description="Vínculo do responsável pelo aluno"
+
+>
+
+
+<div className="grid gap-4">
+
+
+
+
+
+
+<Select
+
+value={responsavelData.responsavel_id}
+
+onValueChange={
+
+v =>
+
+alterarResponsavel(
+
+"responsavel_id",
+
+v
+
+)
+
+}
+
+>
+
+
+<SelectTrigger>
+
+
+<SelectValue
+
+placeholder="Selecione o responsável"
+
+/>
+
+
+</SelectTrigger>
+
+
+
+
+
+<SelectContent>
+
+
+
+{
+
+responsaveis.map(item => (
+
+
+<SelectItem
+
+key={item.id}
+
+value={item.id}
+
+>
+
+
+{item.nome}
+
+
+
+{
+
+item.cpf
+
+?
+
+` - CPF: ${item.cpf}`
+
+:
+
+""
+
+}
+
+
+
+</SelectItem>
+
+
+))
+
+
+}
+
+
+
+</SelectContent>
+
+
+
+</Select>
+
 
 
 
@@ -924,17 +1480,22 @@ e.target.value
 
 <Input
 
-placeholder="Mensalidade"
+placeholder="Parentesco (Pai, Mãe, Tutor...)"
 
-type="number"
-
-value={form.mensalidade}
+value={responsavelData.parentesco}
 
 onChange={
-e=>alterar(
-"mensalidade",
+
+e =>
+
+alterarResponsavel(
+
+"parentesco",
+
 e.target.value
+
 )
+
 }
 
 />
@@ -947,15 +1508,131 @@ e.target.value
 
 
 
+<div className="flex gap-6">
+
+
+
+<label className="flex items-center gap-2">
+
+
+<input
+
+type="checkbox"
+
+checked={
+responsavelData.responsavel_financeiro
+}
+
+onChange={
+
+e =>
+
+alterarResponsavel(
+
+"responsavel_financeiro",
+
+e.target.checked
+
+)
+
+}
+
+/>
+
+
+
+Responsável financeiro
+
+
+</label>
+
+
+
+
+
+
+
+
+<label className="flex items-center gap-2">
+
+
+<input
+
+type="checkbox"
+
+checked={
+responsavelData.responsavel_emergencia
+}
+
+onChange={
+
+e =>
+
+alterarResponsavel(
+
+"responsavel_emergencia",
+
+e.target.checked
+
+)
+
+}
+
+/>
+
+
+
+Contato de emergência
+
+
+</label>
+
+
+
+</div>
+
+
+
+
+
+</div>
+
+
+</SectionCard>
+
+
+
+
+
+
+
+
+
+<SectionCard
+
+title="Status"
+
+description="Controle do cadastro"
+
+>
+
+
 <Select
 
 value={form.status}
 
 onValueChange={
-v=>alterar(
+
+v =>
+
+alterar(
+
 "status",
+
 v
+
 )
+
 }
 
 >
@@ -963,9 +1640,17 @@ v
 
 <SelectTrigger>
 
-<SelectValue placeholder="Status"/>
+
+<SelectValue
+
+placeholder="Status"
+
+/>
+
 
 </SelectTrigger>
+
+
 
 
 
@@ -973,6 +1658,7 @@ v
 
 
 {
+
 STATUS.map(item=>(
 
 
@@ -984,12 +1670,15 @@ value={item}
 
 >
 
+
 {item}
+
 
 </SelectItem>
 
 
 ))
+
 
 }
 
@@ -997,7 +1686,16 @@ value={item}
 </SelectContent>
 
 
+
 </Select>
+
+
+
+
+</SectionCard>
+
+
+
 
 
 
@@ -1008,11 +1706,13 @@ value={item}
 
 onClick={salvar}
 
-className="rounded-xl"
+className="w-full rounded-xl"
 
 >
 
+
 Salvar aluno
+
 
 </Button>
 
@@ -1020,17 +1720,9 @@ Salvar aluno
 
 
 
-</div>
-
-
-
-</SectionCard>
-
-
 
 </div>
+
 
 );
-
-
 }

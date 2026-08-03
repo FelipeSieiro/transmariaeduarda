@@ -88,8 +88,8 @@ function Campo({
   label,
   value
 }: {
-  label:string;
-  value:string;
+  label: string;
+  value: string;
 }) {
 
 
@@ -124,7 +124,7 @@ function Campo({
 
 
 
-export default function AlunoDetalhe(){
+export default function AlunoDetalhe() {
 
 
 
@@ -157,18 +157,18 @@ export default function AlunoDetalhe(){
 
 
 
-  useEffect(()=>{
+  useEffect(() => {
 
 
-    async function carregarAluno(){
-
-
-
-      try{
+    async function carregarAluno() {
 
 
 
-        if(!alunoId){
+      try {
+
+
+
+        if (!alunoId) {
 
           return;
 
@@ -200,7 +200,7 @@ export default function AlunoDetalhe(){
 
 
 
-      }catch(error){
+      } catch (error) {
 
 
 
@@ -230,7 +230,7 @@ export default function AlunoDetalhe(){
 
 
 
-        if(alunoMock){
+        if (alunoMock) {
 
 
           setAluno(
@@ -242,7 +242,7 @@ export default function AlunoDetalhe(){
 
 
 
-      }finally{
+      } finally {
 
 
         setCarregando(false);
@@ -264,7 +264,7 @@ export default function AlunoDetalhe(){
 
 
 
-  },[alunoId]);
+  }, [alunoId]);
 
 
 
@@ -274,7 +274,7 @@ export default function AlunoDetalhe(){
 
 
 
-  if(carregando){
+  if (carregando) {
 
 
     return (
@@ -298,7 +298,7 @@ export default function AlunoDetalhe(){
 
 
 
-  if(!aluno){
+  if (!aluno) {
 
 
     return (
@@ -350,7 +350,7 @@ export default function AlunoDetalhe(){
 
   }
 
-    return (
+  return (
 
     <div className="mx-auto max-w-[1400px] space-y-6">
 
@@ -409,7 +409,7 @@ export default function AlunoDetalhe(){
 
               <AvatarFallback>
 
-                {aluno.nome.slice(0,2)}
+                {aluno.nome.slice(0, 2)}
 
               </AvatarFallback>
 
@@ -445,10 +445,10 @@ export default function AlunoDetalhe(){
               <div className="mt-2 flex flex-wrap items-center gap-2">
 
 
-                <StatusPill status={aluno.status}/>
+                <StatusPill status={aluno.status} />
 
 
-                <StatusPill status={aluno.pagamento}/>
+                <StatusPill status={aluno.pagamento} />
 
 
                 <Badge variant="secondary">
@@ -483,7 +483,7 @@ export default function AlunoDetalhe(){
               className="rounded-xl"
             >
 
-              <Phone className="size-4"/>
+              <Phone className="size-4" />
 
               Contatar
 
@@ -494,7 +494,7 @@ export default function AlunoDetalhe(){
 
             <Button className="rounded-xl">
 
-              <FileText className="size-4"/>
+              <FileText className="size-4" />
 
               Contrato
 
@@ -609,7 +609,7 @@ export default function AlunoDetalhe(){
             <div className="flex items-start gap-3">
 
 
-              <Home className="mt-0.5 size-4 shrink-0 text-primary"/>
+              <Home className="mt-0.5 size-4 shrink-0 text-primary" />
 
 
 
@@ -655,7 +655,7 @@ export default function AlunoDetalhe(){
                 <span className="grid size-9 place-items-center rounded-full bg-primary text-primary-foreground">
 
 
-                  <MapPin className="size-4"/>
+                  <MapPin className="size-4" />
 
 
                 </span>
@@ -717,7 +717,13 @@ export default function AlunoDetalhe(){
 
                 <AvatarFallback>
 
-                  {aluno.responsavel?.slice(0,2)}
+                  {
+                    aluno.responsavel
+                      ? aluno.responsavel
+                        .slice(0, 2)
+                        .toUpperCase()
+                      : "RS"
+                  }
 
                 </AvatarFallback>
 
@@ -757,7 +763,7 @@ export default function AlunoDetalhe(){
 
 
 
-            <Separator/>
+            <Separator />
 
 
 
@@ -770,7 +776,7 @@ export default function AlunoDetalhe(){
               <p className="flex items-center gap-2">
 
 
-                <Phone className="size-4 text-muted-foreground"/>
+                <Phone className="size-4 text-muted-foreground" />
 
 
                 {aluno.telefone}
@@ -785,7 +791,7 @@ export default function AlunoDetalhe(){
               <p className="flex min-w-0 items-center gap-2">
 
 
-                <Mail className="size-4 shrink-0 text-muted-foreground"/>
+                <Mail className="size-4 shrink-0 text-muted-foreground" />
 
 
                 <span className="truncate">
@@ -804,10 +810,10 @@ export default function AlunoDetalhe(){
               <p className="flex items-center gap-2">
 
 
-                <Bus className="size-4 text-muted-foreground"/>
+                <Bus className="size-4 text-muted-foreground" />
 
 
-                {aluno.motorista}
+                {aluno.endereco}
 
 
               </p>
@@ -1042,8 +1048,8 @@ export default function AlunoDetalhe(){
 
 
                   {
-                    aluno.mensalidades.map((m)=>(
-                      
+                    aluno.mensalidades.map((m) => (
+
 
                       <TableRow
                         key={m.competencia}
@@ -1071,7 +1077,7 @@ export default function AlunoDetalhe(){
 
 
                         <TableCell>
-                          <StatusPill status={m.status}/>
+                          <StatusPill status={m.status} />
                         </TableCell>
 
 
@@ -1128,8 +1134,8 @@ export default function AlunoDetalhe(){
 
 
               {
-                aluno.ocorrencias.map((o)=>(
-                  
+                aluno.ocorrencias.map((o) => (
+
 
                   <li
 
@@ -1145,21 +1151,20 @@ export default function AlunoDetalhe(){
 
                       className={`
                         mt-0.5 grid size-9 shrink-0 place-items-center rounded-xl
-                        ${
-                          o.gravidade === "alta"
+                        ${o.gravidade === "alta"
                           ? "bg-destructive/12 text-destructive"
                           :
                           o.gravidade === "media"
-                          ? "bg-warning/15 text-warning"
-                          :
-                          "bg-muted text-muted-foreground"
+                            ? "bg-warning/15 text-warning"
+                            :
+                            "bg-muted text-muted-foreground"
                         }
                       `}
 
                     >
 
 
-                      <MessageSquareWarning className="size-4"/>
+                      <MessageSquareWarning className="size-4" />
 
 
                     </span>
@@ -1242,8 +1247,8 @@ export default function AlunoDetalhe(){
 
 
               {
-                aluno.historico.map((h)=>(
-                  
+                aluno.historico.map((h) => (
+
 
                   <li
 
@@ -1257,7 +1262,7 @@ export default function AlunoDetalhe(){
                     <span className="absolute -left-[31px] top-1 grid size-5 place-items-center rounded-full border-2 border-card bg-primary text-primary-foreground">
 
 
-                      <History className="size-2.5"/>
+                      <History className="size-2.5" />
 
 
                     </span>
@@ -1275,7 +1280,7 @@ export default function AlunoDetalhe(){
                     <p className="flex items-center gap-1 text-xs text-muted-foreground">
 
 
-                      <CalendarDays className="size-3"/>
+                      <CalendarDays className="size-3" />
 
 
                       {h.data}
@@ -1327,8 +1332,8 @@ export default function AlunoDetalhe(){
 
 
               {
-                aluno.documentos.map((d)=>(
-                  
+                aluno.documentos.map((d) => (
+
 
                   <li
 
@@ -1343,7 +1348,7 @@ export default function AlunoDetalhe(){
                     <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary">
 
 
-                      <FileText className="size-4"/>
+                      <FileText className="size-4" />
 
 
                     </span>
@@ -1379,7 +1384,7 @@ export default function AlunoDetalhe(){
                       size="icon"
                     >
 
-                      <Download className="size-4"/>
+                      <Download className="size-4" />
 
                     </Button>
 
@@ -1426,7 +1431,7 @@ export default function AlunoDetalhe(){
 
 
               {
-                Array.from({length:4}).map((_,i)=>(
+                Array.from({ length: 4 }).map((_, i) => (
 
 
                   <div
@@ -1438,12 +1443,12 @@ export default function AlunoDetalhe(){
                   >
 
 
-                    <Images className="size-5"/>
+                    <Images className="size-5" />
 
 
                     <span className="text-[11px]">
 
-                      Foto {i+1}
+                      Foto {i + 1}
 
                     </span>
 

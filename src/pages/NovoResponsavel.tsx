@@ -6,14 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SectionCard } from "@/components/ui-kit/primitives";
 
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-
+import { Textarea } from "@/components/ui/textarea";
 
 import {
   criarResponsavel
@@ -23,29 +16,6 @@ import {
 
 
 
-const PARENTESCOS = [
-
-  "Pai",
-
-  "Mãe",
-
-  "Avô",
-
-  "Avó",
-
-  "Tio",
-
-  "Tia",
-
-  "Irmão",
-
-  "Irmã",
-
-  "Responsável legal",
-
-  "Outro"
-
-];
 
 
 
@@ -70,7 +40,9 @@ export default function NovoResponsavel(){
 
     email:"",
 
-    parentesco:""
+    endereco:"",
+
+    observacoes:""
 
 
   });
@@ -122,6 +94,16 @@ export default function NovoResponsavel(){
 
         return;
 
+
+      }
+
+      if(!form.cpf){
+
+        toast.error(
+          "Informe o CPF do responsável"
+        );
+
+        return;
 
       }
 
@@ -289,6 +271,44 @@ e.target.value
 />
 
 
+  <Input
+
+
+  placeholder="Endereço"
+
+
+  value={form.endereco}
+
+
+  onChange={
+  e=>alterar(
+    "endereco",
+    e.target.value
+  )
+  }
+
+
+  />
+
+
+  <Textarea
+
+
+  placeholder="Observações"
+
+
+  value={form.observacoes}
+
+
+  onChange={
+  e=>alterar(
+    "observacoes",
+    e.target.value
+  )
+  }
+
+
+  />
 
 
 
@@ -296,59 +316,11 @@ e.target.value
 
 
 
-<Select
-
-value={form.parentesco}
-
-onValueChange={
-valor=>alterar(
-"parentesco",
-valor
-)
-}
-
->
-
-
-<SelectTrigger className="rounded-xl">
-
-<SelectValue placeholder="Selecione o parentesco"/>
-
-</SelectTrigger>
 
 
 
 
 
-<SelectContent>
-
-
-{
-PARENTESCOS.map(item=>(
-
-
-<SelectItem
-
-key={item}
-
-value={item}
-
->
-
-{item}
-
-</SelectItem>
-
-
-))
-}
-
-
-
-</SelectContent>
-
-
-</Select>
 
 
 

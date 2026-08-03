@@ -20,9 +20,6 @@ export interface Responsavel {
   email?:string;
 
 
-  parentesco?:string;
-
-
 }
 
 
@@ -147,17 +144,22 @@ export interface Aluno {
 
 
 
-  responsavel_id?:string;
-
-
-
   responsavel?:Responsavel | null;
-
 
 
   aluno_responsavel?: Array<{
 
-    responsavel: Responsavel;
+    responsavel_id?: string;
+    responsavel?: Responsavel;
+    parentesco?: string;
+
+  }>;
+
+  alunos_responsaveis?: Array<{
+
+    responsavel_id?: string;
+    responsavel?: Responsavel;
+    parentesco?: string;
 
   }>;
 
