@@ -619,9 +619,7 @@ export default function Alunos() {
 
 
                         <TableCell>
-
-                          {aluno.matricula}
-
+                          ALU-{aluno.id.slice(0, 8).toUpperCase()}
                         </TableCell>
 
 

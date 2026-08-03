@@ -17,6 +17,7 @@ export interface Aluno {
   responsavel: string;
   parentesco: string;
   telefone: string;
+  enderecoResponsavel?: string;
   email: string;
   motorista: string;
   veiculo: string;

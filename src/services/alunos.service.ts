@@ -3,23 +3,23 @@ import api from "@/lib/api";
 
 
 export interface Responsavel {
+  id: string;
 
+  nome: string;
 
-  id:string;
+  cpf?: string;
 
+  telefone?: string;
 
-  nome:string;
+  email?: string;
 
+  // =====================
+  // ENDEREÇO
+  // =====================
 
-  cpf?:string;
+  endereco?: string;
 
-
-  telefone?:string;
-
-
-  email?:string;
-
-
+  observacoes?: string;
 }
 
 
