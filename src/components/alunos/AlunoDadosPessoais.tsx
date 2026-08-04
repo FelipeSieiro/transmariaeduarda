@@ -1,6 +1,5 @@
 // src/components/alunos/AlunoDadosPessoais.tsx
 import { SectionCard } from "@/components/ui-kit/primitives";
-import type { Aluno } from "@/types";
 
 interface CampoProps {
   readonly label: string;
@@ -21,9 +20,10 @@ function Campo({ label, value }: CampoProps) {
 }
 
 function formatarData(dataIso?: string | null): string {
-  if (!dataIso) return "-";
+  if (!dataIso || dataIso === "-") return "-";
   try {
-    const data = new Date(dataIso);
+    const dataLimpa = dataIso.includes("T") ? dataIso : `${dataIso}T00:00:00Z`;
+    const data = new Date(dataLimpa);
     if (isNaN(data.getTime())) return dataIso;
     return new Intl.DateTimeFormat("pt-BR", { timeZone: "UTC" }).format(data);
   } catch {
@@ -32,17 +32,27 @@ function formatarData(dataIso?: string | null): string {
 }
 
 interface AlunoDadosPessoaisProps {
-  readonly aluno: Aluno;
+  readonly aluno: any;
 }
 
 export function AlunoDadosPessoais({ aluno }: AlunoDadosPessoaisProps) {
-  const matricula = aluno.id
-    ? `ALU-${aluno.id.slice(0, 8).toUpperCase()}`
+  if (!aluno) return null;
+
+  const dados = aluno.data || aluno;
+
+  const matricula = dados.id
+    ? `ALU-${dados.id.slice(0, 8).toUpperCase()}`
     : "-";
 
-  const nomeEscola = typeof aluno.escolas === "string" 
-    ? aluno.escolas 
-    : aluno.escola?.nome ?? aluno.escolas?.nome ?? "-";
+  // Trata escola se vier como string direta ou como objeto aninhado antigo
+  const nomeEscola = 
+    typeof dados.escola === "string" 
+      ? dados.escola 
+      : dados.escola?.nome ?? dados.escolas?.nome ?? "-";
+
+  // Mapeando para as chaves reais que vieram no seu console.log (`nascimento` e `desde`)
+  const dataNascimento = dados.nascimento || dados.data_nascimento;
+  const alunoDesde = dados.desde || dados.data_inicio;
 
   return (
     <SectionCard
@@ -51,11 +61,11 @@ export function AlunoDadosPessoais({ aluno }: AlunoDadosPessoaisProps) {
     >
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
         <Campo label="Matrícula" value={matricula} />
-        <Campo label="Nascimento" value={formatarData(aluno.data_nascimento)} />
+        <Campo label="Nascimento" value={formatarData(dataNascimento)} />
         <Campo label="Escola" value={nomeEscola} />
-        <Campo label="Série" value={aluno.serie} />
-        <Campo label="Turno" value={aluno.turno} />
-        <Campo label="Aluno desde" value={formatarData(aluno.data_inicio)} />
+        <Campo label="Série" value={dados.serie} />
+        <Campo label="Turno" value={dados.turno} />
+        <Campo label="Aluno desde" value={formatarData(alunoDesde)} />
       </div>
     </SectionCard>
   );

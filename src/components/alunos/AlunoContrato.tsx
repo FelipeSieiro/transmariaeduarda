@@ -1,6 +1,5 @@
 import { SectionCard } from "@/components/ui-kit/primitives";
 import { brlExato } from "@/data/mock";
-import { Contrato } from "@/types";
 
 function Campo({ label, value }: { label: string; value: string }) {
   return (
@@ -14,7 +13,7 @@ function Campo({ label, value }: { label: string; value: string }) {
 }
 
 interface AlunoContratoProps {
-  contrato: Contrato | null;
+  contrato: any;
 }
 
 export function AlunoContrato({ contrato }: AlunoContratoProps) {
@@ -31,24 +30,33 @@ export function AlunoContrato({ contrato }: AlunoContratoProps) {
     );
   }
 
+  // Mapeamento seguro suportando tanto snake_case quanto camelCase
+  const numero = contrato.numero || "";
+  const inicio = contrato.inicio || contrato.data_inicio || "";
+  const fim = contrato.fim || contrato.data_fim || "";
+  const diaVenc = contrato.vencimentoDia ?? contrato.dia_vencimento ?? "";
+  const formaPagamento = contrato.formaPagamento || contrato.forma_pagamento || "-";
+  const valor = contrato.valorMensalidade ?? contrato.valor_mensalidade ?? 0;
+  const observacoes = contrato.observacoes || "";
+
   return (
     <SectionCard
-      title={`Contrato ${contrato.numero}`}
+      title={`Contrato ${numero}`}
       description="Vigência e condições comerciais"
     >
       <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-6">
-        <Campo label="Número" value={contrato.numero} />
-        <Campo label="Início" value={contrato.data_inicio} />
-        <Campo label="Término" value={contrato.data_fim || ""} />
-        <Campo label="Vencimento" value={`Dia ${contrato.dia_vencimento}`} />
-        <Campo label="Pagamento" value={contrato.forma_pagamento} />
+        <Campo label="Número" value={numero} />
+        <Campo label="Início" value={inicio} />
+        <Campo label="Término" value={fim === "-" ? "" : fim} />
+        <Campo label="Vencimento" value={diaVenc ? `Dia ${diaVenc}` : ""} />
+        <Campo label="Pagamento" value={formaPagamento} />
         <Campo
           label="Mensalidade"
-          value={brlExato(contrato.valor_mensalidade)}
+          value={typeof valor === "number" ? brlExato(valor) : String(valor)}
         />
       </div>
       <p className="mt-4 rounded-xl bg-muted/60 p-4 text-sm text-muted-foreground">
-        {contrato.observacoes || "Sem observações cadastradas."}
+        {observacoes || "Sem observações cadastradas."}
       </p>
     </SectionCard>
   );

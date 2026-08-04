@@ -196,27 +196,6 @@ export function GradeSemanalRotas({
 
   return (
     <div className="space-y-6">
-      <div className="rounded-2xl border bg-card p-4 shadow-sm flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="rounded-xl bg-primary/10 p-3 text-primary">
-            <Bus className="size-5" />
-          </div>
-          <div>
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Rota Principal Atribuída (Cadastro)
-            </h4>
-            <p className="text-base font-semibold text-foreground mt-0.5">
-              {nomeRotaPrincipal && nomeRotaPrincipal !== "-" ? (
-                nomeRotaPrincipal
-              ) : (
-                <span className="text-amber-600 font-normal text-sm">
-                  Nenhuma rota principal definida no cadastro geral do aluno
-                </span>
-              )}
-            </p>
-          </div>
-        </div>
-      </div>
 
       <SectionCard
         title="Grade Semanal de Transportes"

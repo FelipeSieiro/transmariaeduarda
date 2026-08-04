@@ -55,16 +55,11 @@ export function Topbar() {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="sm" className="hidden shrink-0 gap-2 rounded-xl md:flex">
               <Building2 className="size-4 text-primary" />
-              <span className="max-w-[10rem] truncate">Transportes Aurora Ltda.</span>
+              <span className="max-w-[10rem] truncate">Trans Maria Eduarda</span>
               <ChevronDown className="size-3.5 opacity-60" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-64">
-            <DropdownMenuLabel>Empresas</DropdownMenuLabel>
-            <DropdownMenuItem>Transportes Aurora Ltda.</DropdownMenuItem>
-            <DropdownMenuItem>Aurora Filial Zona Sul</DropdownMenuItem>
-            <DropdownMenuItem>Aurora Fretamento</DropdownMenuItem>
-          </DropdownMenuContent>
+
         </DropdownMenu>
 
         <form

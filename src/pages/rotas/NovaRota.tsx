@@ -120,10 +120,8 @@ export default function NovaRota() {
       return;
     }
 
-    const horaPrincipal = tipoTrajeto === "ENTRADA" ? horarioSaida : horarioRetorno;
-
-    if (!horaPrincipal) {
-      toast.error("Informe o horário do trajeto");
+    if (!horarioSaida.trim() && !horarioRetorno.trim()) {
+      toast.error("Informe pelo menos um horário (Entrada ou Retorno)");
       return;
     }
 
@@ -132,8 +130,8 @@ export default function NovaRota() {
 
       const payload: Record<string, any> = {
         nome: nome.trim(),
-        horario_saida: formatarHorario(horarioSaida || horarioRetorno),
-        horario_retorno: formatarHorario(horarioRetorno),
+        horario_saida: horarioSaida.trim() ? formatarHorario(horarioSaida) : null,
+        horario_retorno: horarioRetorno.trim() ? formatarHorario(horarioRetorno) : null,
         bairro: bairro.trim() || null,
         escola_id: !escolaId || escolaId === "none" ? null : escolaId,
         motorista_id: !motoristaId || motoristaId === "unassigned" ? null : motoristaId,
@@ -269,37 +267,36 @@ export default function NovaRota() {
               </Select>
             </div>
 
-            {tipoTrajeto === "ENTRADA" ? (
-              <div className="space-y-1.5">
-                <Label htmlFor="horario_saida" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  Horário de Entrada *
-                </Label>
-                <Input
-                  id="horario_saida"
-                  type="time"
-                  value={horarioSaida}
-                  onChange={(e) => setHorarioSaida(e.target.value)}
-                  className="rounded-xl h-10"
-                  disabled={submitting}
-                  required
-                />
-              </div>
-            ) : (
-              <div className="space-y-1.5">
-                <Label htmlFor="horario_retorno" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  Horário de Saída *
-                </Label>
-                <Input
-                  id="horario_retorno"
-                  type="time"
-                  value={horarioRetorno}
-                  onChange={(e) => setHorarioRetorno(e.target.value)}
-                  className="rounded-xl h-10"
-                  disabled={submitting}
-                  required
-                />
-              </div>
-            )}
+            {/* Ambos os campos de horário visíveis independentemente */}
+            <div className="space-y-1.5">
+              <Label htmlFor="horario_saida" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Horário de Saída
+              </Label>
+              <Input
+                id="horario_saida"
+                type="time"
+                value={horarioSaida}
+                onChange={(e) => setHorarioSaida(e.target.value)}
+                className="rounded-xl h-10"
+                disabled={submitting}
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="horario_retorno" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Horário de Retorno
+              </Label>
+              <Input
+                id="horario_retorno"
+                type="time"
+                value={horarioRetorno}
+                onChange={(e) => setHorarioRetorno(e.target.value)}
+                className="rounded-xl h-10"
+                disabled={submitting}
+              />
+            </div>
+
+
 
             <div className="space-y-1.5">
               <Label htmlFor="bairro" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
