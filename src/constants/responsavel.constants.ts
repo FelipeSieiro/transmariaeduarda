@@ -12,5 +12,18 @@ export enum Parentesco {
   OUTRO = "Outro",
 }
 
-// Helper para iteração direta em componentes UI
-export const PARENTESCOS = Object.values(Parentesco);
+// Interface genérica para componentes de interface
+export interface SelectOption<T = string> {
+  readonly value: T;
+  readonly label: string;
+}
+
+// Array imutável para iteração direta
+export const PARENTESCOS = Object.values(Parentesco) as readonly Parentesco[];
+
+// Opções prontas para formulários (<Select />, Radio Groups, etc.)
+export const PARENTESCO_OPTIONS: readonly SelectOption<Parentesco>[] =
+  PARENTESCOS.map((parentesco) => ({
+    value: parentesco,
+    label: parentesco,
+  }));

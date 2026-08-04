@@ -1,41 +1,70 @@
-import { useState, useEffect } from "react";
+// src/components/alunos/ModalAgendaAluno.tsx
+import { useEffect, useState } from "react";
 import { X, Save, Plus, Trash2, Clock, Bus } from "lucide-react";
-import { AgendamentosService } from "@/services/agendamentos.service";
-import { ItemAgendamento, TipoTrajeto } from "@/types/agendamento";
+import { toast } from "sonner";
 
-interface Props {
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+import { agendamentoRotasService } from "@/services/agendamento-rotas.service";
+import type { ItemAgendamento, TipoTrajeto } from "@/types";
+
+export interface OptionRota {
+  readonly id: string;
+  readonly nome: string;
+}
+
+interface ModalAgendaAlunoProps {
   alunoId: string;
   alunoNome: string;
   isOpen: boolean;
   onClose: () => void;
-  rotasDisponiveis: { id: string; nome: string }[];
+  rotasDisponiveis: readonly OptionRota[];
 }
 
-const DIAS = [
+export interface DiaOpcao {
+  readonly id: number;
+  readonly label: string;
+}
+
+export const DIAS_SEMANA_MODAL: readonly DiaOpcao[] = [
   { id: 1, label: "Segunda-feira" },
   { id: 2, label: "Terça-feira" },
   { id: 3, label: "Quarta-feira" },
   { id: 4, label: "Quinta-feira" },
   { id: 5, label: "Sexta-feira" },
   { id: 6, label: "Sábado" },
-];
+] as const;
 
-export function ModalAgendaAluno({ alunoId, alunoNome, isOpen, onClose, rotasDisponiveis }: Props) {
+export function ModalAgendaAluno({
+  alunoId,
+  alunoNome,
+  isOpen,
+  onClose,
+  rotasDisponiveis,
+}: ModalAgendaAlunoProps) {
   const [agendamentos, setAgendamentos] = useState<ItemAgendamento[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [saving, setSaving] = useState<boolean>(false);
 
-  // Carregar a grade existente do aluno
   useEffect(() => {
     if (!isOpen || !alunoId) return;
 
     async function loadAgenda() {
       try {
         setLoading(true);
-        const data = await AgendamentosService.getAgendaPorAluno(alunoId);
-        setAgendamentos(data);
+        const data = await agendamentoRotasService.getByAlunoId(alunoId);
+        setAgendamentos(data ?? []);
       } catch (err) {
         console.error("Erro ao carregar agenda:", err);
+        toast.error("Erro ao carregar a grade de transporte do aluno.");
       } finally {
         setLoading(false);
       }
@@ -44,7 +73,6 @@ export function ModalAgendaAluno({ alunoId, alunoNome, isOpen, onClose, rotasDis
     loadAgenda();
   }, [isOpen, alunoId]);
 
-  // Adicionar um novo horário na grade
   const handleAddHorario = (dia_semana: number, tipo_trajeto: TipoTrajeto) => {
     const defaultRota = rotasDisponiveis[0]?.id || "";
     setAgendamentos((prev) => [
@@ -54,13 +82,16 @@ export function ModalAgendaAluno({ alunoId, alunoNome, isOpen, onClose, rotasDis
         rota_id: defaultRota,
         dia_semana,
         tipo_trajeto,
-        horario: tipo_trajeto === "ida" ? "07:00" : "12:00",
+        horario: tipo_trajeto === "ida" || tipo_trajeto === "ENTRADA" ? "07:00" : "12:00",
       },
     ]);
   };
 
-  // Atualizar campo de um item
-  const handleUpdateItem = (index: number, field: keyof ItemAgendamento, value: any) => {
+  const handleUpdateItem = <K extends keyof ItemAgendamento>(
+    index: number,
+    field: K,
+    value: ItemAgendamento[K]
+  ) => {
     setAgendamentos((prev) => {
       const copy = [...prev];
       copy[index] = { ...copy[index], [field]: value };
@@ -68,19 +99,26 @@ export function ModalAgendaAluno({ alunoId, alunoNome, isOpen, onClose, rotasDis
     });
   };
 
-  // Remover um horário da grade
   const handleRemoveItem = (index: number) => {
     setAgendamentos((prev) => prev.filter((_, i) => i !== index));
   };
 
-  // Salvar tudo no backend
   const handleSave = async () => {
     try {
       setSaving(true);
-      await AgendamentosService.sincronizarAgenda(alunoId, agendamentos);
+      await agendamentoRotasService.syncAgendamentos(alunoId, {
+        agendamentos: agendamentos.map((item) => ({
+          rota_id: item.rota_id,
+          dia_semana: item.dia_semana,
+          tipo_trajeto: item.tipo_trajeto,
+          horario: item.horario,
+        })),
+      });
+      toast.success("Grade semanal salva com sucesso!");
       onClose();
     } catch (err) {
       console.error("Erro ao salvar agenda:", err);
+      toast.error("Não foi possível salvar os horários da grade.");
     } finally {
       setSaving(false);
     }
@@ -95,19 +133,26 @@ export function ModalAgendaAluno({ alunoId, alunoNome, isOpen, onClose, rotasDis
         <div className="flex items-center justify-between p-5 border-b border-slate-800 bg-slate-900/50">
           <div>
             <h2 className="text-lg font-bold text-slate-100">Grade Semanal de Transporte</h2>
-            <p className="text-xs text-slate-400">Aluno: <span className="text-blue-400 font-medium">{alunoNome}</span></p>
+            <p className="text-xs text-slate-400">
+              Aluno: <span className="text-blue-400 font-medium">{alunoNome}</span>
+            </p>
           </div>
-          <button onClick={onClose} className="text-slate-400 hover:text-white p-1 rounded-lg">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onClose}
+            className="text-slate-400 hover:text-white rounded-lg"
+          >
             <X className="w-5 h-5" />
-          </button>
+          </Button>
         </div>
 
-        {/* Body - Tabela por Dia da Semana */}
+        {/* Body */}
         <div className="p-6 overflow-y-auto space-y-6 flex-1">
           {loading ? (
             <div className="text-center py-8 text-slate-400">Carregando horários...</div>
           ) : (
-            DIAS.map((dia) => {
+            DIAS_SEMANA_MODAL.map((dia) => {
               const agendamentosDia = agendamentos
                 .map((item, originalIndex) => ({ ...item, originalIndex }))
                 .filter((item) => item.dia_semana === dia.id);
@@ -116,73 +161,94 @@ export function ModalAgendaAluno({ alunoId, alunoNome, isOpen, onClose, rotasDis
                 <div key={dia.id} className="bg-slate-800/40 border border-slate-800 rounded-xl p-4">
                   <div className="flex items-center justify-between mb-3">
                     <h3 className="font-semibold text-slate-200 text-sm flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+                      <span className="w-2 h-2 rounded-full bg-blue-500" />
                       {dia.label}
                     </h3>
                     <div className="flex gap-2">
-                      <button
+                      <Button
                         type="button"
+                        variant="outline"
+                        size="sm"
                         onClick={() => handleAddHorario(dia.id, "ida")}
-                        className="text-xs px-2.5 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-md hover:bg-emerald-500/20 flex items-center gap-1"
+                        className="text-xs bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20"
                       >
-                        <Plus className="w-3 h-3" /> + Ida (Entrada)
-                      </button>
-                      <button
+                        <Plus className="w-3 h-3 mr-1" /> + Ida (Entrada)
+                      </Button>
+                      <Button
                         type="button"
+                        variant="outline"
+                        size="sm"
                         onClick={() => handleAddHorario(dia.id, "volta")}
-                        className="text-xs px-2.5 py-1 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-md hover:bg-amber-500/20 flex items-center gap-1"
+                        className="text-xs bg-amber-500/10 text-amber-400 border-amber-500/20 hover:bg-amber-500/20"
                       >
-                        <Plus className="w-3 h-3" /> + Volta (Saída)
-                      </button>
+                        <Plus className="w-3 h-3 mr-1" /> + Volta (Saída)
+                      </Button>
                     </div>
                   </div>
 
                   {agendamentosDia.length === 0 ? (
-                    <p className="text-xs text-slate-500 italic">Nenhum transporte configurado para este dia.</p>
+                    <p className="text-xs text-slate-500 italic">
+                      Nenhum transporte configurado para este dia.
+                    </p>
                   ) : (
                     <div className="space-y-2">
                       {agendamentosDia.map((item) => (
-                        <div key={item.originalIndex} className="flex items-center gap-3 bg-slate-900/60 p-2.5 rounded-lg border border-slate-800">
-                          {/* Badge Tipo */}
-                          <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded ${
-                            item.tipo_trajeto === "ida" ? "bg-emerald-500/20 text-emerald-400" : "bg-amber-500/20 text-amber-400"
-                          }`}>
+                        <div
+                          key={item.originalIndex}
+                          className="flex items-center gap-3 bg-slate-900/60 p-2.5 rounded-lg border border-slate-800"
+                        >
+                          <span
+                            className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded ${
+                              item.tipo_trajeto === "ida" || item.tipo_trajeto === "ENTRADA"
+                                ? "bg-emerald-500/20 text-emerald-400"
+                                : "bg-amber-500/20 text-amber-400"
+                            }`}
+                          >
                             {item.tipo_trajeto}
                           </span>
 
-                          {/* Seletor Rota */}
                           <div className="flex-1 flex items-center gap-1.5">
                             <Bus className="w-3.5 h-3.5 text-slate-400" />
-                            <select
+                            <Select
                               value={item.rota_id}
-                              onChange={(e) => handleUpdateItem(item.originalIndex, "rota_id", e.target.value)}
-                              className="w-full bg-slate-800 border border-slate-700 text-xs rounded px-2 py-1 text-slate-200 focus:outline-none focus:border-blue-500"
+                              onValueChange={(val) =>
+                                handleUpdateItem(item.originalIndex, "rota_id", val)
+                              }
                             >
-                              {rotasDisponiveis.map((r) => (
-                                <option key={r.id} value={r.id}>{r.nome}</option>
-                              ))}
-                            </select>
+                              <SelectTrigger className="h-8 bg-slate-800 border-slate-700 text-xs text-slate-200">
+                                <SelectValue placeholder="Selecione a rota" />
+                              </SelectTrigger>
+                              <SelectContent className="bg-slate-800 border-slate-700 text-slate-200">
+                                {rotasDisponiveis.map((r) => (
+                                  <SelectItem key={r.id} value={r.id}>
+                                    {r.nome}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
                           </div>
 
-                          {/* Input Horário */}
                           <div className="flex items-center gap-1.5 w-32">
                             <Clock className="w-3.5 h-3.5 text-slate-400" />
-                            <input
+                            <Input
                               type="time"
-                              value={item.horario}
-                              onChange={(e) => handleUpdateItem(item.originalIndex, "horario", e.target.value)}
-                              className="bg-slate-800 border border-slate-700 text-xs rounded px-2 py-1 text-slate-200 focus:outline-none focus:border-blue-500 w-full"
+                              value={item.horario || ""}
+                              onChange={(e) =>
+                                handleUpdateItem(item.originalIndex, "horario", e.target.value)
+                              }
+                              className="h-8 bg-slate-800 border-slate-700 text-xs text-slate-200"
                             />
                           </div>
 
-                          {/* Botão Remover */}
-                          <button
+                          <Button
                             type="button"
+                            variant="ghost"
+                            size="icon"
                             onClick={() => handleRemoveItem(item.originalIndex)}
-                            className="p-1 text-slate-500 hover:text-red-400 transition-colors"
+                            className="text-slate-500 hover:text-red-400 transition-colors h-8 w-8"
                           >
                             <Trash2 className="w-4 h-4" />
-                          </button>
+                          </Button>
                         </div>
                       ))}
                     </div>
@@ -195,20 +261,17 @@ export function ModalAgendaAluno({ alunoId, alunoNome, isOpen, onClose, rotasDis
 
         {/* Footer */}
         <div className="p-4 border-t border-slate-800 bg-slate-900/50 flex justify-end gap-3">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 bg-slate-800 text-slate-300 text-sm font-medium rounded-xl hover:bg-slate-700"
-          >
+          <Button variant="outline" onClick={onClose} className="rounded-xl">
             Cancelar
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={handleSave}
             disabled={saving}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-xl flex items-center gap-2 shadow-lg shadow-blue-500/20"
+            className="bg-blue-600 hover:bg-blue-500 text-white rounded-xl shadow-lg shadow-blue-500/20"
           >
-            <Save className="w-4 h-4" />
+            <Save className="w-4 h-4 mr-2" />
             {saving ? "Salvando..." : "Salvar Horários"}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

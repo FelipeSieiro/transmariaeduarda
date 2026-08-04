@@ -1,6 +1,6 @@
 import { SectionCard } from "@/components/ui-kit/primitives";
 import { brlExato } from "@/data/mock";
-import type { Contrato } from "@/services/contratos.service";
+import { Contrato } from "@/types";
 
 function Campo({ label, value }: { label: string; value: string }) {
   return (
