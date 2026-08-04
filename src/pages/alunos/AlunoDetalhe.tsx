@@ -1,79 +1,49 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Link, useParams } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 
 import { buscarAluno } from "@/services/alunos.service";
 import {
   buscarContratoPorAluno,
   type Contrato,
 } from "@/services/contratos.service";
-import {
-  buscarMensalidadesPorContrato,
-  registrarPagamento,
-  type Mensalidade,
-} from "@/services/mensalidades.service";
 
 import { adaptarAlunoDetalhe } from "@/adapters/alunoDetalhe.adapter";
 import { alunos as alunosMock, brlExato, type Aluno } from "@/data/mock";
-import { FORMAS_PAGAMENTO } from "@/constants";
 
-import {
-  AlertCircle,
-  ArrowLeft,
-  Bus,
-  CalendarDays,
-  CheckCircle2,
-  Clock,
-  DollarSign,
-  Download,
-  FileText,
-  History,
-  Home,
-  Images,
-  Mail,
-  MapPin,
-  MessageSquareWarning,
-  Phone,
-} from "lucide-react";
-
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { SectionCard, StatusPill } from "@/components/ui-kit/primitives";
-import { toast } from "sonner";
+import { SectionCard } from "@/components/ui-kit/primitives";
 
-function Campo({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="min-w-0">
-      <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
-        {label}
-      </p>
-      <p className="mt-0.5 truncate text-sm font-medium">{value || "-"}</p>
-    </div>
-  );
+import { AlunoHeader } from "@/components/alunos/AlunoHeader";
+import { AlunoDadosPessoais } from "@/components/alunos/AlunoDadosPessoais";
+import { AlunoEndereco } from "@/components/alunos/AlunoEndereco";
+import { AlunoResponsaveis } from "@/components/alunos/AlunoResponsaveis";
+import { AlunoContrato } from "@/components/alunos/AlunoContrato";
+import { TabelaMensalidades } from "@/components/alunos/TabelaMensalidades";
+import { AlunoOcorrencias } from "@/components/alunos/AlunoOcorrencias";
+import { AlunoHistorico, type EventoHistorico } from "@/components/alunos/AlunoHistorico";
+import { AlunoDocumentos } from "@/components/alunos/AlunoDocumentos";
+import { AlunoFotos } from "@/components/alunos/AlunoFotos";
+
+// Função auxiliar para converter datas no formato DD/MM/AAAA para ordenação
+function converterParaTimestamp(dataStr?: string): number {
+  if (!dataStr) return 0;
+  
+  // Se já for formato ISO ou padrão YYYY-MM-DD
+  if (dataStr.includes("-")) {
+    const timestamp = new Date(dataStr).getTime();
+    return isNaN(timestamp) ? 0 : timestamp;
+  }
+  
+  // Trata formato brasileiro DD/MM/AAAA
+  const partes = dataStr.split("/");
+  if (partes.length === 3) {
+    const [dia, mes, ano] = partes.map(Number);
+    return new Date(ano, mes - 1, dia).getTime();
+  }
+
+  return 0;
 }
 
 export default function AlunoDetalhe() {
@@ -81,13 +51,6 @@ export default function AlunoDetalhe() {
   const [aluno, setAluno] = useState<Aluno | null>(null);
   const [carregando, setCarregando] = useState(true);
   const [contrato, setContrato] = useState<Contrato | null>(null);
-
-  // Estados das Mensalidades API
-  const [mensalidades, setMensalidades] = useState<Mensalidade[]>([]);
-  const [carregandoMensalidades, setCarregandoMensalidades] = useState(false);
-  const [mensalidadeSelecionada, setMensalidadeSelecionada] = useState<Mensalidade | null>(null);
-  const [formaPagamento, setFormaPagamento] = useState("PIX");
-  const [processandoPagamento, setProcessandoPagamento] = useState(false);
 
   useEffect(() => {
     async function carregarDados() {
@@ -111,10 +74,6 @@ export default function AlunoDetalhe() {
       try {
         const contratoApi = await buscarContratoPorAluno(alunoId);
         setContrato(contratoApi);
-
-        if (contratoApi?.id) {
-          carregarMensalidadesDoContrato(contratoApi.id);
-        }
       } catch (error) {
         console.error("Erro ao buscar contrato:", error);
         setContrato(null);
@@ -126,64 +85,78 @@ export default function AlunoDetalhe() {
     carregarDados();
   }, [alunoId]);
 
-  async function carregarMensalidadesDoContrato(contratoId: string) {
-    try {
-      setCarregandoMensalidades(true);
-      const dados = await buscarMensalidadesPorContrato(contratoId);
-      setMensalidades(dados);
-    } catch (error) {
-      console.error("Erro ao carregar mensalidades:", error);
-    } finally {
-      setCarregandoMensalidades(false);
-    }
-  }
+  // Agrega todos os acontecimentos do aluno em uma linha do tempo unificada
+  const historicoCompleto = useMemo(() => {
+    if (!aluno) return [];
 
-  async function handleBaixarPagamento() {
-    if (!mensalidadeSelecionada) return;
+    const eventos: EventoHistorico[] = [];
 
-    try {
-      setProcessandoPagamento(true);
-      await registrarPagamento(mensalidadeSelecionada.id, {
-        forma_pagamento: formaPagamento,
-        data_pagamento: new Date().toISOString().split("T")[0],
+    // 1. Evento de criação do cadastro do aluno
+    if (aluno.desde) {
+      eventos.push({
+        id: `cad-${aluno.id}`,
+        data: aluno.desde,
+        tipo: "cadastro",
+        titulo: "Aluno Matriculado",
+        descricao: `Cadastro inicial realizado para a escola ${aluno.escola} (${aluno.serie} - ${aluno.turno})`,
       });
-
-      toast.success("Pagamento registrado com sucesso!");
-      setMensalidadeSelecionada(null);
-
-      if (contrato?.id) {
-        await carregarMensalidadesDoContrato(contrato.id);
-      }
-    } catch (error) {
-      console.error("Erro ao dar baixa na mensalidade:", error);
-      toast.error("Erro ao registrar pagamento");
-    } finally {
-      setProcessandoPagamento(false);
     }
-  }
 
-  const renderStatusMensalidade = (status: string) => {
-    switch (status) {
-      case "pago":
-        return (
-          <Badge className="border-emerald-200 bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 gap-1">
-            <CheckCircle2 className="size-3" /> Pago
-          </Badge>
-        );
-      case "atrasado":
-        return (
-          <Badge className="border-rose-200 bg-rose-500/15 text-rose-700 dark:text-rose-400 gap-1">
-            <AlertCircle className="size-3" /> Atrasado
-          </Badge>
-        );
-      default:
-        return (
-          <Badge className="border-amber-200 bg-amber-500/15 text-amber-700 dark:text-amber-400 gap-1">
-            <Clock className="size-3" /> Pendente
-          </Badge>
-        );
+    // 2. Evento de Responsável cadastrado
+    const listaResponsaveis =
+      aluno.responsaveis && aluno.responsaveis.length > 0
+        ? aluno.responsaveis
+        : aluno.responsavel
+          ? [{ nome: aluno.responsavel, parentesco: aluno.parentesco }]
+          : [];
+
+    listaResponsaveis.forEach((resp, idx) => {
+      eventos.push({
+        id: `resp-${idx}`,
+        data: aluno.desde || "—",
+        tipo: "responsavel",
+        titulo: `Responsável Vinculado: ${resp.nome}`,
+        descricao: `Grau de parentesco: ${resp.parentesco || "Responsável legal"}`,
+      });
+    });
+
+    // 3. Evento de Contrato vinculado
+    if (contrato) {
+      eventos.push({
+        id: `cnt-${contrato.id}`,
+        data: contrato.data_inicio,
+        tipo: "contrato",
+        titulo: `Contrato ${contrato.numero} Vinculado`,
+        descricao: `Valor mensal de ${brlExato(contrato.valor_mensalidade)} com vencimento no dia ${contrato.dia_vencimento} (${contrato.forma_pagamento})`,
+      });
     }
-  };
+
+    // 4. Ocorrências operacionais
+    (aluno.ocorrencias || []).forEach((oc, idx) => {
+      eventos.push({
+        id: `oc-${idx}`,
+        data: oc.data,
+        tipo: "ocorrencia",
+        titulo: `Ocorrência: ${oc.tipo}`,
+        descricao: oc.descricao,
+      });
+    });
+
+    // 5. Histórico pré-existente (mock ou logs de sistema)
+    (aluno.historico || []).forEach((h, idx) => {
+      eventos.push({
+        id: `sys-${idx}`,
+        data: h.data,
+        tipo: "sistema",
+        titulo: h.evento,
+      });
+    });
+
+    // Ordena do evento mais recente para o mais antigo
+    return eventos.sort(
+      (a, b) => converterParaTimestamp(b.data) - converterParaTimestamp(a.data)
+    );
+  }, [aluno, contrato]);
 
   if (carregando) {
     return (
@@ -211,25 +184,6 @@ export default function AlunoDetalhe() {
     );
   }
 
-  // Garante uma lista unificada de responsáveis
-  const listaResponsaveis =
-    aluno.responsaveis && aluno.responsaveis.length > 0
-      ? aluno.responsaveis
-      : aluno.responsavel
-        ? [
-            {
-              id: "1",
-              nome: aluno.responsavel,
-              parentesco: aluno.parentesco || "Responsável",
-              telefone: aluno.telefone,
-              email: aluno.email,
-              endereco: aluno.enderecoResponsavel || aluno.endereco,
-              responsavel_financeiro: true,
-              responsavel_emergencia: true,
-            },
-          ]
-        : [];
-
   return (
     <div className="mx-auto max-w-[1400px] space-y-6">
       <Button asChild variant="ghost" size="sm" className="-ml-2 rounded-lg">
@@ -239,166 +193,17 @@ export default function AlunoDetalhe() {
         </Link>
       </Button>
 
-      <section className="surface-card overflow-hidden">
-        <div className="h-20 bg-gradient-to-r from-primary/85 to-gold/70" />
-        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-4 px-5 pb-5 sm:flex sm:flex-wrap sm:justify-between">
-          <div className="flex min-w-0 items-end gap-4">
-            <Avatar className="-mt-10 size-20 shrink-0 border-4 border-card">
-              <AvatarImage src={aluno.foto} alt={aluno.nome} />
-              <AvatarFallback>{aluno.nome.slice(0, 2)}</AvatarFallback>
-            </Avatar>
+      {/* Cabeçalho do Aluno */}
+      <AlunoHeader aluno={aluno} />
 
-            <div className="min-w-0 pb-1">
-              <h1 className="truncate font-display text-2xl font-semibold tracking-tight">
-                {aluno.nome}
-              </h1>
-              <p className="truncate text-sm text-muted-foreground">
-                {aluno.escola} · {aluno.serie} · {aluno.turno}
-              </p>
-              <div className="mt-2 flex flex-wrap items-center gap-2">
-                <StatusPill status={aluno.status} />
-                <StatusPill status={aluno.pagamento} />
-                <Badge variant="secondary">{aluno.rota}</Badge>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex shrink-0 gap-2 pb-1">
-            <Button variant="outline" className="rounded-xl">
-              <Phone className="mr-2 size-4" />
-              Contatar
-            </Button>
-            <Button className="rounded-xl">
-              <FileText className="mr-2 size-4" />
-              Contrato
-            </Button>
-          </div>
-        </div>
-      </section>
-
+      {/* Grid de Informações de Topo */}
       <div className="grid gap-4 lg:grid-cols-3">
-        <SectionCard
-          title="Dados pessoais"
-          description="Informações cadastrais do aluno"
-        >
-          <div className="grid grid-cols-2 gap-4">
-            <Campo
-              label="Matrícula"
-              value={`ALU-${aluno.id.slice(0, 8).toUpperCase()}`}
-            />
-            <Campo label="Nascimento" value={aluno.nascimento} />
-            <Campo label="Escola" value={aluno.escola} />
-            <Campo label="Série" value={aluno.serie} />
-            <Campo label="Turno" value={aluno.turno} />
-            <Campo label="Aluno desde" value={aluno.desde} />
-          </div>
-        </SectionCard>
-
-        <SectionCard
-          title="Endereço"
-          description="Ponto de embarque e desembarque"
-        >
-          <div className="space-y-4">
-            <div className="flex items-start gap-3">
-              <Home className="mt-0.5 size-4 shrink-0 text-primary" />
-              <div className="min-w-0">
-                <p className="text-sm font-medium">{aluno.endereco}</p>
-                <p className="text-xs text-muted-foreground">{aluno.cidade}</p>
-              </div>
-            </div>
-
-            <div className="relative h-40 overflow-hidden rounded-xl border border-border bg-muted">
-              <div className="absolute inset-0 opacity-70 [background-image:linear-gradient(var(--color-border)_1px,transparent_1px),linear-gradient(90deg,var(--color-border)_1px,transparent_1px)] [background-size:26px_26px]" />
-              <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center">
-                <span className="grid size-9 place-items-center rounded-full bg-primary text-primary-foreground">
-                  <MapPin className="size-4" />
-                </span>
-                <span className="mt-2 rounded-lg bg-card px-2 py-1 text-[11px] font-medium shadow-sm">
-                  {aluno.bairro}
-                </span>
-              </div>
-            </div>
-          </div>
-        </SectionCard>
-
-        <SectionCard
-          title="Responsáveis"
-          description="Contatos autorizados cadastrados"
-        >
-          <div className="space-y-5">
-            {listaResponsaveis.length > 0 ? (
-              listaResponsaveis.map((resp, index) => (
-                <div key={resp.id || index} className="space-y-3">
-                  {index > 0 && <Separator className="my-4" />}
-
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex min-w-0 items-center gap-3">
-                      <Avatar className="size-10 shrink-0">
-                        <AvatarFallback>
-                          {resp.nome ? resp.nome.slice(0, 2).toUpperCase() : "RS"}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-medium">
-                          {resp.nome}
-                        </p>
-                        <p className="truncate text-xs text-muted-foreground">
-                          {resp.parentesco || "Responsável"}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex shrink-0 flex-col items-end gap-1">
-                      {resp.responsavel_financeiro && (
-                        <Badge
-                          variant="outline"
-                          className="border-emerald-500/30 bg-emerald-500/10 px-1.5 py-0 text-[10px] text-emerald-600 dark:text-emerald-400"
-                        >
-                          Financeiro
-                        </Badge>
-                      )}
-                      {resp.responsavel_emergencia && (
-                        <Badge
-                          variant="outline"
-                          className="border-amber-500/30 bg-amber-500/10 px-1.5 py-0 text-[10px] text-amber-600 dark:text-amber-400"
-                        >
-                          Emergência
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="space-y-1.5 pl-1 text-xs text-muted-foreground">
-                    {resp.telefone && (
-                      <p className="flex items-center gap-2">
-                        <Phone className="size-3.5 shrink-0" />
-                        <span>{resp.telefone}</span>
-                      </p>
-                    )}
-                    {resp.email && (
-                      <p className="flex min-w-0 items-center gap-2">
-                        <Mail className="size-3.5 shrink-0" />
-                        <span className="truncate">{resp.email}</span>
-                      </p>
-                    )}
-                    {resp.endereco && (
-                      <p className="flex items-center gap-2">
-                        <Bus className="size-3.5 shrink-0" />
-                        <span className="truncate">{resp.endereco}</span>
-                      </p>
-                    )}
-                  </div>
-                </div>
-              ))
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                Nenhum responsável cadastrado.
-              </p>
-            )}
-          </div>
-        </SectionCard>
+        <AlunoDadosPessoais aluno={aluno} />
+        <AlunoEndereco aluno={aluno} />
+        <AlunoResponsaveis aluno={aluno} />
       </div>
 
+      {/* Abas Detalhadas */}
       <Tabs defaultValue="contrato" className="space-y-4">
         <TabsList className="flex h-auto w-full flex-wrap justify-start gap-1 rounded-xl p-1">
           <TabsTrigger value="contrato">Contrato</TabsTrigger>
@@ -410,274 +215,40 @@ export default function AlunoDetalhe() {
         </TabsList>
 
         <TabsContent value="contrato">
-          {contrato ? (
-            <SectionCard
-              title={`Contrato ${contrato.numero}`}
-              description="Vigência e condições comerciais"
-            >
-              <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-6">
-                <Campo label="Número" value={contrato.numero} />
-                <Campo label="Início" value={contrato.data_inicio} />
-                <Campo label="Término" value={contrato.data_fim || ""} />
-                <Campo
-                  label="Vencimento"
-                  value={`Dia ${contrato.dia_vencimento}`}
-                />
-                <Campo label="Pagamento" value={contrato.forma_pagamento} />
-                <Campo
-                  label="Mensalidade"
-                  value={brlExato(contrato.valor_mensalidade)}
-                />
-              </div>
-              <p className="mt-4 rounded-xl bg-muted/60 p-4 text-sm text-muted-foreground">
-                {contrato.observacoes || "Sem observações cadastradas."}
-              </p>
-            </SectionCard>
-          ) : (
-            <SectionCard
-              title="Contrato"
-              description="Vigência e condições comerciais"
-            >
-              <p className="text-sm text-muted-foreground">
-                Nenhum contrato encontrado para este aluno.
-              </p>
-            </SectionCard>
-          )}
+          <AlunoContrato contrato={contrato} />
         </TabsContent>
 
         <TabsContent value="mensalidades">
           <SectionCard
             title="Mensalidades"
             description="Histórico de cobranças e baixas do contrato"
-            bodyClassName="p-0"
           >
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Competência</TableHead>
-                    <TableHead>Vencimento</TableHead>
-                    <TableHead className="text-right">Valor</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Ação</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {carregandoMensalidades ? (
-                    <TableRow>
-                      <TableCell colSpan={5} className="py-6 text-center text-sm text-muted-foreground">
-                        Carregando mensalidades...
-                      </TableCell>
-                    </TableRow>
-                  ) : mensalidades.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={5} className="py-6 text-center text-sm text-muted-foreground">
-                        Nenhuma mensalidade cadastrada para o contrato deste aluno.
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    mensalidades.map((m) => (
-                      <TableRow key={m.id}>
-                        <TableCell className="font-medium">
-                          {m.competencia}
-                        </TableCell>
-                        <TableCell className="text-muted-foreground">
-                          {new Date(m.data_vencimento).toLocaleDateString("pt-BR", {
-                            timeZone: "UTC",
-                          })}
-                        </TableCell>
-                        <TableCell className="text-right font-semibold tabular-nums">
-                          {brlExato(m.valor)}
-                        </TableCell>
-                        <TableCell>
-                          {renderStatusMensalidade(m.status)}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          {m.status !== "pago" && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="gap-1.5 text-xs rounded-lg"
-                              onClick={() => setMensalidadeSelecionada(m)}
-                            >
-                              <DollarSign className="size-3.5" /> Dar Baixa
-                            </Button>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </div>
+            {contrato?.id ? (
+              <TabelaMensalidades contratoId={contrato.id} />
+            ) : (
+              <p className="py-4 text-center text-sm text-muted-foreground">
+                Nenhum contrato ativo encontrado para carregar as mensalidades.
+              </p>
+            )}
           </SectionCard>
         </TabsContent>
 
         <TabsContent value="ocorrencias">
-          <SectionCard
-            title="Ocorrências"
-            description="Registros operacionais vinculados ao aluno"
-            bodyClassName="p-0"
-          >
-            <ul className="divide-y divide-border">
-              {aluno.ocorrencias.map((o) => (
-                <li
-                  key={o.data + o.tipo}
-                  className="flex items-start gap-3 px-5 py-4"
-                >
-                  <span
-                    className={`mt-0.5 grid size-9 shrink-0 place-items-center rounded-xl ${
-                      o.gravidade === "alta"
-                        ? "bg-destructive/12 text-destructive"
-                        : o.gravidade === "media"
-                          ? "bg-warning/15 text-warning"
-                          : "bg-muted text-muted-foreground"
-                    }`}
-                  >
-                    <MessageSquareWarning className="size-4" />
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium">{o.tipo}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {o.descricao}
-                    </p>
-                  </div>
-                  <span className="text-xs text-muted-foreground">
-                    {o.data}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </SectionCard>
+          <AlunoOcorrencias ocorrencias={aluno.ocorrencias} />
         </TabsContent>
 
         <TabsContent value="historico">
-          <SectionCard
-            title="Linha do tempo"
-            description="Eventos do relacionamento com a empresa"
-          >
-            <ol className="relative space-y-6 border-l border-border pl-6">
-              {aluno.historico.map((h) => (
-                <li key={h.data + h.evento} className="relative">
-                  <span className="absolute -left-[31px] top-1 grid size-5 place-items-center rounded-full border-2 border-card bg-primary text-primary-foreground">
-                    <History className="size-2.5" />
-                  </span>
-                  <p className="text-sm font-medium">{h.evento}</p>
-                  <p className="flex items-center gap-1 text-xs text-muted-foreground">
-                    <CalendarDays className="size-3" />
-                    {h.data}
-                  </p>
-                </li>
-              ))}
-            </ol>
-          </SectionCard>
+          <AlunoHistorico historico={historicoCompleto} />
         </TabsContent>
 
         <TabsContent value="documentos">
-          <SectionCard
-            title="Documentos"
-            description="Arquivos anexados ao cadastro"
-          >
-            <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-              {aluno.documentos.map((d) => (
-                <li
-                  key={d.nome}
-                  className="flex items-center gap-3 rounded-xl border border-border p-3"
-                >
-                  <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary">
-                    <FileText className="size-4" />
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium">{d.nome}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {d.tipo} · {d.tamanho}
-                    </p>
-                  </div>
-                  <Button variant="ghost" size="icon">
-                    <Download className="size-4" />
-                  </Button>
-                </li>
-              ))}
-            </ul>
-          </SectionCard>
+          <AlunoDocumentos documentos={aluno.documentos} />
         </TabsContent>
 
         <TabsContent value="fotos">
-          <SectionCard title="Fotos" description="Galeria de registros do aluno">
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="flex aspect-square flex-col items-center justify-center rounded-xl border border-dashed border-border bg-muted/40"
-                >
-                  <Images className="size-5" />
-                  <span className="text-[11px]">Foto {i + 1}</span>
-                </div>
-              ))}
-            </div>
-          </SectionCard>
+          <AlunoFotos />
         </TabsContent>
       </Tabs>
-
-      {/* MODAL DE REGISTRO DE PAGAMENTO / BAIXA */}
-      <Dialog
-        open={!!mensalidadeSelecionada}
-        onOpenChange={(open) => !open && setMensalidadeSelecionada(null)}
-      >
-        <DialogContent className="sm:max-w-[400px]">
-          <DialogHeader>
-            <DialogTitle>Registrar Pagamento</DialogTitle>
-          </DialogHeader>
-
-          {mensalidadeSelecionada && (
-            <div className="space-y-4 py-2">
-              <div className="rounded-lg bg-muted p-3 text-sm space-y-1">
-                <p>
-                  <strong>Competência:</strong> {mensalidadeSelecionada.competencia}
-                </p>
-                <p>
-                  <strong>Valor:</strong>{" "}
-                  {brlExato(mensalidadeSelecionada.valor)}
-                </p>
-              </div>
-
-              <div>
-                <label className="text-xs font-semibold text-muted-foreground mb-1 block">
-                  Forma de Pagamento
-                </label>
-                <Select
-                  value={formaPagamento}
-                  onValueChange={setFormaPagamento}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {FORMAS_PAGAMENTO.map((forma) => (
-                      <SelectItem key={forma} value={forma}>
-                        {forma}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          )}
-
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setMensalidadeSelecionada(null)}
-              disabled={processandoPagamento}
-            >
-              Cancelar
-            </Button>
-            <Button onClick={handleBaixarPagamento} disabled={processandoPagamento}>
-              {processandoPagamento ? "Confirmando..." : "Confirmar Baixa"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

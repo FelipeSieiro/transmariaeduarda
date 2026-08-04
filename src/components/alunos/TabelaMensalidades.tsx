@@ -1,4 +1,3 @@
-// src/components/alunos/TabelaMensalidades.tsx
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { CheckCircle2, Clock, AlertCircle, DollarSign } from "lucide-react";
@@ -37,6 +36,33 @@ import { FORMAS_PAGAMENTO } from "@/constants";
 
 interface Props {
   contratoId: string;
+}
+
+// Função auxiliar para formatar "2026-08" ou "08/2026" para "Agosto / 2026"
+function formatarMesReferencia(valor?: string): string {
+  if (!valor) return "-";
+
+  // Tratamento se vier "YYYY-MM" (ex: 2026-08)
+  if (valor.includes("-")) {
+    const [ano, mes] = valor.split("-");
+    const dataObj = new Date(Number(ano), Number(mes) - 1, 1);
+    if (!isNaN(dataObj.getTime())) {
+      const mesExtenso = dataObj.toLocaleDateString("pt-BR", { month: "long" });
+      return `${mesExtenso.charAt(0).toUpperCase() + mesExtenso.slice(1)} / ${ano}`;
+    }
+  }
+
+  // Tratamento se vier "MM/YYYY" (ex: 08/2026)
+  if (valor.includes("/")) {
+    const [mes, ano] = valor.split("/");
+    const dataObj = new Date(Number(ano), Number(mes) - 1, 1);
+    if (!isNaN(dataObj.getTime())) {
+      const mesExtenso = dataObj.toLocaleDateString("pt-BR", { month: "long" });
+      return `${mesExtenso.charAt(0).toUpperCase() + mesExtenso.slice(1)} / ${ano}`;
+    }
+  }
+
+  return valor;
 }
 
 export function TabelaMensalidades({ contratoId }: Props) {
@@ -88,7 +114,7 @@ export function TabelaMensalidades({ contratoId }: Props) {
     }
   }
 
-  const renderStatus = (status: string) => {
+  const renderStatus = (status?: string | null) => {
     switch (status) {
       case "pago":
         return (
@@ -121,7 +147,7 @@ export function TabelaMensalidades({ contratoId }: Props) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Competência</TableHead>
+              <TableHead>Mês / Referência</TableHead>
               <TableHead>Vencimento</TableHead>
               <TableHead>Valor</TableHead>
               <TableHead>Status</TableHead>
@@ -138,7 +164,9 @@ export function TabelaMensalidades({ contratoId }: Props) {
             ) : (
               mensalidades.map((item) => (
                 <TableRow key={item.id}>
-                  <TableCell className="font-medium">{item.competencia}</TableCell>
+                  <TableCell className="font-medium capitalize">
+                    {formatarMesReferencia(item.competencia)}
+                  </TableCell>
                   <TableCell>
                     {new Date(item.data_vencimento).toLocaleDateString("pt-BR", {
                       timeZone: "UTC",
@@ -184,7 +212,8 @@ export function TabelaMensalidades({ contratoId }: Props) {
             <div className="space-y-4 py-2">
               <div className="rounded-lg bg-muted p-3 text-sm space-y-1">
                 <p>
-                  <strong>Competência:</strong> {mensalidadeSelecionada.competencia}
+                  <strong>Mês Referência:</strong>{" "}
+                  {formatarMesReferencia(mensalidadeSelecionada.competencia)}
                 </p>
                 <p>
                   <strong>Valor:</strong>{" "}

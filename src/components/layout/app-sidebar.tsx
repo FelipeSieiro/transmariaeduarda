@@ -56,16 +56,15 @@ const grupos: {
       {
         title: "Agenda",
         url: "/agenda",
-        icon: CalendarDays,
-        disabled: true,
+        icon: CalendarDays
       },
-      { title: "Rotas", url: "/rotas", icon: RouteIcon, disabled: true },
+      { title: "Rotas", url: "/rotas", icon: RouteIcon },
     ],
   },
   {
     label: "Frota & Equipe",
     items: [
-      { title: "Motoristas", url: "/motoristas", icon: IdCard, disabled: true },
+      { title: "Motoristas", url: "/motoristas", icon: IdCard },
       {
         title: "Veículos",
         url: "/veiculos",

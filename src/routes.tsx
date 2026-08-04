@@ -26,6 +26,10 @@ import Patrimonio from "@/pages/Patrimonio";
 import Relatorios from "@/pages/Relatorios";
 import Rotas from "@/pages/Rotas";
 import Veiculos from "@/pages/Veiculos";
+import NovaRota from "./pages/NovaRota";
+import RotaDetalhes from "./pages/RotaDetalhes";
+import NovoMotorista from "./pages/NovoMotorista";
+import MotoristaDetalhes from "./pages/MotoristaDetalhes";
 
 
 export const router = createBrowserRouter([
@@ -56,7 +60,13 @@ export const router = createBrowserRouter([
       { path: "/patrimonio", element: <Patrimonio /> },
       { path: "/relatorios", element: <Relatorios /> },
       { path: "/rotas", element: <Rotas /> },
+      {path: "/rotas/nova", element: <NovaRota /> },
+      {path: "/rotas/:rotaId", element: <RotaDetalhes /> },
       { path: "/veiculos", element: <Veiculos /> },
+      { path: "/motoristas/novo", element: <NovoMotorista /> },
+      { path: "/motoristas/:id", element: <MotoristaDetalhes /> }
+
+      
     ],
   },
 ]);
