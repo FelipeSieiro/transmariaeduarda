@@ -5,72 +5,93 @@ import api from "@/lib/api";
 export interface Contrato {
 
 
-  id:string;
+  id: string;
 
 
-  aluno_id:string;
+  aluno_id: string;
 
 
-  numero:string;
+  numero: string;
 
 
-  data_inicio:string;
+  data_inicio: string;
 
 
-  data_fim?:string | null;
+  data_fim: string | null;
 
 
-  valor_mensalidade:number;
+  valor_mensalidade: number;
 
 
-  dia_vencimento:number;
+  dia_vencimento: number;
 
 
-  forma_pagamento?:string | null;
+  forma_pagamento: string;
 
 
-  observacoes?:string | null;
+  observacoes: string;
 
 
-  status?:string | null;
+  status: string;
 
 
-  alunos?:{
+  created_at?: string;
 
 
-    id:string;
-
-
-    nome:string;
-
-
-    matricula:string;
-
-
-    escolas?:{
-
-
-      id:string;
-
-      nome:string;
-
-
-    } | null;
+  updated_at?: string;
 
 
 
-    rotas?:{
+
+  alunos?: {
 
 
-      id:string;
-
-      nome:string;
+    id: string;
 
 
-    } | null;
+    nome: string;
 
 
-  } | null;
+    matricula: string;
+
+
+    serie: string;
+
+
+    turno: string;
+
+
+    status: string;
+
+
+
+    escolas?: {
+
+
+      id: string;
+
+
+      nome: string;
+
+
+    };
+
+
+
+    rotas?: {
+
+
+      id: string;
+
+
+      nome: string;
+
+
+    };
+
+
+
+  };
 
 
 }
@@ -81,7 +102,52 @@ export interface Contrato {
 
 
 
-export async function listarContratos(){
+
+
+export interface CriarContratoPayload {
+
+
+  aluno_id: string;
+
+
+  numero: string;
+
+
+  data_inicio: string;
+
+
+  data_fim?: string | null;
+
+
+  valor_mensalidade: number;
+
+
+  dia_vencimento: number;
+
+
+  forma_pagamento: string;
+
+
+  observacoes?: string;
+
+
+  status: string;
+
+
+}
+
+
+
+
+
+
+
+
+
+/**
+ * Lista todos os contratos
+ */
+export async function listarContratos(): Promise<Contrato[]> {
 
 
   const response =
@@ -89,7 +155,7 @@ export async function listarContratos(){
 
 
 
-  return response.data.data as Contrato[];
+  return response.data.data;
 
 
 }
@@ -101,9 +167,13 @@ export async function listarContratos(){
 
 
 
+
+/**
+ * Busca contrato pelo ID
+ */
 export async function buscarContrato(
-  id:string
-){
+  id: string
+): Promise<Contrato | null> {
 
 
   const response =
@@ -113,7 +183,7 @@ export async function buscarContrato(
 
 
 
-  return response.data.data as Contrato;
+  return response.data.data ?? null;
 
 
 }
@@ -125,70 +195,73 @@ export async function buscarContrato(
 
 
 
+
+/**
+ * Busca contrato pelo aluno
+ */
+export async function buscarContratoPorAluno(
+  alunoId: string
+): Promise<Contrato | null> {
+
+
+  const response =
+    await api.get(
+      "/contratos",
+      {
+        params: {
+          aluno_id: alunoId,
+        },
+      }
+    );
+
+
+
+  const contratos =
+    response.data.data;
+
+
+
+  if (
+    !contratos ||
+    contratos.length === 0
+  ) {
+
+    return null;
+
+  }
+
+
+
+  return contratos[0];
+
+
+}
+
+
+
+
+
+
+
+
+
+/**
+ * Cria novo contrato
+ */
 export async function criarContrato(
-  contrato:Partial<Contrato>
-){
+  payload: CriarContratoPayload
+): Promise<Contrato> {
 
 
   const response =
     await api.post(
       "/contratos",
-      contrato
+      payload
     );
 
 
 
-  return response.data.data as Contrato;
-
-
-}
-
-
-
-
-
-
-
-
-export async function atualizarContrato(
-  id:string,
-  contrato:Partial<Contrato>
-){
-
-
-  const response =
-    await api.put(
-      `/contratos/${id}`,
-      contrato
-    );
-
-
-
-  return response.data.data as Contrato;
-
-
-}
-
-
-
-
-
-
-
-
-export async function removerContrato(
-  id:string
-){
-
-
-  const response =
-    await api.delete(
-      `/contratos/${id}`
-    );
-
-
-
-  return response.data;
+  return response.data.data;
 
 
 }

@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
+import { buscarContratoPorAluno } from "@/services/contratos.service";
+import type { Contrato } from "@/services/contratos.service";
+
 import {
   ArrowLeft,
   Bus,
@@ -75,20 +78,30 @@ export default function AlunoDetalhe() {
 
   const [aluno, setAluno] = useState<Aluno | null>(null);
   const [carregando, setCarregando] = useState(true);
+  const [contrato, setContrato] = useState<Contrato | null>(null);
+
+
 
 
   useEffect(() => {
     async function carregarAluno() {
+      if (!alunoId) return;
+
       try {
-        if (!alunoId) return;
 
         const response = await buscarAluno(alunoId);
+
         const alunoAdaptado = adaptarAlunoDetalhe(response);
 
         setAluno(alunoAdaptado);
 
+
       } catch (error) {
-        console.error("Erro ao buscar aluno API:", error);
+
+        console.error(
+          "Erro ao buscar aluno API:",
+          error
+        );
 
         const alunoMock = alunosMock.find(
           (item) => item.id === alunoId
@@ -98,12 +111,34 @@ export default function AlunoDetalhe() {
           setAluno(alunoMock);
         }
 
-      } finally {
-        setCarregando(false);
       }
+
+
+      try {
+
+        const contratoApi =
+          await buscarContratoPorAluno(alunoId);
+
+        setContrato(contratoApi);
+
+      } catch (error) {
+
+        console.error(
+          "Erro ao buscar contrato:",
+          error
+        );
+
+        setContrato(null);
+
+      }
+
+
+      setCarregando(false);
     }
 
+
     carregarAluno();
+
   }, [alunoId]);
 
 
@@ -239,7 +274,7 @@ export default function AlunoDetalhe() {
           </div>
 
         </SectionCard>
-                <SectionCard
+        <SectionCard
           title="Endereço"
           description="Ponto de embarque e desembarque"
         >
@@ -393,42 +428,74 @@ export default function AlunoDetalhe() {
 
         <TabsContent value="contrato">
 
-          <SectionCard
-            title={`Contrato ${aluno.contrato.numero}`}
-            description="Vigência e condições comerciais"
-          >
+          {contrato ? (
 
-            <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-6">
+            <SectionCard
+              title={`Contrato ${contrato.numero}`}
+              description="Vigência e condições comerciais"
+            >
 
-              <Campo label="Número" value={aluno.contrato.numero} />
+              <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-6">
 
-              <Campo label="Início" value={aluno.contrato.inicio} />
+                <Campo
+                  label="Número"
+                  value={contrato.numero}
+                />
 
-              <Campo label="Término" value={aluno.contrato.fim} />
+                <Campo
+                  label="Início"
+                  value={contrato.data_inicio}
+                />
 
-              <Campo
-                label="Vencimento"
-                value={`Dia ${aluno.contrato.vencimentoDia}`}
-              />
+                <Campo
+                  label="Término"
+                  value={contrato.data_fim}
+                />
 
-              <Campo
-                label="Pagamento"
-                value={aluno.contrato.formaPagamento}
-              />
+                <Campo
+                  label="Vencimento"
+                  value={`Dia ${contrato.dia_vencimento}`}
+                />
 
-              <Campo
-                label="Mensalidade"
-                value={brlExato(aluno.mensalidade)}
-              />
+                <Campo
+                  label="Pagamento"
+                  value={contrato.forma_pagamento}
+                />
 
-            </div>
+                <Campo
+                  label="Mensalidade"
+                  value={brlExato(
+                    contrato.valor_mensalidade
+                  )}
+                />
+
+              </div>
 
 
-            <p className="mt-4 rounded-xl bg-muted/60 p-4 text-sm text-muted-foreground">
-              {aluno.contrato.observacoes}
-            </p>
+              <p className="mt-4 rounded-xl bg-muted/60 p-4 text-sm text-muted-foreground">
 
-          </SectionCard>
+                {contrato.observacoes ||
+                  "Sem observações cadastradas."}
+
+              </p>
+
+
+            </SectionCard>
+
+          ) : (
+
+            <SectionCard
+              title="Contrato"
+              description="Vigência e condições comerciais"
+            >
+
+              <p className="text-sm text-muted-foreground">
+                Nenhum contrato encontrado para este aluno.
+              </p>
+
+            </SectionCard>
+
+          )}
 
         </TabsContent>
 
@@ -522,7 +589,7 @@ export default function AlunoDetalhe() {
           </SectionCard>
 
         </TabsContent>
-                <TabsContent value="ocorrencias">
+        <TabsContent value="ocorrencias">
 
           <SectionCard
             title="Ocorrências"
@@ -542,12 +609,11 @@ export default function AlunoDetalhe() {
                   <span
                     className={`
                       mt-0.5 grid size-9 shrink-0 place-items-center rounded-xl
-                      ${
-                        o.gravidade === "alta"
-                          ? "bg-destructive/12 text-destructive"
-                          : o.gravidade === "media"
-                            ? "bg-warning/15 text-warning"
-                            : "bg-muted text-muted-foreground"
+                      ${o.gravidade === "alta"
+                        ? "bg-destructive/12 text-destructive"
+                        : o.gravidade === "media"
+                          ? "bg-warning/15 text-warning"
+                          : "bg-muted text-muted-foreground"
                       }
                     `}
                   >

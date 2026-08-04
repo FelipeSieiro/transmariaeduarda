@@ -1,28 +1,28 @@
 import {
   useEffect,
-  useState
+  useState,
 } from "react";
 
 
 import {
-  Link
+  Link,
 } from "react-router-dom";
 
 
 import {
   FileSignature,
   Plus,
-  Eye
+  Eye,
 } from "lucide-react";
 
 
 import {
-  Button
+  Button,
 } from "@/components/ui/button";
 
 
 import {
-  SectionCard
+  SectionCard,
 } from "@/components/ui-kit/primitives";
 
 
@@ -38,30 +38,27 @@ import {
 
 import {
   listarContratos,
-  type Contrato
+  type Contrato,
 } from "@/services/contratos.service";
 
 
 import {
-  toast
+  toast,
 } from "sonner";
 
 
 
 
 
-
-
-
 function moeda(
-  valor:number
-){
+  valor: number
+) {
 
   return valor.toLocaleString(
     "pt-BR",
     {
-      style:"currency",
-      currency:"BRL"
+      style: "currency",
+      currency: "BRL",
     }
   );
 
@@ -74,14 +71,12 @@ function moeda(
 
 
 
-
-export default function Contratos(){
-
+export default function Contratos() {
 
 
   const [
     contratos,
-    setContratos
+    setContratos,
   ] = useState<Contrato[]>([]);
 
 
@@ -90,7 +85,7 @@ export default function Contratos(){
 
   const [
     carregando,
-    setCarregando
+    setCarregando,
   ] = useState(true);
 
 
@@ -100,15 +95,13 @@ export default function Contratos(){
 
 
 
-
-  useEffect(()=>{
-
-
-    async function carregar(){
+  useEffect(() => {
 
 
+    async function carregar() {
 
-      try{
+
+      try {
 
 
         const dados =
@@ -122,12 +115,14 @@ export default function Contratos(){
 
 
 
-      }catch(error){
+      } catch (error) {
 
 
         console.error(
+          "Erro ao carregar contratos:",
           error
         );
+
 
 
         toast.error(
@@ -135,7 +130,8 @@ export default function Contratos(){
         );
 
 
-      }finally{
+
+      } finally {
 
 
         setCarregando(
@@ -144,7 +140,6 @@ export default function Contratos(){
 
 
       }
-
 
 
     }
@@ -157,7 +152,7 @@ export default function Contratos(){
 
 
 
-  },[]);
+  }, []);
 
 
 
@@ -179,19 +174,24 @@ export default function Contratos(){
       <div className="flex items-center justify-between">
 
 
+
         <div>
 
 
           <h1 className="flex items-center gap-2 text-3xl font-semibold">
 
 
-            <FileSignature className="size-7"/>
+            <FileSignature
+              className="size-7"
+            />
 
 
             Contratos
 
 
           </h1>
+
+
 
 
 
@@ -204,7 +204,9 @@ export default function Contratos(){
           </p>
 
 
+
         </div>
+
 
 
 
@@ -216,10 +218,15 @@ export default function Contratos(){
           className="rounded-xl"
         >
 
-          <Link to="/contratos/novo">
+
+          <Link
+            to="/contratos/novo"
+          >
 
 
-            <Plus className="size-4"/>
+            <Plus
+              className="size-4"
+            />
 
 
             Novo contrato
@@ -249,238 +256,300 @@ export default function Contratos(){
 
         description="Lista de contratos ativos e históricos"
 
-
         bodyClassName="p-0"
 
       >
 
 
 
-      {
-        carregando ?
 
 
-        (
-
-          <div className="p-6 text-center">
-
-            Carregando contratos...
-
-          </div>
-
-        )
+        {
+          carregando ?
 
 
-        :
+            (
+
+              <div
+                className="p-6 text-center"
+              >
+
+                Carregando contratos...
+
+              </div>
+
+            )
 
 
-        (
-
-        <div className="overflow-x-auto">
+            : contratos.length === 0 ?
 
 
-          <Table>
+              (
+
+                <div
+                  className="p-6 text-center text-sm text-muted-foreground"
+                >
+
+                  Nenhum contrato encontrado.
+
+                </div>
+
+              )
 
 
-            <TableHeader>
+              :
 
 
-              <TableRow>
+              (
 
-
-                <TableHead>
-                  Número
-                </TableHead>
-
-
-                <TableHead>
-                  Aluno
-                </TableHead>
-
-
-                <TableHead>
-                  Escola
-                </TableHead>
-
-
-                <TableHead>
-                  Mensalidade
-                </TableHead>
-
-
-                <TableHead>
-                  Vencimento
-                </TableHead>
-
-
-                <TableHead>
-                  Status
-                </TableHead>
-
-
-                <TableHead>
-                  Ações
-                </TableHead>
-
-
-              </TableRow>
-
-
-            </TableHeader>
-
-
-
-
-
-            <TableBody>
-
-
-            {
-              contratos.map(
-                contrato => (
-
-
-                <TableRow
-                  key={contrato.id}
+                <div
+                  className="overflow-x-auto"
                 >
 
 
-
-                  <TableCell
-                    className="font-medium"
-                  >
-
-                    {contrato.numero}
+                  <Table>
 
 
-                  </TableCell>
+                    <TableHeader>
+
+
+                      <TableRow>
+
+
+                        <TableHead>
+                          Número
+                        </TableHead>
+
+
+                        <TableHead>
+                          Aluno
+                        </TableHead>
+
+
+                        <TableHead>
+                          Escola
+                        </TableHead>
+
+
+                        <TableHead>
+                          Mensalidade
+                        </TableHead>
+
+
+                        <TableHead>
+                          Vencimento
+                        </TableHead>
+
+
+                        <TableHead>
+                          Status
+                        </TableHead>
+
+
+                        <TableHead>
+                          Ações
+                        </TableHead>
+
+
+                      </TableRow>
+
+
+                    </TableHeader>
 
 
 
 
 
-                  <TableCell>
 
 
-                    {contrato.alunos?.nome ?? "-"}
+                    <TableBody>
 
 
-                  </TableCell>
+                      {
+                        contratos.map(
+                          (
+                            contrato
+                          ) => (
 
 
-
-
-
-                  <TableCell>
-
-
-                    {
-                      contrato.alunos?.escolas?.nome
-                      ??
-                      "-"
-                    }
-
-
-                  </TableCell>
+                            <TableRow
+                              key={
+                                contrato.id
+                              }
+                            >
 
 
 
+                              <TableCell
+                                className="font-medium"
+                              >
+
+                                {
+                                  contrato.numero
+                                }
+
+                              </TableCell>
 
 
-                  <TableCell>
 
 
-                    {
-                      moeda(
-                        Number(
-                          contrato.valor_mensalidade
+
+
+                              <TableCell>
+
+
+                                {
+                                  contrato.alunos?.nome
+                                  ??
+                                  "-"
+                                }
+
+
+                              </TableCell>
+
+
+
+
+
+
+
+                              <TableCell>
+
+
+                                {
+                                  contrato.alunos?.escolas?.nome
+                                  ??
+                                  "-"
+                                }
+
+
+                              </TableCell>
+
+
+
+
+
+
+
+                              <TableCell>
+
+
+                                {
+                                  moeda(
+                                    Number(
+                                      contrato.valor_mensalidade
+                                    )
+                                  )
+                                }
+
+
+                              </TableCell>
+
+
+
+
+
+
+
+                              <TableCell>
+
+
+                                Dia{" "}
+
+                                {
+                                  contrato.dia_vencimento
+                                }
+
+
+                              </TableCell>
+
+
+
+
+
+
+
+                              <TableCell>
+
+
+                                {
+                                  contrato.status
+                                  ??
+                                  "-"
+                                }
+
+
+                              </TableCell>
+
+
+
+
+
+
+
+                              <TableCell>
+
+
+                                <Button
+
+                                  asChild
+
+                                  variant="ghost"
+
+                                  size="icon"
+
+                                >
+
+
+                                  <Link
+                                    to={
+                                      `/contratos/${contrato.id}`
+                                    }
+                                  >
+
+
+                                    <Eye
+                                      className="size-4"
+                                    />
+
+
+                                  </Link>
+
+
+                                </Button>
+
+
+                              </TableCell>
+
+
+
+
+
+                            </TableRow>
+
+
+                          )
                         )
-                      )
-                    }
-
-
-                  </TableCell>
+                      }
 
 
 
 
 
-                  <TableCell>
-
-
-                    Dia {contrato.dia_vencimento}
-
-
-                  </TableCell>
+                    </TableBody>
 
 
 
-
-
-                  <TableCell>
-
-
-                    {contrato.status ?? "-"}
-
-
-                  </TableCell>
+                  </Table>
 
 
 
+                </div>
 
 
-                  <TableCell>
+              )
 
-
-                    <Button
-
-                      asChild
-
-                      variant="ghost"
-
-                      size="icon"
-
-                    >
-
-
-                      <Link
-                        to={`/contratos/${contrato.id}`}
-                      >
-
-
-                        <Eye className="size-4"/>
-
-
-                      </Link>
-
-
-                    </Button>
-
-
-                  </TableCell>
-
-
-
-
-                </TableRow>
-
-
-              ))
-            }
-
-
-            </TableBody>
-
-
-          </Table>
-
-
-        </div>
-
-        )
-
-
-      }
+        }
 
 
 
@@ -495,6 +564,5 @@ export default function Contratos(){
     </div>
 
   );
-
 
 }
