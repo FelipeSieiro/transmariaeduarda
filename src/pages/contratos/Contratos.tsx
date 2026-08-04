@@ -4,6 +4,7 @@ import { Eye, FileSignature, Plus } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { SectionCard } from "@/components/ui-kit/primitives";
 import {
   Table,
@@ -86,40 +87,55 @@ export default function Contratos() {
                   <TableHead>Mensalidade</TableHead>
                   <TableHead>Vencimento</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Ações</TableHead>
+                  <TableHead className="w-16">Ações</TableHead>
                 </TableRow>
               </TableHeader>
 
               <TableBody>
-                {contratos.map((contrato) => (
-                  <TableRow key={contrato.id}>
-                    <TableCell className="font-medium">
-                      {contrato.numero}
-                    </TableCell>
+                {contratos.map((contrato) => {
+                  const isAtivo = contrato.status?.toUpperCase() === "ATIVO";
 
-                    <TableCell>{contrato.alunos?.nome ?? "-"}</TableCell>
+                  return (
+                    <TableRow key={contrato.id}>
+                      <TableCell className="font-medium">
+                        {contrato.numero}
+                      </TableCell>
 
-                    <TableCell>
-                      {contrato.alunos?.escolas?.nome ?? "-"}
-                    </TableCell>
+                      <TableCell>{contrato.alunos?.nome ?? "-"}</TableCell>
 
-                    <TableCell>
-                      {moeda(Number(contrato.valor_mensalidade))}
-                    </TableCell>
+                      <TableCell>
+                        {contrato.alunos?.escolas?.nome ?? "-"}
+                      </TableCell>
 
-                    <TableCell>Dia {contrato.dia_vencimento}</TableCell>
+                      <TableCell>
+                        {moeda(Number(contrato.valor_mensalidade))}
+                      </TableCell>
 
-                    <TableCell>{contrato.status ?? "-"}</TableCell>
+                      <TableCell>Dia {contrato.dia_vencimento}</TableCell>
 
-                    <TableCell>
-                      <Button asChild variant="ghost" size="icon">
-                        <Link to={`/contratos/${contrato.id}`}>
-                          <Eye className="size-4" />
-                        </Link>
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                      <TableCell>
+                        <Badge
+                          variant={isAtivo ? "default" : "secondary"}
+                          className={
+                            isAtivo
+                              ? "bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 border-emerald-500/20"
+                              : "bg-muted text-muted-foreground"
+                          }
+                        >
+                          {contrato.status ?? "INATIVO"}
+                        </Badge>
+                      </TableCell>
+
+                      <TableCell>
+                        <Button asChild variant="ghost" size="icon">
+                          <Link to={`/contratos/${contrato.id}`}>
+                            <Eye className="size-4" />
+                          </Link>
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           </div>

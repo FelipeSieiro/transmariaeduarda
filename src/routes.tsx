@@ -30,6 +30,8 @@ import NovaRota from "./pages/NovaRota";
 import RotaDetalhes from "./pages/RotaDetalhes";
 import NovoMotorista from "./pages/NovoMotorista";
 import MotoristaDetalhes from "./pages/MotoristaDetalhes";
+import NovoVeiculo from "./pages/NovoVeiculo";
+import VeiculoDetalhes from "./pages/VeiculoDetalhes";
 
 
 export const router = createBrowserRouter([
@@ -61,10 +63,12 @@ export const router = createBrowserRouter([
       { path: "/relatorios", element: <Relatorios /> },
       { path: "/rotas", element: <Rotas /> },
       {path: "/rotas/nova", element: <NovaRota /> },
-      {path: "/rotas/:rotaId", element: <RotaDetalhes /> },
+      {path: "/rotas/:id", element: <RotaDetalhes /> },
       { path: "/veiculos", element: <Veiculos /> },
       { path: "/motoristas/novo", element: <NovoMotorista /> },
-      { path: "/motoristas/:id", element: <MotoristaDetalhes /> }
+      { path: "/motoristas/:id", element: <MotoristaDetalhes /> },
+      { path: "/veiculos/novo", element: <NovoVeiculo /> },
+      { path: "/veiculos/:id", element: <VeiculoDetalhes /> }
 
       
     ],

@@ -132,3 +132,8 @@ export async function removerAluno(id: string): Promise<any> {
   const response = await api.delete(`/alunos/${id}`);
   return response.data;
 }
+
+export async function obterAgendamentosRotasDoAluno(alunoId: string) {
+  const response = await api.get(`/alunos/${alunoId}/agendamentos-rotas`);
+  return response.data?.data ?? response.data ?? [];
+}

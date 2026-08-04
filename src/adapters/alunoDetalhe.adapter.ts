@@ -2,11 +2,9 @@ import type { Aluno as AlunoApi } from "@/services/alunos.service";
 import type { Aluno as AlunoMock } from "@/data/mock";
 
 export function adaptarAlunoDetalhe(aluno: AlunoApi): AlunoMock {
-  // Array contendo todas as relações de responsáveis da API
   const vinculosResponsaveis =
     aluno.aluno_responsavel ?? aluno.alunos_responsaveis ?? [];
 
-  // Mapeamento de TODOS os responsáveis vinculados
   const responsaveisMapeados = vinculosResponsaveis.map((vinculo: any) => {
     const respObj = vinculo.responsaveis ?? vinculo.responsavel ?? {};
 
@@ -32,10 +30,8 @@ export function adaptarAlunoDetalhe(aluno: AlunoApi): AlunoMock {
     };
   });
 
-  // Primeiro responsável (para manter a compatibilidade com campos antigos)
   const primeiroResponsavel = responsaveisMapeados[0];
 
-  // Endereço do aluno
   const enderecoAluno = [aluno.endereco, aluno.numero, aluno.complemento]
     .filter(Boolean)
     .join(", ");
@@ -61,19 +57,12 @@ export function adaptarAlunoDetalhe(aluno: AlunoApi): AlunoMock {
     serie: aluno.serie ?? "-",
     turno: aluno.turno ?? "-",
 
-    // Endereço do aluno
     endereco: enderecoAluno || "-",
     bairro: aluno.bairro ?? "-",
     cidade: aluno.cidade ?? "-",
 
-    // ===============================
-    // RESPONSÁVEIS
-    // ===============================
-
-    // Lista completa com todos os responsáveis
     responsaveis: responsaveisMapeados,
 
-    // Retrocompatibilidade (campos legados individuais)
     responsavel: primeiroResponsavel?.nome ?? "Responsável não vinculado",
     parentesco: primeiroResponsavel?.parentesco ?? "-",
     telefone: primeiroResponsavel?.telefone ?? "-",
@@ -81,10 +70,6 @@ export function adaptarAlunoDetalhe(aluno: AlunoApi): AlunoMock {
     enderecoResponsavel: primeiroResponsavel?.endereco ?? "-",
     bairroResponsavel: primeiroResponsavel?.bairro ?? "-",
     cidadeResponsavel: primeiroResponsavel?.cidade ?? "-",
-
-    // ===============================
-    // TRANSPORTE & STATUS
-    // ===============================
 
     motorista: "-",
     veiculo: "-",
@@ -94,10 +79,6 @@ export function adaptarAlunoDetalhe(aluno: AlunoApi): AlunoMock {
     status: aluno.status === "inativo" ? "inativo" : "ativo",
     pagamento: "pendente",
     desde: aluno.data_inicio ?? aluno.created_at ?? "-",
-
-    // ===============================
-    // CONTRATO
-    // ===============================
 
     contrato: {
       numero: `API-${aluno.id.substring(0, 8)}`,

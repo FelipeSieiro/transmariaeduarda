@@ -68,8 +68,7 @@ const grupos: {
       {
         title: "Veículos",
         url: "/veiculos",
-        icon: Bus,
-        disabled: true,
+        icon: Bus
       },
       {
         title: "Patrimônio",

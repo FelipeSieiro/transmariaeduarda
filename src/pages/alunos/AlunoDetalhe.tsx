@@ -1,6 +1,7 @@
+// src/pages/AlunoDetalhe.tsx
 import { useEffect, useState, useMemo } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Bus } from "lucide-react";
 
 import { buscarAluno } from "@/services/alunos.service";
 import {
@@ -25,18 +26,17 @@ import { AlunoOcorrencias } from "@/components/alunos/AlunoOcorrencias";
 import { AlunoHistorico, type EventoHistorico } from "@/components/alunos/AlunoHistorico";
 import { AlunoDocumentos } from "@/components/alunos/AlunoDocumentos";
 import { AlunoFotos } from "@/components/alunos/AlunoFotos";
+import { GradeSemanalRotas } from "../GradeSemanalRotas";
 
 // Função auxiliar para converter datas no formato DD/MM/AAAA para ordenação
 function converterParaTimestamp(dataStr?: string): number {
   if (!dataStr) return 0;
   
-  // Se já for formato ISO ou padrão YYYY-MM-DD
   if (dataStr.includes("-")) {
     const timestamp = new Date(dataStr).getTime();
     return isNaN(timestamp) ? 0 : timestamp;
   }
   
-  // Trata formato brasileiro DD/MM/AAAA
   const partes = dataStr.split("/");
   if (partes.length === 3) {
     const [dia, mes, ano] = partes.map(Number);
@@ -85,13 +85,11 @@ export default function AlunoDetalhe() {
     carregarDados();
   }, [alunoId]);
 
-  // Agrega todos os acontecimentos do aluno em uma linha do tempo unificada
   const historicoCompleto = useMemo(() => {
     if (!aluno) return [];
 
     const eventos: EventoHistorico[] = [];
 
-    // 1. Evento de criação do cadastro do aluno
     if (aluno.desde) {
       eventos.push({
         id: `cad-${aluno.id}`,
@@ -102,7 +100,6 @@ export default function AlunoDetalhe() {
       });
     }
 
-    // 2. Evento de Responsável cadastrado
     const listaResponsaveis =
       aluno.responsaveis && aluno.responsaveis.length > 0
         ? aluno.responsaveis
@@ -120,7 +117,6 @@ export default function AlunoDetalhe() {
       });
     });
 
-    // 3. Evento de Contrato vinculado
     if (contrato) {
       eventos.push({
         id: `cnt-${contrato.id}`,
@@ -131,7 +127,6 @@ export default function AlunoDetalhe() {
       });
     }
 
-    // 4. Ocorrências operacionais
     (aluno.ocorrencias || []).forEach((oc, idx) => {
       eventos.push({
         id: `oc-${idx}`,
@@ -142,7 +137,6 @@ export default function AlunoDetalhe() {
       });
     });
 
-    // 5. Histórico pré-existente (mock ou logs de sistema)
     (aluno.historico || []).forEach((h, idx) => {
       eventos.push({
         id: `sys-${idx}`,
@@ -152,7 +146,6 @@ export default function AlunoDetalhe() {
       });
     });
 
-    // Ordena do evento mais recente para o mais antigo
     return eventos.sort(
       (a, b) => converterParaTimestamp(b.data) - converterParaTimestamp(a.data)
     );
@@ -193,19 +186,20 @@ export default function AlunoDetalhe() {
         </Link>
       </Button>
 
-      {/* Cabeçalho do Aluno */}
       <AlunoHeader aluno={aluno} />
 
-      {/* Grid de Informações de Topo */}
       <div className="grid gap-4 lg:grid-cols-3">
         <AlunoDadosPessoais aluno={aluno} />
         <AlunoEndereco aluno={aluno} />
         <AlunoResponsaveis aluno={aluno} />
       </div>
 
-      {/* Abas Detalhadas */}
-      <Tabs defaultValue="contrato" className="space-y-4">
+      <Tabs defaultValue="transporte" className="space-y-4">
         <TabsList className="flex h-auto w-full flex-wrap justify-start gap-1 rounded-xl p-1">
+          <TabsTrigger value="transporte" className="gap-2">
+            <Bus className="size-4" />
+            Transporte / Rotas
+          </TabsTrigger>
           <TabsTrigger value="contrato">Contrato</TabsTrigger>
           <TabsTrigger value="mensalidades">Mensalidades</TabsTrigger>
           <TabsTrigger value="ocorrencias">Ocorrências</TabsTrigger>
@@ -213,6 +207,15 @@ export default function AlunoDetalhe() {
           <TabsTrigger value="documentos">Documentos</TabsTrigger>
           <TabsTrigger value="fotos">Fotos</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="transporte">
+          {alunoId && (
+            <GradeSemanalRotas 
+              alunoId={alunoId} 
+              nomeRotaPrincipal={aluno.rota} 
+            />
+          )}
+        </TabsContent>
 
         <TabsContent value="contrato">
           <AlunoContrato contrato={contrato} />
