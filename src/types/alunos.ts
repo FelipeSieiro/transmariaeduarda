@@ -1,5 +1,15 @@
-import { Responsavel } from "./responsavel";
+import type { Contrato, ContratoDetalhe, HistoricoItemDetalhe } from "./contrato";
+import type { EscolaResumida } from "./escola";
+import type { Mensalidade } from "./mensalidade";
+import type {
+  AlunoResponsavelVinculo,
+  PayloadResponsavelVinculo,
+  Responsavel,
+  ResponsavelDetalhe,
+} from "./responsavel";
+import type { RotaResumida } from "./rota";
 
+export type StatusAluno = "ativo" | "inativo" | string;
 
 export interface Aluno {
   id: string;
@@ -10,39 +20,35 @@ export interface Aluno {
   data_inicio?: string | null;
   created_at?: string;
   updated_at?: string;
+
+  // Escola
   escola_id?: string | null;
-  escolas?: {
-    id: string;
-    nome: string;
-  } | null;
+  escolas?: EscolaResumida | null;
+
+  // Turma e Período
   serie?: string | null;
   turno?: string | null;
+
+  // Endereço
   endereco?: string | null;
   numero?: string | null;
   complemento?: string | null;
   bairro?: string | null;
   cidade?: string | null;
   cep?: string | null;
+
+  // Rota
   rota_id?: string | null;
-  rotas?: {
-    id: string;
-    nome: string;
-  } | null;
-  status?: string | null;
+  rotas?: RotaResumida | null;
+
+  // Financeiro e Status
+  mensalidade?: number | string | null;
+  status?: StatusAluno | null;
+
+  // Vinculações
   responsavel?: Responsavel | null;
-  aluno_responsavel?: Array<{
-    id?: string;
-    responsavel_id?: string;
-    responsavel?: Responsavel;
-    parentesco?: string;
-    responsavel_financeiro?: boolean;
-    responsavel_emergencia?: boolean;
-  }>;
-  alunos_responsaveis?: Array<{
-    responsavel_id?: string;
-    responsavel?: Responsavel;
-    parentesco?: string;
-  }>;
+  aluno_responsavel?: AlunoResponsavelVinculo[];
+  alunos_responsaveis?: AlunoResponsavelVinculo[];
   contratos?: Contrato[];
   contrato?: Contrato;
   mensalidades?: Mensalidade[];
@@ -50,11 +56,49 @@ export interface Aluno {
 
 export interface CadastroAlunoCompleto {
   aluno: Partial<Aluno>;
-  responsaveis: Array<{
-    responsavel_id: string;
-    parentesco?: string;
-    responsavel_financeiro?: boolean;
-    responsavel_emergencia?: boolean;
-  }>;
+  responsaveis: PayloadResponsavelVinculo[];
   contrato?: Contrato;
+}
+
+export interface AlunoDetalhe {
+  id: string;
+  nome: string;
+  foto: string;
+  nascimento: string;
+  escola: string;
+  serie: string;
+  turno: string;
+
+  // Endereço Aluno
+  endereco: string;
+  bairro: string;
+  cidade: string;
+
+  // Responsáveis
+  responsaveis: ResponsavelDetalhe[];
+  responsavel: string;
+  parentesco: string;
+  telefone: string;
+  email: string;
+  enderecoResponsavel: string;
+  bairroResponsavel: string;
+  cidadeResponsavel: string;
+
+  // Transporte e Rota
+  motorista: string;
+  veiculo: string;
+  rota: string;
+
+  // Status e Contrato
+  mensalidade: number;
+  status: "ativo" | "inativo";
+  pagamento: string;
+  desde: string;
+  contrato: ContratoDetalhe;
+
+  // Coleções
+  mensalidades: unknown[];
+  ocorrencias: unknown[];
+  historico: HistoricoItemDetalhe[];
+  documentos: unknown[];
 }

@@ -11,8 +11,3 @@ export interface Veiculo {
   updated_at?: string;
   deleted_at?: string | null;
 }
-
-export interface ApiResponse<T> {
-  success: boolean;
-  data: T;
-}

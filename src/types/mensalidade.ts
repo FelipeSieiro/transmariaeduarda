@@ -12,17 +12,7 @@ export interface Mensalidade {
   updated_at?: string;
 }
 
-export type Mensalidade = {
-  id: string;
-  contrato_id: string;
-  competencia: string;
-  valor: number;
-  data_vencimento: string;
-  status: "pendente" | "pago" | "atrasado";
-  data_pagamento?: string | null;
-};
-
-export type PagarMensalidadePayload = {
+export interface PagarMensalidadePayload {
   forma_pagamento: string;
   data_pagamento: string;
-};
+}

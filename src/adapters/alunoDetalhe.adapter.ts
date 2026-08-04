@@ -1,68 +1,96 @@
-import type { Aluno as AlunoApi } from "@/services/alunos.service";
-import type { Aluno as AlunoMock } from "@/data/mock";
+import type {
+  Aluno,
+  AlunoDetalhe,
+  AlunoResponsavelVinculo,
+  HistoricoItemDetalhe,
+  ResponsavelDetalhe,
+} from "@/types";
 
-export function adaptarAlunoDetalhe(aluno: AlunoApi): AlunoMock {
+// --- Funções Auxiliares ---
+
+function formatarEndereco(
+  logradouro?: string | null,
+  numero?: string | null,
+  complemento?: string | null
+): string {
+  const partes = [logradouro, numero, complemento].filter(Boolean);
+  return partes.length > 0 ? partes.join(", ") : "-";
+}
+
+function mapearResponsavel(
+  vinculo: AlunoResponsavelVinculo,
+  index: number,
+  alunoId: string
+): ResponsavelDetalhe {
+  const respObj = vinculo.responsaveis ?? vinculo.responsavel;
+
+  return {
+    id: respObj?.id ?? `${alunoId}-resp-${index}`,
+    nome: respObj?.nome ?? "Responsável sem nome",
+    email: respObj?.email ?? "-",
+    telefone: respObj?.telefone ?? "-",
+    parentesco: vinculo.parentesco ?? "Responsável",
+    responsavel_financeiro: Boolean(vinculo.responsavel_financeiro),
+    responsavel_emergencia: Boolean(vinculo.responsavel_emergencia),
+    endereco: respObj?.endereco ?? "-",
+    bairro: "-",
+    cidade: "-",
+  };
+}
+
+function gerarHistorico(
+  aluno: Aluno,
+  totalResponsaveis: number
+): HistoricoItemDetalhe[] {
+  const dataCriacao = aluno.created_at ?? "-";
+  const historico: HistoricoItemDetalhe[] = [
+    {
+      data: dataCriacao,
+      evento: "Aluno cadastrado via sistema",
+    },
+  ];
+
+  if (totalResponsaveis > 0) {
+    historico.push({
+      data: dataCriacao,
+      evento: `${totalResponsaveis} responsável(eis) vinculado(s) ao aluno`,
+    });
+  }
+
+  return historico;
+}
+
+// --- Função Principal ---
+
+export function adaptarAlunoDetalhe(aluno: Aluno): AlunoDetalhe {
   const vinculosResponsaveis =
     aluno.aluno_responsavel ?? aluno.alunos_responsaveis ?? [];
 
-  const responsaveisMapeados = vinculosResponsaveis.map((vinculo: any) => {
-    const respObj = vinculo.responsaveis ?? vinculo.responsavel ?? {};
-
-    const enderecoFormatado = [
-      respObj.endereco,
-      respObj.numero,
-      respObj.complemento,
-    ]
-      .filter(Boolean)
-      .join(", ");
-
-    return {
-      id: respObj.id ?? String(Math.random()),
-      nome: respObj.nome ?? "Responsável sem nome",
-      email: respObj.email ?? "-",
-      telefone: respObj.telefone ?? "-",
-      parentesco: vinculo.parentesco ?? "Responsável",
-      responsavel_financeiro: Boolean(vinculo.responsavel_financeiro),
-      responsavel_emergencia: Boolean(vinculo.responsavel_emergencia),
-      endereco: enderecoFormatado || "-",
-      bairro: respObj.bairro ?? "-",
-      cidade: respObj.cidade ?? "-",
-    };
-  });
+  const responsaveisMapeados = vinculosResponsaveis.map((vinculo, index) =>
+    mapearResponsavel(vinculo, index, aluno.id)
+  );
 
   const primeiroResponsavel = responsaveisMapeados[0];
-
-  const enderecoAluno = [aluno.endereco, aluno.numero, aluno.complemento]
-    .filter(Boolean)
-    .join(", ");
+  const escolaNome = aluno.escolas?.nome ?? aluno.escola_id ?? "Não informado";
 
   return {
     id: aluno.id,
     nome: aluno.nome,
-
     foto:
       aluno.foto_url ??
-      `https://api.dicebear.com/9.x/avataaars/svg?seed=${encodeURIComponent(
-        aluno.nome
-      )}`,
-
+      `https://api.dicebear.com/9.x/avataaars/svg?seed=${encodeURIComponent(aluno.nome)}`,
     nascimento: aluno.data_nascimento ?? "-",
-
-    escola:
-      (aluno as any).escola ??
-      aluno.escolas?.nome ??
-      aluno.escola_id ??
-      "Não informado",
-
+    escola: escolaNome,
     serie: aluno.serie ?? "-",
     turno: aluno.turno ?? "-",
 
-    endereco: enderecoAluno || "-",
+    endereco: formatarEndereco(aluno.endereco, aluno.numero, aluno.complemento),
     bairro: aluno.bairro ?? "-",
     cidade: aluno.cidade ?? "-",
 
     responsaveis: responsaveisMapeados,
 
+    // Dados do responsável principal (fallback plano para compatibilidade com a UI)
     responsavel: primeiroResponsavel?.nome ?? "Responsável não vinculado",
     parentesco: primeiroResponsavel?.parentesco ?? "-",
     telefone: primeiroResponsavel?.telefone ?? "-",
@@ -91,22 +119,7 @@ export function adaptarAlunoDetalhe(aluno: AlunoApi): AlunoMock {
 
     mensalidades: [],
     ocorrencias: [],
-
-    historico: [
-      {
-        data: aluno.created_at ?? "-",
-        evento: "Aluno cadastrado via sistema",
-      },
-      ...(vinculosResponsaveis.length > 0
-        ? [
-            {
-              data: aluno.created_at ?? "-",
-              evento: `${vinculosResponsaveis.length} responsável(eis) vinculado(s) ao aluno`,
-            },
-          ]
-        : []),
-    ],
-
+    historico: gerarHistorico(aluno, vinculosResponsaveis.length),
     documentos: [],
-  } as AlunoMock;
+  };
 }

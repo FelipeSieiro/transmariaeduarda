@@ -1,3 +1,9 @@
+export interface RotaResumida {
+  id: string;
+  nome: string;
+  bairro?: string | null;
+}
+
 export interface Rota {
   id: string;
   nome: string;
