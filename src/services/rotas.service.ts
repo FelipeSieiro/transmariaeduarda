@@ -1,5 +1,5 @@
 import api from "@/lib/api";
-import type { Rota, CreateRotaDTO, UpdateRotaDTO } from "@/types/rota";
+import type { Rota, CreateRotaDTO, UpdateRotaDTO } from "@/types";
 
 export const rotasService = {
   async getAll(): Promise<Rota[]> {

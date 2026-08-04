@@ -26,7 +26,8 @@ import { AlunoOcorrencias } from "@/components/alunos/AlunoOcorrencias";
 import { AlunoHistorico, type EventoHistorico } from "@/components/alunos/AlunoHistorico";
 import { AlunoDocumentos } from "@/components/alunos/AlunoDocumentos";
 import { AlunoFotos } from "@/components/alunos/AlunoFotos";
-import { GradeSemanalRotas } from "../GradeSemanalRotas";
+import { GradeSemanalRotas } from "@/components/agenda/GradeSemanalRotas";
+
 
 // Função auxiliar para converter datas no formato DD/MM/AAAA para ordenação
 function converterParaTimestamp(dataStr?: string): number {

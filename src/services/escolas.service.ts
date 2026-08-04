@@ -1,12 +1,7 @@
 // src/services/escolas.service.ts
 import api from "@/lib/api";
+import { Escola } from "@/types";
 
-export interface Escola {
-    id: string;
-    nome: string;
-    endereco?: string;
-    telefone?: string;
-}
 
 export async function listarEscolas(): Promise<Escola[]> {
     const response = await api.get("/escolas");
@@ -16,7 +11,7 @@ export async function listarEscolas(): Promise<Escola[]> {
         : response.data.data || [];
 }
 
-// Objeto agrupador para compatibilidade com a sintaxe escolasService.getAll()
+
 export const escolasService = {
     getAll: listarEscolas,
     listar: listarEscolas,

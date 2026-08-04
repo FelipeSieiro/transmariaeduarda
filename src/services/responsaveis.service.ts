@@ -1,14 +1,6 @@
 import api from "@/lib/api";
+import { Responsavel } from "@/types";
 
-export interface Responsavel {
-    id: string;
-    nome: string;
-    cpf?: string;
-    telefone?: string;
-    email?: string;
-    endereco?: string;
-    observacoes?: string;
-}
 
 export async function listarResponsaveis(): Promise<Responsavel[]> {
     const response = await api.get("/responsaveis");

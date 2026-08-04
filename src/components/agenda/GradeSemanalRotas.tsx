@@ -16,9 +16,8 @@ import { SectionCard } from "@/components/ui-kit/primitives";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import { rotasService } from "@/services/rotas.service";
-import { agendamentoRotasService } from "@/services/agendamento-rotas.service";
+import { AgendamentoRotaItem, agendamentoRotasService } from "@/services/agendamento-rotas.service";
 import { Rota } from "@/types/rota";
-import { AgendamentoRotaItem } from "@/types/agendamento";
 
 const DIAS_SEMANA = [
   { label: "Segunda-feira", value: 1 },
