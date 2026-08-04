@@ -2,6 +2,11 @@ import api from "@/lib/api";
 
 
 
+// ======================================================
+// RESPONSÁVEL
+// ======================================================
+
+
 export interface Responsavel {
 
 
@@ -36,37 +41,58 @@ export interface Responsavel {
 
 
 
-export interface Contrato {
+// ======================================================
+// MENSALIDADE
+// ======================================================
 
 
-  id?: string;
+export interface Mensalidade {
 
 
-  aluno_id?: string;
+  id:string;
 
 
-  numero?: string;
+  contrato_id:string;
 
 
-  data_inicio?: string;
+  competencia:string;
 
 
-  data_fim?: string | null;
+  valor:number;
 
 
-  valor_mensalidade?: number;
+  data_vencimento:string;
 
 
-  dia_vencimento?: number;
+  status?:
+
+    | "pendente"
+
+    | "pago"
+
+    | "atrasado"
+
+    | "cancelado"
+
+    | string
+
+    | null;
 
 
-  forma_pagamento?: string;
+
+  data_pagamento?:string | null;
 
 
-  observacoes?: string;
+  forma_pagamento?:string | null;
 
 
-  status?: string;
+  observacoes?:string | null;
+
+
+  created_at?:string;
+
+
+  updated_at?:string;
 
 
 }
@@ -77,6 +103,63 @@ export interface Contrato {
 
 
 
+
+
+// ======================================================
+// CONTRATO
+// ======================================================
+
+
+export interface Contrato {
+
+
+  id?:string;
+
+
+  aluno_id?:string;
+
+
+  numero?:string;
+
+
+  data_inicio?:string;
+
+
+  data_fim?:string | null;
+
+
+  valor_mensalidade?:number;
+
+
+  dia_vencimento?:number;
+
+
+  forma_pagamento?:string;
+
+
+  observacoes?:string;
+
+
+  status?:string;
+
+
+
+  mensalidades?:Mensalidade[];
+
+
+}
+
+
+
+
+
+
+
+
+
+// ======================================================
+// ALUNO
+// ======================================================
 
 
 export interface Aluno {
@@ -91,72 +174,93 @@ export interface Aluno {
   nome:string;
 
 
-  foto_url?:string;
+  foto_url?:string | null;
 
 
-  data_nascimento?:string;
+  data_nascimento?:string | null;
 
 
-  data_inicio?:string;
+  data_inicio?:string | null;
 
 
   created_at?:string;
 
 
+  updated_at?:string;
 
-  escola_id?:string;
 
 
-  escolas?: {
+  escola_id?:string | null;
+
+
+  escolas?:{
+
 
     id:string;
 
+
     nome:string;
+
 
   } | null;
 
 
 
-  serie?:string;
 
 
-  turno?:string;
+  serie?:string | null;
 
 
-
-  endereco?:string;
-
-
-  numero?:string;
-
-
-  complemento?:string;
-
-
-  bairro?:string;
-
-
-  cidade?:string;
-
-
-  cep?:string;
+  turno?:string | null;
 
 
 
-  rota_id?:string;
 
 
-  rotas?: {
+  endereco?:string | null;
+
+
+  numero?:string | null;
+
+
+  complemento?:string | null;
+
+
+  bairro?:string | null;
+
+
+  cidade?:string | null;
+
+
+  cep?:string | null;
+
+
+
+
+
+  rota_id?:string | null;
+
+
+  rotas?:{
+
 
     id:string;
 
+
     nome:string;
+
 
   } | null;
 
 
 
-  status?:string;
+
+
+  status?:string | null;
+
+
+
+
 
 
 
@@ -171,7 +275,12 @@ export interface Aluno {
 
 
 
-  aluno_responsavel?: Array<{
+
+
+  aluno_responsavel?:Array<{
+
+    id?:string;
+
 
     responsavel_id?:string;
 
@@ -194,7 +303,11 @@ export interface Aluno {
 
 
 
-  alunos_responsaveis?: Array<{
+
+
+
+
+  alunos_responsaveis?:Array<{
 
     responsavel_id?:string;
 
@@ -211,16 +324,46 @@ export interface Aluno {
 
 
 
+
+
+
+
   // =====================
-  // CONTRATO
+  // CONTRATOS
+  // retorno do backend:
+  //
+  // contratos:[
+  //   {
+  //     id,
+  //     mensalidades:[]
+  //   }
+  // ]
   // =====================
+
+
+  contratos?:Array<Contrato>;
+
+
+
+
+
+  // Compatibilidade
+  // com telas antigas
 
 
   contrato?:Contrato;
 
 
 
-  mensalidade?:number;
+
+
+  // Compatibilidade
+  // com mocks antigos
+
+
+  mensalidades?:Mensalidade[];
+
+
 
 
 
@@ -286,23 +429,26 @@ export interface CadastroAlunoCompleto {
 
 
 
-  responsaveis:
-
-    Array<{
-
-      responsavel_id:string;
 
 
-      parentesco?:string;
+  responsaveis:Array<{
+
+    responsavel_id:string;
 
 
-      responsavel_financeiro?:boolean;
+    parentesco?:string;
 
 
-      responsavel_emergencia?:boolean;
+    responsavel_financeiro?:boolean;
 
 
-    }>;
+    responsavel_emergencia?:boolean;
+
+
+  }>;
+
+
+
 
 
 
@@ -352,6 +498,11 @@ export async function criarAlunoCompleto(
 
 
 
+// ======================================================
+// LISTAR ALUNOS
+// ======================================================
+
+
 export async function listarAlunos(){
 
 
@@ -378,6 +529,11 @@ export async function listarAlunos(){
 
 
 
+// ======================================================
+// BUSCAR ALUNO
+// ======================================================
+
+
 export async function buscarAluno(
 
   id:string
@@ -395,6 +551,8 @@ export async function buscarAluno(
 
 
 
+
+
   console.log(
 
     "ALUNO API:",
@@ -405,7 +563,52 @@ export async function buscarAluno(
 
 
 
-  return response.data.data as Aluno;
+
+
+  const aluno =
+
+    response.data.data as Aluno;
+
+
+
+
+
+  // Compatibilidade
+
+  // transforma contratos[0]
+
+  // em contrato
+
+
+  if(
+
+    aluno.contratos &&
+
+    aluno.contratos.length
+
+  ){
+
+
+    aluno.contrato =
+
+      aluno.contratos[0];
+
+
+    aluno.mensalidades =
+
+      aluno.contratos[0]
+
+      .mensalidades ?? [];
+
+
+  }
+
+
+
+
+
+
+  return aluno;
 
 
 }
@@ -416,6 +619,11 @@ export async function buscarAluno(
 
 
 
+
+
+// ======================================================
+// ATUALIZAR ALUNO
+// ======================================================
 
 
 export async function atualizarAluno(
@@ -450,6 +658,11 @@ export async function atualizarAluno(
 
 
 
+
+
+// ======================================================
+// REMOVER ALUNO
+// ======================================================
 
 
 export async function removerAluno(
