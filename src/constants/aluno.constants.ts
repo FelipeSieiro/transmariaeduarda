@@ -8,7 +8,6 @@ export enum Serie {
   SETIMO_FUNDAMENTAL = "7º Fundamental",
   OITAVO_FUNDAMENTAL = "8º Fundamental",
   NONO_FUNDAMENTAL = "9º Fundamental",
-
   PRIMEIRO_MEDIO = "1º Médio",
   SEGUNDO_MEDIO = "2º Médio",
   TERCEIRO_MEDIO = "3º Médio",
@@ -53,3 +52,11 @@ export enum StatusAluno {
   ATIVO = "ativo",
   INATIVO = "inativo",
 }
+
+
+
+// Helpers para iteração direta em componentes UI (<Select />, listas, etc)
+export const SERIES = Object.values(Serie);
+export const TURMAS = Object.values(Turma);
+export const TURNOS = Object.values(Turno);
+export const STATUS_ALUNO = Object.values(StatusAluno);

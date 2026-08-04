@@ -1,16 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { MoreHorizontal, Plus, Search, Users } from "lucide-react";
 import { toast } from "sonner";
-import {
-  MoreHorizontal,
-  Plus,
-  Search,
-  Users,
-} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-
 import {
   Table,
   TableBody,
@@ -19,18 +13,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
-import {
-  EmptyState,
-  SectionCard,
-} from "@/components/ui-kit/primitives";
+import { EmptyState, SectionCard } from "@/components/ui-kit/primitives";
 
 import {
   listarResponsaveis,
@@ -63,17 +52,11 @@ export default function Responsaveis() {
       "Tem certeza que deseja excluir este responsável?"
     );
 
-    if (!confirmar) {
-      return;
-    }
+    if (!confirmar) return;
 
     try {
       await removerResponsavel(id);
-
-      setResponsaveis((prev) =>
-        prev.filter((item) => item.id !== id)
-      );
-
+      setResponsaveis((prev) => prev.filter((item) => item.id !== id));
       toast.success("Responsável excluído com sucesso");
     } catch (error) {
       console.error(error);
@@ -96,10 +79,7 @@ export default function Responsaveis() {
     <div className="mx-auto max-w-[1600px] space-y-6">
       <header className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="font-display text-3xl font-semibold">
-            Responsáveis
-          </h1>
-
+          <h1 className="font-display text-3xl font-semibold">Responsáveis</h1>
           <p className="text-sm text-muted-foreground">
             Cadastro de responsáveis financeiros e contatos autorizados
           </p>
@@ -109,7 +89,7 @@ export default function Responsaveis() {
           className="rounded-xl"
           onClick={() => navigate("/responsaveis/novo")}
         >
-          <Plus className="size-4" />
+          <Plus className="size-4 mr-2" />
           Novo responsável
         </Button>
       </header>
@@ -120,7 +100,6 @@ export default function Responsaveis() {
       >
         <div className="relative mb-4">
           <Search className="absolute left-3 top-3 size-4 text-muted-foreground" />
-
           <Input
             placeholder="Buscar responsável..."
             value={busca}
@@ -158,29 +137,18 @@ export default function Responsaveis() {
                       {responsavel.nome}
                     </TableCell>
 
-                    <TableCell>
-                      {responsavel.cpf ?? "-"}
-                    </TableCell>
+                    <TableCell>{responsavel.cpf ?? "-"}</TableCell>
 
-                    <TableCell>
-                      {responsavel.telefone ?? "-"}
-                    </TableCell>
+                    <TableCell>{responsavel.telefone ?? "-"}</TableCell>
 
-                    <TableCell>
-                      {responsavel.email ?? "-"}
-                    </TableCell>
+                    <TableCell>{responsavel.email ?? "-"}</TableCell>
 
-                    <TableCell>
-                      {responsavel.endereco ?? "-"}
-                    </TableCell>
+                    <TableCell>{responsavel.endereco ?? "-"}</TableCell>
 
                     <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                          >
+                          <Button variant="ghost" size="icon">
                             <MoreHorizontal className="size-4" />
                           </Button>
                         </DropdownMenuTrigger>
@@ -206,9 +174,7 @@ export default function Responsaveis() {
 
                           <DropdownMenuItem
                             className="text-destructive"
-                            onClick={() =>
-                              excluirResponsavel(responsavel.id)
-                            }
+                            onClick={() => excluirResponsavel(responsavel.id)}
                           >
                             Excluir
                           </DropdownMenuItem>

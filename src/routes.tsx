@@ -3,8 +3,16 @@ import { createBrowserRouter } from "react-router-dom";
 import AppLayout from "@/AppLayout";
 
 
-import Responsaveis from "@/pages/Responsaveis";
-import NovoResponsavel from "@/pages/NovoResponsavel";
+import Responsaveis from "@/pages/responsaveis/Responsaveis";
+import NovoResponsavel from "@/pages/responsaveis/NovoResponsavel";
+
+import Alunos from "@/pages/alunos/Alunos";
+import NovoAluno from "@/pages/alunos/NovoAluno";
+import AlunoDetalhe from "@/pages/alunos/AlunoDetalhe";
+
+import Contratos from "@/pages/contratos/Contratos";
+import NovoContrato from "@/pages/contratos/NovoContrato";
+import ContratoDetalhe from "@/pages/contratos/ContratoDetalhe";
 
 import Dashboard from "@/pages/Dashboard";
 import Agenda from "@/pages/Agenda";
@@ -19,12 +27,6 @@ import Relatorios from "@/pages/Relatorios";
 import Rotas from "@/pages/Rotas";
 import Veiculos from "@/pages/Veiculos";
 
-import Alunos from "@/pages/alunos/Alunos";
-import AlunoDetalhe from "@/pages/alunos/AlunoDetalhe";
-import Contratos from "@/pages/contratos/Contratos";
-import NovoContrato from "@/pages/contratos/NovoContrato";
-import ContratoDetalhe from "@/pages/contratos/ContratoDetalhe";
-import NovoAluno from "@/pages/alunos/NovoAluno";
 
 export const router = createBrowserRouter([
   {
