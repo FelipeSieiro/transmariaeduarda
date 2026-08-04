@@ -3,24 +3,75 @@ import api from "@/lib/api";
 
 
 export interface Responsavel {
+
+
   id: string;
+
 
   nome: string;
 
+
   cpf?: string;
+
 
   telefone?: string;
 
+
   email?: string;
 
-  // =====================
-  // ENDEREÇO
-  // =====================
 
   endereco?: string;
 
+
   observacoes?: string;
+
+
 }
+
+
+
+
+
+
+
+
+
+export interface Contrato {
+
+
+  id?: string;
+
+
+  aluno_id?: string;
+
+
+  numero?: string;
+
+
+  data_inicio?: string;
+
+
+  data_fim?: string | null;
+
+
+  valor_mensalidade?: number;
+
+
+  dia_vencimento?: number;
+
+
+  forma_pagamento?: string;
+
+
+  observacoes?: string;
+
+
+  status?: string;
+
+
+}
+
+
 
 
 
@@ -31,39 +82,29 @@ export interface Responsavel {
 export interface Aluno {
 
 
-
   id:string;
-
 
 
   matricula:string;
 
 
-
   nome:string;
-
 
 
   foto_url?:string;
 
 
-
   data_nascimento?:string;
 
 
-
   data_inicio?:string;
-
 
 
   created_at?:string;
 
 
 
-
-
   escola_id?:string;
-
 
 
   escolas?: {
@@ -76,46 +117,33 @@ export interface Aluno {
 
 
 
-
-
   serie?:string;
-
 
 
   turno?:string;
 
 
 
-
-
   endereco?:string;
-
 
 
   numero?:string;
 
 
-
   complemento?:string;
-
 
 
   bairro?:string;
 
 
-
   cidade?:string;
-
 
 
   cep?:string;
 
 
 
-
-
   rota_id?:string;
-
 
 
   rotas?: {
@@ -128,11 +156,7 @@ export interface Aluno {
 
 
 
-
-
   status?:string;
-
-
 
 
 
@@ -143,23 +167,43 @@ export interface Aluno {
   // =====================
 
 
-
   responsavel?:Responsavel | null;
+
 
 
   aluno_responsavel?: Array<{
 
-    responsavel_id?: string;
-    responsavel?: Responsavel;
-    parentesco?: string;
+    responsavel_id?:string;
+
+
+    responsavel?:Responsavel;
+
+
+    parentesco?:string;
+
+
+    responsavel_financeiro?:boolean;
+
+
+    responsavel_emergencia?:boolean;
+
 
   }>;
+
+
+
+
 
   alunos_responsaveis?: Array<{
 
-    responsavel_id?: string;
-    responsavel?: Responsavel;
-    parentesco?: string;
+    responsavel_id?:string;
+
+
+    responsavel?:Responsavel;
+
+
+    parentesco?:string;
+
 
   }>;
 
@@ -167,11 +211,12 @@ export interface Aluno {
 
 
 
+  // =====================
+  // CONTRATO
+  // =====================
 
 
-  // =====================
-  // CAMPOS FINANCEIROS
-  // =====================
+  contrato?:Contrato;
 
 
 
@@ -179,6 +224,122 @@ export interface Aluno {
 
 
 
+}
+
+
+
+
+
+
+
+
+
+// ======================================================
+// CADASTRO NORMAL
+// ======================================================
+
+
+export async function criarAluno(
+
+  aluno:Partial<Aluno>
+
+){
+
+
+  const response =
+
+    await api.post(
+
+      "/alunos",
+
+      aluno
+
+    );
+
+
+
+  return response.data.data as Aluno;
+
+
+}
+
+
+
+
+
+
+
+
+
+// ======================================================
+// CADASTRO COMPLETO
+// ALUNO + RESPONSÁVEIS + CONTRATO
+// ======================================================
+
+
+export interface CadastroAlunoCompleto {
+
+
+  aluno:
+
+    Partial<Aluno>;
+
+
+
+  responsaveis:
+
+    Array<{
+
+      responsavel_id:string;
+
+
+      parentesco?:string;
+
+
+      responsavel_financeiro?:boolean;
+
+
+      responsavel_emergencia?:boolean;
+
+
+    }>;
+
+
+
+  contrato?:Contrato;
+
+
+
+}
+
+
+
+
+
+
+
+
+
+export async function criarAlunoCompleto(
+
+  payload:CadastroAlunoCompleto
+
+){
+
+
+  const response =
+
+    await api.post(
+
+      "/alunos/completo",
+
+      payload
+
+    );
+
+
+
+  return response.data.data as Aluno;
 
 
 }
@@ -195,7 +356,12 @@ export async function listarAlunos(){
 
 
   const response =
-    await api.get("/alunos");
+
+    await api.get(
+
+      "/alunos"
+
+    );
 
 
 
@@ -213,20 +379,28 @@ export async function listarAlunos(){
 
 
 export async function buscarAluno(
+
   id:string
+
 ){
 
 
   const response =
+
     await api.get(
+
       `/alunos/${id}`
+
     );
 
 
 
   console.log(
+
     "ALUNO API:",
+
     response.data.data
+
   );
 
 
@@ -244,42 +418,23 @@ export async function buscarAluno(
 
 
 
-export async function criarAluno(
-  aluno:Partial<Aluno>
-){
-
-
-  const response =
-    await api.post(
-      "/alunos",
-      aluno
-    );
-
-
-
-  return response.data.data as Aluno;
-
-
-}
-
-
-
-
-
-
-
-
-
 export async function atualizarAluno(
+
   id:string,
+
   aluno:Partial<Aluno>
+
 ){
 
 
   const response =
+
     await api.put(
+
       `/alunos/${id}`,
+
       aluno
+
     );
 
 
@@ -298,13 +453,18 @@ export async function atualizarAluno(
 
 
 export async function removerAluno(
+
   id:string
+
 ){
 
 
   const response =
+
     await api.delete(
+
       `/alunos/${id}`
+
     );
 
 
