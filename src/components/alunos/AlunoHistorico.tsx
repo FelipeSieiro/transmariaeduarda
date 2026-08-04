@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 
 import { SectionCard } from "@/components/ui-kit/primitives";
-import { EventoHistorico } from "@/services/alunos.service";
+import { EventoHistorico } from "@/types";
 
 interface AlunoHistoricoProps {
   historico?: EventoHistorico[];

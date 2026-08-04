@@ -6,11 +6,10 @@ import { ArrowLeft, Bus } from "lucide-react";
 import { buscarAluno } from "@/services/alunos.service";
 import {
   buscarContratoPorAluno,
-  type Contrato,
 } from "@/services/contratos.service";
 
 import { adaptarAlunoDetalhe } from "@/adapters/alunoDetalhe.adapter";
-import { alunos as alunosMock, brlExato, type Aluno } from "@/data/mock";
+import { Aluno, alunos as alunosMock, brlExato} from "@/data/mock";
 
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -27,6 +26,7 @@ import { AlunoHistorico, type EventoHistorico } from "@/components/alunos/AlunoH
 import { AlunoDocumentos } from "@/components/alunos/AlunoDocumentos";
 import { AlunoFotos } from "@/components/alunos/AlunoFotos";
 import { GradeSemanalRotas } from "@/components/agenda/GradeSemanalRotas";
+import { Contrato } from "@/types";
 
 
 // Função auxiliar para converter datas no formato DD/MM/AAAA para ordenação
