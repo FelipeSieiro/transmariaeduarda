@@ -1,3 +1,4 @@
+// src/pages/RotaDetalhes.tsx
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
@@ -45,7 +46,6 @@ export default function RotaDetalhes() {
 
         setRota(dadosRota);
 
-        // Busca Motorista com tratamento isolado de erro
         if (dadosRota.motorista_id) {
           motoristasService
             .getById(dadosRota.motorista_id)
@@ -53,7 +53,6 @@ export default function RotaDetalhes() {
             .catch(() => setNomeMotorista(null));
         }
 
-        // Busca Veículo com tratamento isolado de erro
         if (dadosRota.veiculo_id) {
           veiculosService
             .getById(dadosRota.veiculo_id)
@@ -93,8 +92,8 @@ export default function RotaDetalhes() {
 
   if (loading) {
     return (
-      <div className="mx-auto max-w-4xl space-y-6 p-6">
-        <Skeleton className="h-10 w-48" />
+      <div className="mx-auto max-w-4xl space-y-6">
+        <Skeleton className="h-10 w-48 rounded-xl" />
         <Skeleton className="h-64 rounded-xl" />
       </div>
     );
@@ -104,24 +103,23 @@ export default function RotaDetalhes() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
-      {/* Header */}
       <header className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <Button
-            variant="outline"
+            variant="ghost"
             size="icon"
-            className="rounded-xl"
+            className="rounded-xl text-muted-foreground hover:text-foreground"
             onClick={() => navigate("/rotas")}
           >
             <ArrowLeft className="size-4" />
           </Button>
           <div className="flex items-center gap-3">
-            <div className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+            <div className="inline-flex p-2 rounded-xl bg-primary/10 text-primary">
               <Bus className="size-5" />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="font-display text-2xl font-semibold">
+            <div className="space-y-0.5">
+              <div className="flex items-center gap-2.5">
+                <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
                   {rota.nome}
                 </h1>
                 <StatusPill status={rota.status ? rota.status.toLowerCase() : "ativa"} />
@@ -153,54 +151,52 @@ export default function RotaDetalhes() {
         </div>
       </header>
 
-      {/* Grid com Informações */}
       <div className="grid gap-6 md:grid-cols-3">
-        {/* Card Principal */}
         <SectionCard
           title="Informações da Rota"
-          description="Visão geral e horários"
+          description="Visão geral e horários do trajeto"
           className="md:col-span-2"
         >
           <div className="grid gap-6 sm:grid-cols-2">
-            <div className="space-y-1">
-              <span className="text-xs font-medium uppercase text-muted-foreground">
+            <div className="space-y-1.5">
+              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 Nome da Rota
               </span>
-              <p className="text-base font-medium">{rota.nome}</p>
+              <p className="text-base font-medium text-foreground">{rota.nome}</p>
             </div>
 
-            <div className="space-y-1">
-              <span className="text-xs font-medium uppercase text-muted-foreground">
+            <div className="space-y-1.5">
+              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 Bairro / Região
               </span>
-              <div className="flex items-center gap-1.5 font-medium">
+              <div className="flex items-center gap-2 font-medium text-foreground">
                 <MapPin className="size-4 text-muted-foreground" />
                 {rota.bairro || "Não informado"}
               </div>
             </div>
 
-            <div className="space-y-1">
-              <span className="text-xs font-medium uppercase text-muted-foreground">
+            <div className="space-y-1.5">
+              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 Horário de Saída
               </span>
-              <div className="flex items-center gap-1.5 font-medium">
+              <div className="flex items-center gap-2 font-medium text-foreground">
                 <Clock className="size-4 text-muted-foreground" />
-                {rota.horario_saida ? rota.horario_saida.slice(0, 5) : "-"}
+                {rota.horario_saida ? rota.horario_saida.slice(0, 5) : "—"}
               </div>
             </div>
 
-            <div className="space-y-1">
-              <span className="text-xs font-medium uppercase text-muted-foreground">
+            <div className="space-y-1.5">
+              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 Horário de Retorno
               </span>
-              <div className="flex items-center gap-1.5 font-medium">
+              <div className="flex items-center gap-2 font-medium text-foreground">
                 <Clock className="size-4 text-muted-foreground" />
-                {rota.horario_retorno ? rota.horario_retorno.slice(0, 5) : "-"}
+                {rota.horario_retorno ? rota.horario_retorno.slice(0, 5) : "—"}
               </div>
             </div>
 
-            <div className="sm:col-span-2 space-y-1">
-              <span className="text-xs font-medium uppercase text-muted-foreground">
+            <div className="sm:col-span-2 space-y-1.5">
+              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 Descrição / Observações
               </span>
               <p className="text-sm text-muted-foreground leading-relaxed">
@@ -210,31 +206,41 @@ export default function RotaDetalhes() {
           </div>
         </SectionCard>
 
-        {/* Card de Alocações */}
-        <SectionCard title="Alocações" description="Motorista e Veículo">
+        <SectionCard
+          title="Alocações"
+          description="Motorista e veículo designados"
+        >
           <div className="space-y-5">
             <div className="flex items-start gap-3">
-              <UserCheck className="size-5 text-muted-foreground mt-0.5" />
-              <div>
-                <p className="text-xs text-muted-foreground">Motorista</p>
-                <p className="font-medium">
+              <div className="inline-flex p-2 rounded-xl bg-muted/60 text-muted-foreground mt-0.5">
+                <UserCheck className="size-4" />
+              </div>
+              <div className="space-y-0.5">
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Motorista
+                </p>
+                <p className="font-medium text-foreground">
                   {nomeMotorista || (rota.motorista_id ? "Carregando..." : "Sem motorista")}
                 </p>
               </div>
             </div>
 
             <div className="flex items-start gap-3">
-              <Bus className="size-5 text-muted-foreground mt-0.5" />
-              <div>
-                <p className="text-xs text-muted-foreground">Veículo</p>
-                <p className="font-medium">
+              <div className="inline-flex p-2 rounded-xl bg-muted/60 text-muted-foreground mt-0.5">
+                <Bus className="size-4" />
+              </div>
+              <div className="space-y-0.5">
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Veículo
+                </p>
+                <p className="font-medium text-foreground">
                   {nomeVeiculo || (rota.veiculo_id ? "Carregando..." : "Sem veículo")}
                 </p>
               </div>
             </div>
 
             {rota.created_at && (
-              <div className="pt-3 border-t">
+              <div className="pt-4 border-t border-border/60">
                 <p className="text-[11px] text-muted-foreground">
                   Cadastrado em:{" "}
                   {new Date(rota.created_at).toLocaleDateString("pt-BR")}

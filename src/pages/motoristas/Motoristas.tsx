@@ -1,3 +1,4 @@
+// src/pages/Motoristas.tsx
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -120,8 +121,11 @@ export default function Motoristas() {
   return (
     <div className="mx-auto max-w-[1600px] space-y-6">
       <header className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="font-display text-3xl font-semibold">Motoristas</h1>
+        <div className="space-y-1">
+          <h1 className="font-display flex items-center gap-2.5 text-3xl font-semibold tracking-tight text-foreground">
+            <IdCard className="size-7 text-primary" />
+            Motoristas
+          </h1>
           <p className="text-sm text-muted-foreground">
             {filtrados.length} de {motoristas.length} motoristas cadastrados
           </p>
@@ -151,7 +155,7 @@ export default function Motoristas() {
         title="Filtros"
         description="Pesquisa por nome, CPF, CNH ou telefone"
         action={
-          <Button variant="ghost" size="sm" onClick={limpar}>
+          <Button variant="ghost" size="sm" onClick={limpar} className="rounded-lg text-muted-foreground hover:text-foreground">
             <Filter className="size-4 mr-2" />
             Limpar
           </Button>
@@ -175,8 +179,8 @@ export default function Motoristas() {
             <SelectTrigger className="rounded-xl">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={TODOS}>Todos</SelectItem>
+            <SelectContent className="rounded-xl">
+              <SelectItem value={TODOS}>Todos os status</SelectItem>
               <SelectItem value="ativo">Ativo</SelectItem>
               <SelectItem value="inativo">Inativo</SelectItem>
             </SelectContent>
@@ -186,29 +190,30 @@ export default function Motoristas() {
 
       <SectionCard
         title="Lista de motoristas"
-        description="Dados vindos da API"
+        description="Dados cadastrais e profissionais"
         bodyClassName="p-0"
         action={
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setOrdem(ordem === "nome" ? "id" : "nome")}
+            className="rounded-lg text-muted-foreground hover:text-foreground"
           >
             <ArrowUpDown className="size-4 mr-2" />
-            Ordenar
+            Ordenar por {ordem === "nome" ? "Nome" : "ID"}
           </Button>
         }
       >
         {visiveis.length === 0 ? (
-          <div className="p-5">
+          <div className="p-8">
             <EmptyState
               icon={IdCard}
               title="Nenhum motorista encontrado"
-              description="Cadastre um motorista para visualizar aqui."
+              description="Cadastre um motorista ou ajuste os filtros aplicados."
               action={
-                <Button variant="outline" onClick={limpar}>
+                <Button variant="outline" onClick={limpar} className="rounded-xl">
                   <SlidersHorizontal className="size-4 mr-2" />
-                  Limpar
+                  Limpar filtros
                 </Button>
               }
             />
@@ -218,45 +223,47 @@ export default function Motoristas() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Motorista</TableHead>
+                  <TableHead className="pl-6">Motorista</TableHead>
                   <TableHead>CPF</TableHead>
                   <TableHead>Telefone</TableHead>
                   <TableHead>CNH / Cat.</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead />
+                  <TableHead className="w-16 pr-6 text-right">Ações</TableHead>
                 </TableRow>
               </TableHeader>
 
               <TableBody>
                 {visiveis.map((motorista) => (
                   <TableRow key={motorista.id}>
-                    <TableCell>
+                    <TableCell className="pl-6">
                       <Link
                         to={`/motoristas/${motorista.id}`}
-                        className="flex items-center gap-3"
+                        className="flex items-center gap-3 group"
                       >
-                        <Avatar>
+                        <Avatar className="rounded-xl">
                           <AvatarImage src={motorista.foto_url ?? undefined} />
-                          <AvatarFallback>
+                          <AvatarFallback className="rounded-xl bg-primary/10 text-primary font-medium text-xs">
                             {(motorista.nome || "MO").slice(0, 2).toUpperCase()}
                           </AvatarFallback>
                         </Avatar>
 
                         <div>
-                          <p className="font-medium">{motorista.nome}</p>
+                          <p className="font-medium text-foreground group-hover:text-primary transition-colors">
+                            {motorista.nome}
+                          </p>
                           <p className="text-xs text-muted-foreground">
-                            {motorista.cidade ?? ""}
+                            {motorista.cidade ?? "—"}
                           </p>
                         </div>
                       </Link>
                     </TableCell>
 
                     <TableCell className="text-muted-foreground">
-                      {motorista.cpf || "-"}
+                      {motorista.cpf || "—"}
                     </TableCell>
 
                     <TableCell className="text-muted-foreground">
-                      {motorista.telefone || "-"}
+                      {motorista.telefone || "—"}
                     </TableCell>
 
                     <TableCell className="text-muted-foreground">
@@ -266,39 +273,46 @@ export default function Motoristas() {
                               ? `(${motorista.categoria_cnh})`
                               : ""
                           }`
-                        : "-"}
+                        : "—"}
                     </TableCell>
 
                     <TableCell>
                       <StatusPill status={motorista.status ?? "ativo"} />
                     </TableCell>
 
-                    <TableCell>
+                    <TableCell className="pr-6 text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="rounded-lg text-muted-foreground hover:text-foreground"
+                          >
                             <MoreHorizontal className="size-4" />
                           </Button>
                         </DropdownMenuTrigger>
 
-                        <DropdownMenuContent>
+                        <DropdownMenuContent align="end" className="rounded-xl">
                           <DropdownMenuItem
                             onClick={() => navigate(`/motoristas/${motorista.id}`)}
+                            className="rounded-lg cursor-pointer"
                           >
-                            Visualizar
+                            Visualizar detalhes
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={() =>
                               navigate(`/motoristas/${motorista.id}/editar`)
                             }
+                            className="rounded-lg cursor-pointer"
                           >
-                            Editar
+                            Editar cadastro
                           </DropdownMenuItem>
                           {motorista.status === "ativo" && (
                             <DropdownMenuItem
                               onClick={() => excluirMotorista(motorista.id)}
+                              className="rounded-lg text-destructive focus:text-destructive cursor-pointer"
                             >
-                              Excluir
+                              Excluir motorista
                             </DropdownMenuItem>
                           )}
                         </DropdownMenuContent>

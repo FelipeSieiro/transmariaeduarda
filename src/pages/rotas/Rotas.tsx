@@ -1,3 +1,4 @@
+// src/pages/RotasPage.tsx
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -92,16 +93,17 @@ export default function RotasPage() {
       const pesquisa =
         !q ||
         rota.nome?.toLowerCase().includes(q) ||
-        rota.descricao?.toLowerCase().includes(q);
+        rota.descricao?.toLowerCase().includes(q) ||
+        rota.bairro?.toLowerCase().includes(q);
 
-      return pesquisa && (status === TODOS || rota.status === status);
+      return pesquisa && (status === TODOS || rota.status?.toLowerCase() === status.toLowerCase());
     });
 
     return resultado.sort((a, b) => {
       if (ordem === "nome") {
         return (a.nome || "").localeCompare(b.nome || "");
       }
-      return String(a.id).localeCompare(String(a.id));
+      return String(a.id).localeCompare(String(b.id));
     });
   }, [rotas, busca, status, ordem]);
 
@@ -121,8 +123,11 @@ export default function RotasPage() {
   return (
     <div className="mx-auto max-w-[1600px] space-y-6">
       <header className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="font-display text-3xl font-semibold">Gestão de Rotas</h1>
+        <div className="space-y-1">
+          <h1 className="font-display flex items-center gap-2.5 text-3xl font-semibold tracking-tight text-foreground">
+            <Bus className="size-7 text-primary" />
+            Gestão de Rotas
+          </h1>
           <p className="text-sm text-muted-foreground">
             {filtrados.length} de {rotas.length} rotas cadastradas
           </p>
@@ -149,9 +154,14 @@ export default function RotasPage() {
 
       <SectionCard
         title="Filtros"
-        description="Pesquisa por nome ou descrição"
+        description="Pesquisa por nome, descrição ou bairro"
         action={
-          <Button variant="ghost" size="sm" onClick={limpar}>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={limpar}
+            className="rounded-lg text-muted-foreground hover:text-foreground"
+          >
             <Filter className="size-4 mr-2" />
             Limpar
           </Button>
@@ -167,18 +177,18 @@ export default function RotasPage() {
                 setPagina(1);
               }}
               placeholder="Buscar rota..."
-              className="pl-9 rounded-xl"
+              className="pl-9 rounded-xl h-10"
             />
           </div>
 
           <Select value={status} onValueChange={setStatus}>
-            <SelectTrigger className="rounded-xl">
+            <SelectTrigger className="rounded-xl h-10">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={TODOS}>Todos</SelectItem>
-              <SelectItem value="ativo">Ativo</SelectItem>
-              <SelectItem value="inativo">Inativo</SelectItem>
+            <SelectContent className="rounded-xl">
+              <SelectItem value={TODOS}>Todos os status</SelectItem>
+              <SelectItem value="ativa">Ativa</SelectItem>
+              <SelectItem value="inativa">Inativa</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -186,29 +196,30 @@ export default function RotasPage() {
 
       <SectionCard
         title="Lista de rotas"
-        description="Dados vindos da API"
+        description="Rotas de transporte escolar cadastradas no sistema"
         bodyClassName="p-0"
         action={
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setOrdem(ordem === "nome" ? "id" : "nome")}
+            className="rounded-lg text-muted-foreground hover:text-foreground"
           >
             <ArrowUpDown className="size-4 mr-2" />
-            Ordenar
+            Ordenar por {ordem === "nome" ? "Nome" : "ID"}
           </Button>
         }
       >
         {visiveis.length === 0 ? (
-          <div className="p-5">
+          <div className="p-8">
             <EmptyState
               icon={Bus}
               title="Nenhuma rota encontrada"
-              description="Cadastre uma rota para visualizar aqui."
+              description="Cadastre uma rota ou ajuste os filtros aplicados."
               action={
-                <Button variant="outline" onClick={limpar}>
+                <Button variant="outline" onClick={limpar} className="rounded-xl">
                   <SlidersHorizontal className="size-4 mr-2" />
-                  Limpar
+                  Limpar filtros
                 </Button>
               }
             />
@@ -218,55 +229,61 @@ export default function RotasPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Nome</TableHead>
+                  <TableHead className="pl-6">Nome</TableHead>
                   <TableHead>Descrição</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead />
+                  <TableHead className="w-16 pr-6 text-right">Ações</TableHead>
                 </TableRow>
               </TableHeader>
 
               <TableBody>
                 {visiveis.map((rota) => (
                   <TableRow key={rota.id}>
-                    <TableCell>
+                    <TableCell className="pl-6">
                       <Link
                         to={`/rotas/${rota.id}`}
                         className="flex items-center gap-3 group"
                       >
-                        <div className="flex size-9 items-center justify-center rounded-lg bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+                        <div className="flex size-9 items-center justify-center rounded-xl bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary transition-colors">
                           <Bus className="size-4" />
                         </div>
                         <div>
-                          <p className="font-medium group-hover:underline">{rota.nome}</p>
+                          <p className="font-medium text-foreground group-hover:underline">
+                            {rota.nome}
+                          </p>
                         </div>
                       </Link>
                     </TableCell>
 
-                    <TableCell className="text-muted-foreground">
-                      {rota.descricao || "-"}
+                    <TableCell className="text-muted-foreground max-w-md truncate">
+                      {rota.descricao || "—"}
                     </TableCell>
 
                     <TableCell>
-                      <StatusPill status={rota.status ?? "ativo"} />
+                      <StatusPill status={rota.status ? rota.status.toLowerCase() : "ativa"} />
                     </TableCell>
 
-                    <TableCell>
+                    <TableCell className="pr-6 text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="rounded-lg text-muted-foreground hover:text-foreground"
+                          >
                             <MoreHorizontal className="size-4" />
                           </Button>
                         </DropdownMenuTrigger>
 
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem asChild>
+                        <DropdownMenuContent align="end" className="rounded-xl">
+                          <DropdownMenuItem asChild className="rounded-lg cursor-pointer">
                             <Link to={`/rotas/${rota.id}`}>Visualizar</Link>
                           </DropdownMenuItem>
-                          <DropdownMenuItem asChild>
+                          <DropdownMenuItem asChild className="rounded-lg cursor-pointer">
                             <Link to={`/rotas/${rota.id}/editar`}>Editar</Link>
                           </DropdownMenuItem>
                           <DropdownMenuItem
-                            className="text-destructive focus:text-destructive cursor-pointer"
+                            className="rounded-lg text-destructive focus:text-destructive cursor-pointer"
                             onClick={() => excluirRota(rota.id)}
                           >
                             Excluir

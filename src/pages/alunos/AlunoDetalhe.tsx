@@ -2,14 +2,14 @@
 import { useEffect, useState, useMemo } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, Bus } from "lucide-react";
+import { toast } from "sonner";
 
 import { buscarAluno } from "@/services/alunos.service";
-import {
-  buscarContratoPorAluno,
-} from "@/services/contratos.service";
+import { buscarContratoPorAluno } from "@/services/contratos.service";
 
 import { adaptarAlunoDetalhe } from "@/adapters/alunoDetalhe.adapter";
-import { Aluno, alunos as alunosMock, brlExato} from "@/data/mock";
+import { type Aluno, alunos as alunosMock, brlExato } from "@/data/mock";
+import type { Contrato } from "@/types";
 
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -26,16 +26,14 @@ import { AlunoHistorico, type EventoHistorico } from "@/components/alunos/AlunoH
 import { AlunoDocumentos } from "@/components/alunos/AlunoDocumentos";
 import { AlunoFotos } from "@/components/alunos/AlunoFotos";
 import { GradeSemanalRotas } from "@/components/agenda/GradeSemanalRotas";
-import { Contrato } from "@/types";
 
-
-// Função auxiliar para converter datas no formato DD/MM/AAAA para ordenação
+// Função auxiliar para converter datas no formato DD/MM/AAAA ou ISO para ordenação
 function converterParaTimestamp(dataStr?: string): number {
   if (!dataStr) return 0;
   
   if (dataStr.includes("-")) {
     const timestamp = new Date(dataStr).getTime();
-    return isNaN(timestamp) ? 0 : timestamp;
+    return Number.isNaN(timestamp) ? 0 : timestamp;
   }
   
   const partes = dataStr.split("/");
@@ -69,6 +67,8 @@ export default function AlunoDetalhe() {
         if (alunoMock) {
           alunoData = alunoMock;
           setAluno(alunoMock);
+        } else {
+          toast.error("Não foi possível carregar os dados do aluno.");
         }
       }
 
@@ -154,22 +154,22 @@ export default function AlunoDetalhe() {
 
   if (carregando) {
     return (
-      <div className="mx-auto max-w-[1200px] p-6 text-center">
-        Carregando aluno...
+      <div className="mx-auto max-w-[1200px] p-12 text-center text-sm text-muted-foreground animate-pulse">
+        Carregando detalhes do aluno...
       </div>
     );
   }
 
   if (!aluno) {
     return (
-      <div className="mx-auto max-w-[1200px] p-6 text-center">
-        <h1 className="font-display text-2xl font-semibold">
+      <div className="mx-auto max-w-[1200px] py-16 text-center space-y-4">
+        <h1 className="font-display text-2xl font-semibold text-foreground">
           Aluno não encontrado
         </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Verifique a URL ou volte para a lista de alunos.
+        <p className="text-sm text-muted-foreground">
+          Verifique a URL ou volte para a lista geral de alunos.
         </p>
-        <div className="mt-4">
+        <div>
           <Button asChild className="rounded-xl">
             <Link to="/alunos">Voltar para alunos</Link>
           </Button>
@@ -180,7 +180,7 @@ export default function AlunoDetalhe() {
 
   return (
     <div className="mx-auto max-w-[1400px] space-y-6">
-      <Button asChild variant="ghost" size="sm" className="-ml-2 rounded-lg">
+      <Button asChild variant="ghost" size="sm" className="-ml-2 rounded-xl text-muted-foreground hover:text-foreground">
         <Link to="/alunos">
           <ArrowLeft className="mr-2 size-4" />
           Voltar para alunos
@@ -196,17 +196,17 @@ export default function AlunoDetalhe() {
       </div>
 
       <Tabs defaultValue="transporte" className="space-y-4">
-        <TabsList className="flex h-auto w-full flex-wrap justify-start gap-1 rounded-xl p-1">
-          <TabsTrigger value="transporte" className="gap-2">
+        <TabsList className="flex h-auto w-full flex-wrap justify-start gap-1 rounded-xl p-1 bg-muted/50 border border-border/50">
+          <TabsTrigger value="transporte" className="gap-2 rounded-lg">
             <Bus className="size-4" />
             Transporte / Rotas
           </TabsTrigger>
-          <TabsTrigger value="contrato">Contrato</TabsTrigger>
-          <TabsTrigger value="mensalidades">Mensalidades</TabsTrigger>
-          <TabsTrigger value="ocorrencias">Ocorrências</TabsTrigger>
-          <TabsTrigger value="historico">Histórico</TabsTrigger>
-          <TabsTrigger value="documentos">Documentos</TabsTrigger>
-          <TabsTrigger value="fotos">Fotos</TabsTrigger>
+          <TabsTrigger value="contrato" className="rounded-lg">Contrato</TabsTrigger>
+          <TabsTrigger value="mensalidades" className="rounded-lg">Mensalidades</TabsTrigger>
+          <TabsTrigger value="ocorrencias" className="rounded-lg">Ocorrências</TabsTrigger>
+          <TabsTrigger value="historico" className="rounded-lg">Histórico</TabsTrigger>
+          <TabsTrigger value="documentos" className="rounded-lg">Documentos</TabsTrigger>
+          <TabsTrigger value="fotos" className="rounded-lg">Fotos</TabsTrigger>
         </TabsList>
 
         <TabsContent value="transporte">
@@ -230,7 +230,7 @@ export default function AlunoDetalhe() {
             {contrato?.id ? (
               <TabelaMensalidades contratoId={contrato.id} />
             ) : (
-              <p className="py-4 text-center text-sm text-muted-foreground">
+              <p className="py-6 text-center text-sm text-muted-foreground">
                 Nenhum contrato ativo encontrado para carregar as mensalidades.
               </p>
             )}

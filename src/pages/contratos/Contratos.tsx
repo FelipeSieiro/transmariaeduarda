@@ -1,3 +1,4 @@
+// src/pages/Contratos.tsx
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Eye, FileSignature, Plus } from "lucide-react";
@@ -32,10 +33,10 @@ export default function Contratos() {
     async function carregar() {
       try {
         const dados = await listarContratos();
-        setContratos(dados);
+        setContratos(dados || []);
       } catch (error) {
         console.error("Erro ao carregar contratos:", error);
-        toast.error("Erro ao carregar contratos");
+        toast.error("Erro ao carregar lista de contratos");
       } finally {
         setCarregando(false);
       }
@@ -47,15 +48,15 @@ export default function Contratos() {
   return (
     <div className="mx-auto max-w-7xl space-y-6">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="flex items-center gap-2 text-3xl font-semibold">
-            <FileSignature className="size-7" />
+        <header className="space-y-1">
+          <h1 className="font-display flex items-center gap-2.5 text-3xl font-semibold tracking-tight text-foreground">
+            <FileSignature className="size-7 text-primary" />
             Contratos
           </h1>
           <p className="text-sm text-muted-foreground">
-            Gestão de contratos dos alunos
+            Gestão completa de contratos ativos e históricos dos alunos
           </p>
-        </div>
+        </header>
 
         <Button asChild className="rounded-xl">
           <Link to="/contratos/novo">
@@ -71,9 +72,11 @@ export default function Contratos() {
         bodyClassName="p-0"
       >
         {carregando ? (
-          <div className="p-6 text-center">Carregando contratos...</div>
+          <div className="p-12 text-center text-sm text-muted-foreground animate-pulse">
+            Carregando contratos...
+          </div>
         ) : contratos.length === 0 ? (
-          <div className="p-6 text-center text-sm text-muted-foreground">
+          <div className="py-12 text-center text-sm text-muted-foreground">
             Nenhum contrato encontrado.
           </div>
         ) : (
@@ -81,13 +84,13 @@ export default function Contratos() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Número</TableHead>
+                  <TableHead className="pl-6">Número</TableHead>
                   <TableHead>Aluno</TableHead>
                   <TableHead>Escola</TableHead>
                   <TableHead>Mensalidade</TableHead>
                   <TableHead>Vencimento</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead className="w-16">Ações</TableHead>
+                  <TableHead className="w-16 pr-6 text-right">Ações</TableHead>
                 </TableRow>
               </TableHeader>
 
@@ -97,37 +100,46 @@ export default function Contratos() {
 
                   return (
                     <TableRow key={contrato.id}>
-                      <TableCell className="font-medium">
+                      <TableCell className="pl-6 font-medium text-foreground">
                         {contrato.numero}
                       </TableCell>
 
-                      <TableCell>{contrato.alunos?.nome ?? "-"}</TableCell>
-
-                      <TableCell>
-                        {contrato.alunos?.escolas?.nome ?? "-"}
+                      <TableCell className="text-foreground">
+                        {contrato.alunos?.nome ?? "—"}
                       </TableCell>
 
-                      <TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {contrato.alunos?.escolas?.nome ?? "—"}
+                      </TableCell>
+
+                      <TableCell className="font-medium text-foreground">
                         {moeda(Number(contrato.valor_mensalidade))}
                       </TableCell>
 
-                      <TableCell>Dia {contrato.dia_vencimento}</TableCell>
+                      <TableCell className="text-muted-foreground">
+                        Dia {contrato.dia_vencimento}
+                      </TableCell>
 
                       <TableCell>
                         <Badge
                           variant={isAtivo ? "default" : "secondary"}
                           className={
                             isAtivo
-                              ? "bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 border-emerald-500/20"
-                              : "bg-muted text-muted-foreground"
+                              ? "bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 border-emerald-500/20 shadow-none"
+                              : "bg-muted text-muted-foreground shadow-none"
                           }
                         >
                           {contrato.status ?? "INATIVO"}
                         </Badge>
                       </TableCell>
 
-                      <TableCell>
-                        <Button asChild variant="ghost" size="icon">
+                      <TableCell className="pr-6 text-right">
+                        <Button
+                          asChild
+                          variant="ghost"
+                          size="icon"
+                          className="rounded-lg text-muted-foreground hover:text-foreground"
+                        >
                           <Link to={`/contratos/${contrato.id}`}>
                             <Eye className="size-4" />
                           </Link>

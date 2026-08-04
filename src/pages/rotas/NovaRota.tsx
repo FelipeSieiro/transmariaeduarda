@@ -1,6 +1,7 @@
+// src/pages/NovaRota.tsx
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Save, Loader2, Lock } from "lucide-react";
+import { ArrowLeft, Save, Loader2, Lock, Route as RouteIcon } from "lucide-react";
 import { toast } from "sonner";
 
 import { SectionCard } from "@/components/ui-kit/primitives";
@@ -27,7 +28,6 @@ export default function NovaRota() {
   const isEditing = Boolean(id);
   const navigate = useNavigate();
 
-  // Campos do Formulário
   const [nome, setNome] = useState("");
   const [tipoTrajeto, setTipoTrajeto] = useState<"ENTRADA" | "SAIDA">("ENTRADA");
   const [escolaId, setEscolaId] = useState<string>("");
@@ -39,7 +39,6 @@ export default function NovaRota() {
   const [status, setStatus] = useState<string>("ATIVA");
   const [descricao, setDescricao] = useState("");
 
-  // Listas de Opções
   const [motoristas, setMotoristas] = useState<Motorista[]>([]);
   const [veiculos, setVeiculos] = useState<Veiculo[]>([]);
   const [escolas, setEscolas] = useState<Escola[]>([]);
@@ -47,7 +46,6 @@ export default function NovaRota() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
-  // 1. Carrega opções e dados da rota
   useEffect(() => {
     async function carregarDados() {
       try {
@@ -88,7 +86,6 @@ export default function NovaRota() {
     carregarDados();
   }, [id, navigate]);
 
-  // 2. Construção estruturada do nome da rota
   useEffect(() => {
     const tipoTexto = tipoTrajeto === "ENTRADA" ? "Entrada" : "Saída";
     
@@ -110,7 +107,6 @@ export default function NovaRota() {
     setNome(nomeFormatado);
   }, [tipoTrajeto, escolaId, horarioSaida, horarioRetorno, bairro, motoristaId, escolas, motoristas]);
 
-  // Formata HH:mm para HH:mm:ss garantindo retorno de string
   const formatarHorario = (valor: string): string => {
     if (!valor) return "";
     return valor.length === 5 ? `${valor}:00` : valor;
@@ -124,7 +120,6 @@ export default function NovaRota() {
       return;
     }
 
-    // Se o tipo for ENTRADA usa horarioSaida, se for SAIDA usa horarioRetorno
     const horaPrincipal = tipoTrajeto === "ENTRADA" ? horarioSaida : horarioRetorno;
 
     if (!horaPrincipal) {
@@ -137,7 +132,6 @@ export default function NovaRota() {
 
       const payload: Record<string, any> = {
         nome: nome.trim(),
-        // Garante envio de string para atender a validação do Zod
         horario_saida: formatarHorario(horarioSaida || horarioRetorno),
         horario_retorno: formatarHorario(horarioRetorno),
         bairro: bairro.trim() || null,
@@ -172,7 +166,7 @@ export default function NovaRota() {
   if (loading) {
     return (
       <div className="mx-auto max-w-3xl space-y-6">
-        <Skeleton className="h-10 w-48" />
+        <Skeleton className="h-10 w-48 rounded-xl" />
         <Skeleton className="h-96 rounded-xl" />
       </div>
     );
@@ -183,31 +177,38 @@ export default function NovaRota() {
       <header className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <Button
-            variant="outline"
+            variant="ghost"
             size="icon"
-            className="rounded-xl"
+            className="rounded-xl text-muted-foreground hover:text-foreground"
             onClick={() => navigate("/rotas")}
           >
             <ArrowLeft className="size-4" />
           </Button>
-          <div>
-            <h1 className="font-display text-2xl font-semibold">
-              {isEditing ? "Editar Rota" : "Nova Rota"}
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              {isEditing
-                ? "Atualize as informações da rota selecionada"
-                : "Preencha os dados para cadastrar uma nova rota"}
-            </p>
+          <div className="flex items-center gap-3">
+            <div className="inline-flex p-2 rounded-xl bg-primary/10 text-primary">
+              <RouteIcon className="size-5" />
+            </div>
+            <div className="space-y-0.5">
+              <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
+                {isEditing ? "Editar Rota" : "Nova Rota"}
+              </h1>
+              <p className="text-sm text-muted-foreground">
+                {isEditing
+                  ? "Atualize as informações e diretrizes da rota selecionada"
+                  : "Preencha os dados para cadastrar uma nova rota"}
+              </p>
+            </div>
           </div>
         </div>
       </header>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Identificação da Rota */}
-        <SectionCard title="Identificação da Rota">
-          <div className="space-y-2">
-            <Label htmlFor="nome" className="flex items-center gap-1.5 font-medium">
+        <SectionCard
+          title="Identificação da Rota"
+          description="Nome gerado automaticamente com base nos parâmetros preenchidos"
+        >
+          <div className="space-y-1.5">
+            <Label htmlFor="nome" className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               <Lock className="size-3.5 text-muted-foreground" />
               Nome da Rota (Gerado Automático)
             </Label>
@@ -216,44 +217,48 @@ export default function NovaRota() {
               value={nome}
               readOnly
               placeholder="Preencha os campos abaixo para gerar o nome..."
-              className="rounded-xl bg-muted/50 font-semibold text-foreground cursor-not-allowed"
+              className="rounded-xl h-10 bg-muted/50 font-semibold text-foreground cursor-not-allowed"
             />
           </div>
         </SectionCard>
 
-        {/* Informações Principais */}
-        <SectionCard title="Informações e Horários">
+        <SectionCard
+          title="Informações e Horários"
+          description="Definição de trajeto, escola, horários e região"
+        >
           <div className="grid gap-4 md:grid-cols-2">
-            {/* Tipo de Trajeto */}
-            <div className="space-y-2">
-              <Label htmlFor="tipo_trajeto">Tipo de Trajeto *</Label>
+            <div className="space-y-1.5">
+              <Label htmlFor="tipo_trajeto" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Tipo de Trajeto *
+              </Label>
               <Select
                 value={tipoTrajeto}
                 onValueChange={(val: "ENTRADA" | "SAIDA") => setTipoTrajeto(val)}
                 disabled={submitting}
               >
-                <SelectTrigger id="tipo_trajeto" className="rounded-xl">
+                <SelectTrigger id="tipo_trajeto" className="rounded-xl h-10">
                   <SelectValue placeholder="Selecione o tipo" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="rounded-xl">
                   <SelectItem value="ENTRADA">Entrada</SelectItem>
                   <SelectItem value="SAIDA">Saída</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-            {/* Escola */}
-            <div className="space-y-2">
-              <Label htmlFor="escola_id">Escola</Label>
+            <div className="space-y-1.5">
+              <Label htmlFor="escola_id" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Escola
+              </Label>
               <Select
                 value={escolaId}
                 onValueChange={setEscolaId}
                 disabled={submitting}
               >
-                <SelectTrigger id="escola_id" className="rounded-xl">
+                <SelectTrigger id="escola_id" className="rounded-xl h-10">
                   <SelectValue placeholder="Selecione a escola" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="rounded-xl">
                   <SelectItem value="none">Nenhuma</SelectItem>
                   {escolas.map((e) => (
                     <SelectItem key={e.id} value={e.id}>
@@ -264,60 +269,65 @@ export default function NovaRota() {
               </Select>
             </div>
 
-            {/* Horários Dinâmicos */}
             {tipoTrajeto === "ENTRADA" ? (
-              <div className="space-y-2">
-                <Label htmlFor="horario_saida">Horário de Entrada *</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="horario_saida" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Horário de Entrada *
+                </Label>
                 <Input
                   id="horario_saida"
                   type="time"
                   value={horarioSaida}
                   onChange={(e) => setHorarioSaida(e.target.value)}
-                  className="rounded-xl"
+                  className="rounded-xl h-10"
                   disabled={submitting}
                   required
                 />
               </div>
             ) : (
-              <div className="space-y-2">
-                <Label htmlFor="horario_retorno">Horário de Saída *</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="horario_retorno" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Horário de Saída *
+                </Label>
                 <Input
                   id="horario_retorno"
                   type="time"
                   value={horarioRetorno}
                   onChange={(e) => setHorarioRetorno(e.target.value)}
-                  className="rounded-xl"
+                  className="rounded-xl h-10"
                   disabled={submitting}
                   required
                 />
               </div>
             )}
 
-            {/* Bairro */}
-            <div className="space-y-2">
-              <Label htmlFor="bairro">Bairro / Região</Label>
+            <div className="space-y-1.5">
+              <Label htmlFor="bairro" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Bairro / Região
+              </Label>
               <Input
                 id="bairro"
                 value={bairro}
                 onChange={(e) => setBairro(e.target.value)}
                 placeholder="Ex: Centro"
-                className="rounded-xl"
+                className="rounded-xl h-10"
                 disabled={submitting}
               />
             </div>
 
-            {/* Status */}
-            <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="status">Status</Label>
+            <div className="space-y-1.5 md:col-span-2">
+              <Label htmlFor="status" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Status
+              </Label>
               <Select
                 value={status}
                 onValueChange={setStatus}
                 disabled={submitting}
               >
-                <SelectTrigger id="status" className="rounded-xl">
+                <SelectTrigger id="status" className="rounded-xl h-10">
                   <SelectValue placeholder="Selecione o status" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="rounded-xl">
                   <SelectItem value="ATIVA">Ativa</SelectItem>
                   <SelectItem value="INATIVA">Inativa</SelectItem>
                 </SelectContent>
@@ -326,21 +336,24 @@ export default function NovaRota() {
           </div>
         </SectionCard>
 
-        {/* Atribuições de Equipe e Veículo */}
-        <SectionCard title="Atribuições e Detalhes">
+        <SectionCard
+          title="Atribuições e Detalhes"
+          description="Designação de motorista, veículo e observações adicionais"
+        >
           <div className="grid gap-4 md:grid-cols-2">
-            {/* Motorista */}
-            <div className="space-y-2">
-              <Label htmlFor="motorista_id">Motorista Responsável</Label>
+            <div className="space-y-1.5">
+              <Label htmlFor="motorista_id" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Motorista Responsável
+              </Label>
               <Select
                 value={motoristaId}
                 onValueChange={setMotoristaId}
                 disabled={submitting}
               >
-                <SelectTrigger id="motorista_id" className="rounded-xl">
+                <SelectTrigger id="motorista_id" className="rounded-xl h-10">
                   <SelectValue placeholder="Selecione o motorista" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="rounded-xl">
                   <SelectItem value="unassigned">Sem motorista</SelectItem>
                   {motoristas.map((m) => (
                     <SelectItem key={m.id} value={m.id}>
@@ -351,18 +364,19 @@ export default function NovaRota() {
               </Select>
             </div>
 
-            {/* Veículo */}
-            <div className="space-y-2">
-              <Label htmlFor="veiculo_id">Veículo Atribuído</Label>
+            <div className="space-y-1.5">
+              <Label htmlFor="veiculo_id" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Veículo Atribuído
+              </Label>
               <Select
                 value={veiculoId}
                 onValueChange={setVeiculoId}
                 disabled={submitting}
               >
-                <SelectTrigger id="veiculo_id" className="rounded-xl">
+                <SelectTrigger id="veiculo_id" className="rounded-xl h-10">
                   <SelectValue placeholder="Selecione o veículo" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="rounded-xl">
                   <SelectItem value="unassigned">Sem veículo</SelectItem>
                   {veiculos.map((v) => (
                     <SelectItem key={v.id} value={v.id}>
@@ -373,9 +387,10 @@ export default function NovaRota() {
               </Select>
             </div>
 
-            {/* Descrição */}
-            <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="descricao">Descrição / Observações</Label>
+            <div className="space-y-1.5 md:col-span-2">
+              <Label htmlFor="descricao" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Descrição / Observações
+              </Label>
               <Textarea
                 id="descricao"
                 value={descricao}
@@ -387,8 +402,7 @@ export default function NovaRota() {
             </div>
           </div>
 
-          {/* Botões de Ação */}
-          <div className="flex justify-end gap-3 pt-6 mt-6 border-t">
+          <div className="flex justify-end gap-3 pt-6 mt-6 border-t border-border/60">
             <Button
               type="button"
               variant="outline"
@@ -400,7 +414,7 @@ export default function NovaRota() {
             </Button>
             <Button
               type="submit"
-              className="rounded-xl"
+              className="rounded-xl px-6"
               disabled={submitting}
             >
               {submitting ? (

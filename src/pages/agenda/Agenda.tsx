@@ -1,3 +1,4 @@
+// src/pages/AgendaPorRotas.tsx
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -48,30 +49,33 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import {
-  listarAlunos,
-  obterAgendamentosRotasDoAluno,
-  type Aluno,
-} from "@/services/alunos.service";
-import { listarRotas, type Rota } from "@/services/rotas.service";
+import { listarAlunos, obterAgendamentosRotasDoAluno } from "@/services/alunos.service";
+import { listarRotas } from "@/services/rotas.service";
+import type { Aluno, Rota, AgendamentoRota } from "@/types";
 
 const TODOS = "__todos__";
 
-interface AgendamentoRota {
-  id: string;
-  aluno_id: string;
-  rota_id: string;
-  dia_semana: number; // 0=Dom, 1=Seg, 2=Ter, 3=Qua, 4=Qui, 5=Sex, 6=Sáb
-  periodo?: string | null;
+function getIniciais(nome?: string): string {
+  if (!nome) return "AL";
+  const partes = nome.trim().split(" ").filter(Boolean);
+  if (partes.length === 0) return "AL";
+  if (partes.length === 1) return partes[0].substring(0, 2).toUpperCase();
+  return (partes[0][0] + partes[partes.length - 1][0]).toUpperCase();
+}
+
+function obterNomeEscola(aluno: Aluno): string {
+  if (typeof aluno.escolas === "string") return aluno.escolas;
+  if (typeof aluno.escola === "string") return aluno.escola;
+  return aluno.escola?.nome ?? aluno.escolas?.nome ?? aluno.escola_nome ?? "";
 }
 
 export default function AgendaPorRotas() {
   const navigate = useNavigate();
 
   // Estados de dados
-  const [alunos, setAlunos] = useState<Aluno[]>([]);
-  const [rotas, setRotas] = useState<Rota[]>([]);
-  const [agendamentos, setAgendamentos] = useState<AgendamentoRota[]>([]);
+  const [alunos, setAlunos] = useState<readonly Aluno[]>([]);
+  const [rotas, setRotas] = useState<readonly Rota[]>([]);
+  const [agendamentos, setAgendamentos] = useState<readonly AgendamentoRota[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Estados de controle e filtros
@@ -108,7 +112,7 @@ export default function AgendaPorRotas() {
         );
 
         const resultados = await Promise.all(chamadasAgendamentos);
-        const todosAgendamentos = resultados.flat();
+        const todosAgendamentos = resultados.flat() as AgendamentoRota[];
         setAgendamentos(todosAgendamentos);
       } catch (error) {
         console.error("Erro ao carregar dados da agenda", error);
@@ -184,7 +188,7 @@ export default function AgendaPorRotas() {
           const bateTexto =
             !q ||
             aluno.nome.toLowerCase().includes(q) ||
-            aluno.matricula.toLowerCase().includes(q);
+            (aluno.matricula && aluno.matricula.toLowerCase().includes(q));
           const bateTurno =
             turnoFiltro === TODOS || aluno.turno === turnoFiltro;
 
@@ -205,7 +209,7 @@ export default function AgendaPorRotas() {
               const bateTexto =
                 !q ||
                 aluno.nome.toLowerCase().includes(q) ||
-                aluno.matricula.toLowerCase().includes(q);
+                (aluno.matricula && aluno.matricula.toLowerCase().includes(q));
               const bateTurno =
                 turnoFiltro === TODOS || aluno.turno === turnoFiltro;
 
@@ -247,10 +251,10 @@ export default function AgendaPorRotas() {
       {/* Header principal */}
       <header className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="font-display text-3xl font-semibold">
+          <h1 className="font-display text-3xl font-semibold tracking-tight text-foreground">
             Agenda por Rota
           </h1>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-muted-foreground mt-0.5">
             Escalonamento de transporte semanal •{" "}
             <span className="font-medium text-foreground">
               {format(inicioDaSemana, "dd 'de' MMMM", { locale: ptBR })}
@@ -261,26 +265,27 @@ export default function AgendaPorRotas() {
         <div className="flex items-center gap-2">
           <Button
             variant="outline"
-            className="rounded-xl"
+            className="rounded-xl gap-2"
             onClick={() => toast.success("Exportação da agenda iniciada")}
           >
-            <Download className="size-4 mr-2" />
-            Exportar
+            <Download className="size-4" />
+            <span>Exportar</span>
           </Button>
 
           {/* Navegador de Semanas */}
-          <div className="flex items-center gap-1 border-l pl-2">
+          <div className="flex items-center gap-1 border-l border-border pl-2">
             <Button
               variant="outline"
               size="icon"
               className="rounded-xl size-9"
               onClick={semanaAnterior}
+              title="Semana anterior"
             >
               <ChevronLeft className="size-4" />
             </Button>
             <Button
               variant="outline"
-              className="rounded-xl h-9 text-xs"
+              className="rounded-xl h-9 px-3 text-xs"
               onClick={irParaHoje}
             >
               <CalendarIcon className="size-3.5 mr-1.5 text-muted-foreground" />
@@ -291,6 +296,7 @@ export default function AgendaPorRotas() {
               size="icon"
               className="rounded-xl size-9"
               onClick={proximaSemana}
+              title="Próxima semana"
             >
               <ChevronRight className="size-4" />
             </Button>
@@ -298,7 +304,7 @@ export default function AgendaPorRotas() {
         </div>
       </header>
 
-      {/* Seletor de Dias da Semana (Destaque do dia selecionado + Navegação por clique) */}
+      {/* Seletor de Dias da Semana */}
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-6">
         {diasDaSemana.map((dia) => {
           const ehHoje = isSameDay(dia, new Date());
@@ -311,17 +317,17 @@ export default function AgendaPorRotas() {
               onClick={() => setDiaSelecionado(dia)}
               className={`flex flex-col items-start justify-between rounded-xl border p-3.5 transition-all text-left cursor-pointer ${
                 ehSelecionado
-                  ? "border-primary bg-primary text-primary-foreground shadow-md ring-2 ring-primary/20"
+                  ? "border-primary bg-primary text-primary-foreground shadow-md ring-2 ring-primary/25"
                   : ehHoje
                   ? "border-primary/50 bg-primary/5 hover:bg-primary/10"
-                  : "bg-card hover:bg-accent/50 hover:border-accent-foreground/20"
+                  : "bg-card border-border hover:bg-accent/50 hover:border-border"
               }`}
             >
               <div className="flex w-full items-center justify-between">
                 <span
                   className={`text-[11px] font-semibold uppercase tracking-wider ${
                     ehSelecionado
-                      ? "text-primary-foreground/80"
+                      ? "text-primary-foreground/85"
                       : "text-muted-foreground"
                   }`}
                 >
@@ -355,7 +361,7 @@ export default function AgendaPorRotas() {
                       : "text-muted-foreground"
                   }`}
                 >
-                  {ehSelecionado ? "Visualizando" : "Clique para ver"}
+                  {ehSelecionado ? "Visualizando" : "Selecionar dia"}
                 </span>
               </div>
             </button>
@@ -375,8 +381,8 @@ export default function AgendaPorRotas() {
         }
         description="Filtre os alunos agendados para este dia"
         action={
-          <Button variant="ghost" size="sm" onClick={limparFiltros}>
-            <Filter className="size-4 mr-2" />
+          <Button variant="ghost" size="sm" onClick={limparFiltros} className="gap-1.5">
+            <Filter className="size-3.5" />
             Limpar
           </Button>
         }
@@ -423,8 +429,9 @@ export default function AgendaPorRotas() {
 
       {/* Exibição das Rotas no Dia Selecionado */}
       {loading ? (
-        <div className="py-12 text-center text-sm text-muted-foreground">
-          Carregando rotas e agendamentos...
+        <div className="py-12 text-center text-sm text-muted-foreground flex flex-col items-center justify-center gap-2">
+          <Clock className="size-5 animate-spin text-primary" />
+          <span>Carregando rotas e agendamentos...</span>
         </div>
       ) : rotasDoDiaSelecionado.length === 0 ? (
         <EmptyState
@@ -436,8 +443,8 @@ export default function AgendaPorRotas() {
             { locale: ptBR }
           )} com os filtros atuais.`}
           action={
-            <Button variant="outline" onClick={limparFiltros}>
-              <SlidersHorizontal className="size-4 mr-2" />
+            <Button variant="outline" onClick={limparFiltros} className="rounded-xl gap-2">
+              <SlidersHorizontal className="size-4" />
               Limpar Filtros
             </Button>
           }
@@ -465,11 +472,11 @@ export default function AgendaPorRotas() {
               action={
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon">
+                    <Button variant="ghost" size="icon" className="rounded-xl">
                       <MoreHorizontal className="size-4" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
+                  <DropdownMenuContent align="end" className="rounded-xl">
                     <DropdownMenuItem
                       onClick={() => navigate(`/rotas/${rota.id}`)}
                     >
@@ -480,54 +487,57 @@ export default function AgendaPorRotas() {
               }
             >
               {rota.alunos.length === 0 ? (
-                <div className="py-6 text-center text-xs text-muted-foreground italic border rounded-xl bg-muted/10">
+                <div className="py-6 text-center text-xs text-muted-foreground italic border border-border/60 rounded-xl bg-muted/20">
                   Nenhum aluno agendado para esta rota neste dia.
                 </div>
               ) : (
                 <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
-                  {rota.alunos.map((aluno) => (
-                    <div
-                      key={aluno.id}
-                      onClick={() => navigate(`/alunos/${aluno.id}`)}
-                      className="group cursor-pointer rounded-xl border bg-card p-3 shadow-xs hover:border-primary/50 hover:shadow-sm transition-all space-y-2 flex flex-col justify-between"
-                    >
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2.5">
-                          <Avatar className="size-8">
-                            <AvatarImage src={aluno.foto_url ?? undefined} />
-                            <AvatarFallback className="text-xs">
-                              {aluno.nome.slice(0, 2)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="min-w-0 flex-1">
-                            <p className="text-xs font-semibold truncate group-hover:text-primary transition-colors">
-                              {aluno.nome}
-                            </p>
-                            <p className="text-[10px] text-muted-foreground truncate">
-                              Matrícula: {aluno.matricula || "N/A"}
-                            </p>
+                  {rota.alunos.map((aluno) => {
+                    const escolaNome = obterNomeEscola(aluno);
+                    const fotoUrl = aluno.foto || aluno.foto_url || aluno.avatar_url;
+
+                    return (
+                      <div
+                        key={aluno.id}
+                        onClick={() => navigate(`/alunos/${aluno.id}`)}
+                        className="group cursor-pointer rounded-xl border border-border bg-card p-3 shadow-xs hover:border-primary/50 hover:shadow-md transition-all space-y-2 flex flex-col justify-between"
+                      >
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2.5">
+                            <Avatar className="size-8 shrink-0 border border-border">
+                              <AvatarImage src={fotoUrl ?? undefined} alt={aluno.nome} />
+                              <AvatarFallback className="text-[11px] bg-primary/10 text-primary font-semibold">
+                                {getIniciais(aluno.nome)}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="min-w-0 flex-1">
+                              <p className="text-xs font-semibold truncate group-hover:text-primary transition-colors text-foreground">
+                                {aluno.nome}
+                              </p>
+                              <p className="text-[10px] text-muted-foreground truncate">
+                                Matrícula: {aluno.matricula || "N/A"}
+                              </p>
+                            </div>
                           </div>
+
+                          {escolaNome && (
+                            <div className="flex items-center gap-1 text-[11px] text-muted-foreground pt-1 border-t border-border/50">
+                              <MapPin className="size-3 shrink-0 text-muted-foreground/70" />
+                              <span className="truncate">{escolaNome}</span>
+                            </div>
+                          )}
                         </div>
 
-                        {(aluno as any).escolas?.nome && (
-                          <div className="flex items-center gap-1 text-[11px] text-muted-foreground pt-1 border-t border-border/50">
-                            <MapPin className="size-3 shrink-0 text-muted-foreground/70" />
-                            <span className="truncate">
-                              {(aluno as any).escolas.nome}
-                            </span>
-                          </div>
-                        )}
+                        <div className="pt-2 flex items-center justify-between border-t border-border/50 text-[10px]">
+                          <span className="flex items-center gap-1 text-muted-foreground font-medium">
+                            <Clock className="size-3" />
+                            {aluno.turno || "Manhã"}
+                          </span>
+                          <StatusPill status={aluno.status ?? "ativo"} />
+                        </div>
                       </div>
-
-                      <div className="pt-2 flex items-center justify-between border-t text-[10px]">
-                        <span className="flex items-center gap-1 text-muted-foreground font-medium">
-                          <Clock className="size-3" />
-                          {aluno.turno || "Manhã"}
-                        </span>
-                        <StatusPill status={aluno.status ?? "ativo"} />
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </SectionCard>

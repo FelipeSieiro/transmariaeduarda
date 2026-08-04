@@ -1,3 +1,4 @@
+// src/pages/MotoristaDetalhes.tsx
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Edit, IdCard, Trash2 } from "lucide-react";
@@ -8,6 +9,17 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import { motoristasService, type Motorista } from "@/services/motoristas.service";
+
+function Campo({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="space-y-0.5">
+      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+        {label}
+      </p>
+      <p className="text-sm font-medium text-foreground">{value || "—"}</p>
+    </div>
+  );
+}
 
 export default function MotoristaDetalhes() {
   const { id } = useParams<{ id: string }>();
@@ -54,7 +66,7 @@ export default function MotoristaDetalhes() {
   if (loading) {
     return (
       <div className="mx-auto max-w-4xl space-y-6">
-        <Skeleton className="h-10 w-48" />
+        <Skeleton className="h-10 w-48 rounded-xl" />
         <Skeleton className="h-48 rounded-xl" />
       </div>
     );
@@ -62,26 +74,39 @@ export default function MotoristaDetalhes() {
 
   if (!motorista) return null;
 
+  const salarioFormatado =
+    motorista.salario !== null && motorista.salario !== undefined
+      ? new Intl.NumberFormat("pt-BR", {
+          style: "currency",
+          currency: "BRL",
+        }).format(Number(motorista.salario))
+      : "—";
+
+  const dataCadastroFormatada = motorista.created_at
+    ? new Date(motorista.created_at).toLocaleDateString("pt-BR")
+    : "—";
+
   return (
     <div className="mx-auto max-w-4xl space-y-6">
-      {/* Header */}
       <header className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <Button
-            variant="outline"
+            variant="ghost"
             size="icon"
-            className="rounded-xl"
+            className="rounded-xl text-muted-foreground hover:text-foreground"
             onClick={() => navigate("/motoristas")}
           >
             <ArrowLeft className="size-4" />
           </Button>
           <div className="flex items-center gap-3">
-            <div className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+            <div className="inline-flex p-2 rounded-xl bg-primary/10 text-primary">
               <IdCard className="size-5" />
             </div>
-            <div>
-              <h1 className="font-display text-2xl font-semibold">{motorista.nome}</h1>
-              <p className="text-sm text-muted-foreground">ID: {motorista.id}</p>
+            <div className="space-y-0.5">
+              <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
+                {motorista.nome}
+              </h1>
+              <p className="text-xs text-muted-foreground font-mono">ID: {motorista.id}</p>
             </div>
           </div>
         </div>
@@ -97,7 +122,7 @@ export default function MotoristaDetalhes() {
           </Button>
           <Button
             variant="destructive"
-            className="rounded-xl"
+            className="rounded-xl shadow-none"
             onClick={handleExcluir}
           >
             <Trash2 className="size-4 mr-2" />
@@ -106,82 +131,28 @@ export default function MotoristaDetalhes() {
         </div>
       </header>
 
-      {/* Card de Informações */}
       <SectionCard
         title="Informações do Motorista"
         description="Visão geral dos dados cadastrais e profissionais"
       >
         <div className="grid gap-6 md:grid-cols-2">
-          <div className="space-y-1">
-            <span className="text-xs font-medium uppercase text-muted-foreground">
-              Nome Completo
-            </span>
-            <p className="text-base font-medium">{motorista.nome}</p>
-          </div>
+          <Campo label="Nome Completo" value={motorista.nome} />
 
-          <div className="space-y-1">
-            <span className="text-xs font-medium uppercase text-muted-foreground">
+          <div className="space-y-0.5">
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Status
-            </span>
-            <div>
+            </p>
+            <div className="pt-1">
               <StatusPill status={motorista.status ?? "ativo"} />
             </div>
           </div>
 
-          <div className="space-y-1">
-            <span className="text-xs font-medium uppercase text-muted-foreground">
-              CPF
-            </span>
-            <p className="text-sm text-muted-foreground">{motorista.cpf || "-"}</p>
-          </div>
-
-          <div className="space-y-1">
-            <span className="text-xs font-medium uppercase text-muted-foreground">
-              Telefone
-            </span>
-            <p className="text-sm text-muted-foreground">{motorista.telefone || "-"}</p>
-          </div>
-
-          <div className="space-y-1">
-            <span className="text-xs font-medium uppercase text-muted-foreground">
-              CNH
-            </span>
-            <p className="text-sm text-muted-foreground">{motorista.cnh || "-"}</p>
-          </div>
-
-          <div className="space-y-1">
-            <span className="text-xs font-medium uppercase text-muted-foreground">
-              Categoria CNH
-            </span>
-            <p className="text-sm text-muted-foreground">
-              {motorista.categoria_cnh || "-"}
-            </p>
-          </div>
-
-          <div className="space-y-1">
-            <span className="text-xs font-medium uppercase text-muted-foreground">
-              Salário
-            </span>
-            <p className="text-sm text-muted-foreground">
-              {motorista.salario !== null && motorista.salario !== undefined
-                ? new Intl.NumberFormat("pt-BR", {
-                    style: "currency",
-                    currency: "BRL",
-                  }).format(Number(motorista.salario))
-                : "-"}
-            </p>
-          </div>
-
-          <div className="space-y-1">
-            <span className="text-xs font-medium uppercase text-muted-foreground">
-              Data de Cadastro
-            </span>
-            <p className="text-sm text-muted-foreground">
-              {motorista.created_at
-                ? new Date(motorista.created_at).toLocaleDateString("pt-BR")
-                : "-"}
-            </p>
-          </div>
+          <Campo label="CPF" value={motorista.cpf || "—"} />
+          <Campo label="Telefone" value={motorista.telefone || "—"} />
+          <Campo label="CNH" value={motorista.cnh || "—"} />
+          <Campo label="Categoria CNH" value={motorista.categoria_cnh || "—"} />
+          <Campo label="Salário" value={salarioFormatado} />
+          <Campo label="Data de Cadastro" value={dataCadastroFormatada} />
         </div>
       </SectionCard>
     </div>

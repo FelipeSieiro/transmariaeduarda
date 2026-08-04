@@ -1,6 +1,7 @@
+// src/pages/NovoMotorista.tsx
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Save, Loader2 } from "lucide-react";
+import { ArrowLeft, Save, Loader2, IdCard } from "lucide-react";
 import { toast } from "sonner";
 
 import { SectionCard } from "@/components/ui-kit/primitives";
@@ -101,7 +102,7 @@ export default function NovoMotorista() {
   if (loading) {
     return (
       <div className="mx-auto max-w-3xl space-y-6">
-        <Skeleton className="h-10 w-48" />
+        <Skeleton className="h-10 w-48 rounded-xl" />
         <Skeleton className="h-64 rounded-xl" />
       </div>
     );
@@ -109,95 +110,108 @@ export default function NovoMotorista() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      {/* Header */}
       <header className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <Button
-            variant="outline"
+            variant="ghost"
             size="icon"
-            className="rounded-xl"
+            className="rounded-xl text-muted-foreground hover:text-foreground"
             onClick={() => navigate("/motoristas")}
           >
             <ArrowLeft className="size-4" />
           </Button>
-          <div>
-            <h1 className="font-display text-2xl font-semibold">
-              {isEditing ? "Editar Motorista" : "Novo Motorista"}
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              {isEditing
-                ? "Atualize as informações do motorista selecionado"
-                : "Preencha os dados para cadastrar um novo motorista"}
-            </p>
+          <div className="flex items-center gap-3">
+            <div className="inline-flex p-2 rounded-xl bg-primary/10 text-primary">
+              <IdCard className="size-5" />
+            </div>
+            <div className="space-y-0.5">
+              <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
+                {isEditing ? "Editar Motorista" : "Novo Motorista"}
+              </h1>
+              <p className="text-sm text-muted-foreground">
+                {isEditing
+                  ? "Atualize as informações cadastrais e profissionais"
+                  : "Preencha os dados para cadastrar um novo motorista"}
+              </p>
+            </div>
           </div>
         </div>
       </header>
 
-      {/* Formulário */}
       <form onSubmit={handleSubmit}>
         <SectionCard
           title="Dados Pessoais e Profissionais"
           description="Informações cadastrais e de habilitação"
         >
           <div className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Nome Completo *</label>
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Nome Completo *
+              </label>
               <Input
                 value={nome}
                 onChange={(e) => setNome(e.target.value)}
                 placeholder="Ex: Carlos Silva"
-                className="rounded-xl"
+                className="rounded-xl h-10"
                 disabled={submitting}
               />
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">CPF</label>
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  CPF
+                </label>
                 <Input
                   value={cpf}
                   onChange={(e) => setCpf(e.target.value)}
                   placeholder="000.000.000-00"
-                  className="rounded-xl"
+                  className="rounded-xl h-10"
                   disabled={submitting}
                 />
               </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Telefone</label>
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Telefone
+                </label>
                 <Input
                   value={telefone}
                   onChange={(e) => setTelefone(e.target.value)}
                   placeholder="(11) 99999-9999"
-                  className="rounded-xl"
+                  className="rounded-xl h-10"
                   disabled={submitting}
                 />
               </div>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Número da CNH</label>
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Número da CNH
+                </label>
                 <Input
                   value={cnh}
                   onChange={(e) => setCnh(e.target.value)}
                   placeholder="Ex: 12345678900"
-                  className="rounded-xl"
+                  className="rounded-xl h-10"
                   disabled={submitting}
                 />
               </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Categoria CNH</label>
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Categoria CNH
+                </label>
                 <Select
                   value={categoriaCnh}
                   onValueChange={setCategoriaCnh}
                   disabled={submitting}
                 >
-                  <SelectTrigger className="rounded-xl">
+                  <SelectTrigger className="rounded-xl h-10">
                     <SelectValue placeholder="Selecione a categoria" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="rounded-xl">
                     <SelectItem value="A">A</SelectItem>
                     <SelectItem value="B">B</SelectItem>
                     <SelectItem value="C">C</SelectItem>
@@ -213,30 +227,34 @@ export default function NovoMotorista() {
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Salário (R$)</label>
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Salário (R$)
+                </label>
                 <Input
                   type="number"
                   step="0.01"
                   value={salario}
                   onChange={(e) => setSalario(e.target.value)}
-                  placeholder="0.00"
-                  className="rounded-xl"
+                  placeholder="0,00"
+                  className="rounded-xl h-10"
                   disabled={submitting}
                 />
               </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Status</label>
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Status
+                </label>
                 <Select
                   value={status}
                   onValueChange={setStatus}
                   disabled={submitting}
                 >
-                  <SelectTrigger className="rounded-xl">
+                  <SelectTrigger className="rounded-xl h-10">
                     <SelectValue placeholder="Selecione o status" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="rounded-xl">
                     <SelectItem value="ativo">Ativo</SelectItem>
                     <SelectItem value="inativo">Inativo</SelectItem>
                   </SelectContent>
@@ -244,7 +262,7 @@ export default function NovoMotorista() {
               </div>
             </div>
 
-            <div className="flex justify-end gap-3 pt-4 border-t">
+            <div className="flex justify-end gap-3 pt-6 border-t border-border/60">
               <Button
                 type="button"
                 variant="outline"
@@ -256,7 +274,7 @@ export default function NovoMotorista() {
               </Button>
               <Button
                 type="submit"
-                className="rounded-xl"
+                className="rounded-xl px-6"
                 disabled={submitting}
               >
                 {submitting ? (

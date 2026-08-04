@@ -1,45 +1,62 @@
+// src/pages/VeiculoDetalhes.tsx
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Bus, Calendar, Edit, Users } from "lucide-react";
+import { ArrowLeft, Bus, Calendar, Edit, Users, UserCheck } from "lucide-react";
 import { toast } from "sonner";
 
 import { SectionCard, StatusPill } from "@/components/ui-kit/primitives";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 
 import { veiculosService, type Veiculo } from "@/services/veiculos.service";
+import { motoristasService } from "@/services/motoristas.service";
 
 export default function VeiculoDetalhes() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [veiculo, setVeiculo] = useState<Veiculo | null>(null);
-  const [carregando, setCarregando] = useState(true);
+  const [nomeMotorista, setNomeMotorista] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function carregar() {
       try {
         if (id) {
+          setLoading(true);
           const dados = await veiculosService.getById(id);
           setVeiculo(dados);
+
+          if (dados?.motorista_id) {
+            motoristasService
+              .getById(dados.motorista_id)
+              .then((m: any) => setNomeMotorista(m?.nome || m?.data?.nome || null))
+              .catch(() => setNomeMotorista(null));
+          }
         }
       } catch (error) {
         console.error("Erro ao carregar detalhes", error);
         toast.error("Não foi possível carregar os dados do veículo");
       } finally {
-        setCarregando(false);
+        setLoading(false);
       }
     }
     carregar();
   }, [id]);
 
-  if (carregando) {
-    return <div className="p-8 text-center text-muted-foreground">Carregando...</div>;
+  if (loading) {
+    return (
+      <div className="mx-auto max-w-4xl space-y-6">
+        <Skeleton className="h-10 w-48 rounded-xl" />
+        <Skeleton className="h-64 rounded-xl" />
+      </div>
+    );
   }
 
   if (!veiculo) {
     return (
-      <div className="p-8 text-center space-y-4">
+      <div className="mx-auto max-w-md p-8 text-center space-y-4">
         <p className="text-muted-foreground">Veículo não encontrado.</p>
-        <Button variant="outline" onClick={() => navigate("/veiculos")}>
+        <Button variant="outline" onClick={() => navigate("/veiculos")} className="rounded-xl">
           Voltar para Lista
         </Button>
       </div>
@@ -47,29 +64,29 @@ export default function VeiculoDetalhes() {
   }
 
   return (
-    <div className="mx-auto max-w-[1200px] space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
+    <div className="mx-auto max-w-4xl space-y-6">
+      <header className="flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
           <Button
-            variant="outline"
+            variant="ghost"
             size="icon"
-            className="rounded-xl"
+            className="rounded-xl text-muted-foreground hover:text-foreground"
             onClick={() => navigate("/veiculos")}
           >
             <ArrowLeft className="size-4" />
           </Button>
           <div className="flex items-center gap-3">
-            <div className="flex size-12 items-center justify-center rounded-xl bg-muted text-muted-foreground">
-              <Bus className="size-6" />
+            <div className="inline-flex p-2 rounded-xl bg-primary/10 text-primary">
+              <Bus className="size-5" />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="font-display text-2xl font-semibold">
+            <div className="space-y-0.5">
+              <div className="flex items-center gap-2.5">
+                <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
                   {veiculo.modelo}
                 </h1>
-                <StatusPill status={veiculo.status ?? "ativo"} />
+                <StatusPill status={veiculo.status ? veiculo.status.toLowerCase() : "ativo"} />
               </div>
-              <p className="text-sm font-mono text-muted-foreground">
+              <p className="text-xs font-mono text-muted-foreground">
                 Placa: {veiculo.placa}
               </p>
             </div>
@@ -77,71 +94,99 @@ export default function VeiculoDetalhes() {
         </div>
 
         <Button
+          variant="outline"
           className="rounded-xl"
           onClick={() => navigate(`/veiculos/${veiculo.id}/editar`)}
         >
           <Edit className="size-4 mr-2" />
           Editar Veículo
         </Button>
-      </div>
+      </header>
 
       <div className="grid gap-6 md:grid-cols-3">
-        <SectionCard title="Informações do Veículo" className="md:col-span-2">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <p className="text-xs text-muted-foreground">Modelo</p>
-              <p className="font-medium">{veiculo.modelo}</p>
+        <SectionCard
+          title="Informações do Veículo"
+          description="Dados principais de identificação e especificações"
+          className="md:col-span-2"
+        >
+          <div className="grid gap-6 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Modelo
+              </span>
+              <p className="text-base font-medium text-foreground">{veiculo.modelo}</p>
             </div>
 
-            <div>
-              <p className="text-xs text-muted-foreground">Placa</p>
-              <p className="font-medium font-mono">{veiculo.placa}</p>
+            <div className="space-y-1.5">
+              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Placa
+              </span>
+              <p className="font-medium font-mono text-foreground">{veiculo.placa}</p>
             </div>
 
-            <div>
-              <p className="text-xs text-muted-foreground">Marca</p>
-              <p className="font-medium">{veiculo.marca || "-"}</p>
+            <div className="space-y-1.5">
+              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Marca
+              </span>
+              <p className="font-medium text-foreground">{veiculo.marca || "—"}</p>
             </div>
 
-            <div>
-              <p className="text-xs text-muted-foreground">Ano</p>
-              <p className="font-medium">{veiculo.ano || "-"}</p>
+            <div className="space-y-1.5">
+              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Ano de Fabricação
+              </span>
+              <p className="font-medium text-foreground">{veiculo.ano || "—"}</p>
             </div>
 
-            <div>
-              <p className="text-xs text-muted-foreground">Capacidade</p>
-              <p className="font-medium">
-                {veiculo.capacidade ? `${veiculo.capacidade} passageiros` : "-"}
+            <div className="space-y-1.5">
+              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Capacidade
+              </span>
+              <p className="font-medium text-foreground">
+                {veiculo.capacidade ? `${veiculo.capacidade} passageiros` : "—"}
               </p>
             </div>
 
-            <div>
-              <p className="text-xs text-muted-foreground">Motorista ID</p>
-              <p className="font-medium text-xs font-mono">
-                {veiculo.motorista_id || "Não vinculado"}
+            <div className="space-y-1.5">
+              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Motorista Vinculado
+              </span>
+              <p className="font-medium text-foreground">
+                {nomeMotorista || (veiculo.motorista_id ? "Carregando..." : "Não vinculado")}
               </p>
             </div>
           </div>
         </SectionCard>
 
-        <SectionCard title="Resumo">
-          <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <Users className="size-5 text-muted-foreground" />
-              <div>
-                <p className="text-xs text-muted-foreground">Lotação Máxima</p>
-                <p className="font-medium">{veiculo.capacidade ?? 0} Lugares</p>
+        <SectionCard
+          title="Resumo"
+          description="Informações adicionais"
+        >
+          <div className="space-y-5">
+            <div className="flex items-start gap-3">
+              <div className="inline-flex p-2 rounded-xl bg-muted/60 text-muted-foreground mt-0.5">
+                <Users className="size-4" />
+              </div>
+              <div className="space-y-0.5">
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Lotação Máxima
+                </p>
+                <p className="font-medium text-foreground">{veiculo.capacidade ?? 0} Lugares</p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
-              <Calendar className="size-5 text-muted-foreground" />
-              <div>
-                <p className="text-xs text-muted-foreground">Cadastrado em</p>
-                <p className="font-medium">
+            <div className="flex items-start gap-3">
+              <div className="inline-flex p-2 rounded-xl bg-muted/60 text-muted-foreground mt-0.5">
+                <Calendar className="size-4" />
+              </div>
+              <div className="space-y-0.5">
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Cadastrado em
+                </p>
+                <p className="font-medium text-foreground">
                   {veiculo.created_at
                     ? new Date(veiculo.created_at).toLocaleDateString("pt-BR")
-                    : "-"}
+                    : "—"}
                 </p>
               </div>
             </div>
