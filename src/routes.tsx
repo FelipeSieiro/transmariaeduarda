@@ -7,7 +7,7 @@ import AlunoDetalhe from "@/pages/AlunoDetalhe";
 import Agenda from "@/pages/Agenda";
 import Abastecimentos from "@/pages/Abastecimentos";
 import Configuracoes from "@/pages/Configuracoes";
-import Contratos from "@/pages/Contratos";
+
 import Despesas from "@/pages/Despesas";
 import Financeiro from "@/pages/Financeiro";
 import Manutencoes from "@/pages/Manutencoes";
@@ -19,6 +19,9 @@ import Rotas from "@/pages/Rotas";
 import Veiculos from "@/pages/Veiculos";
 import NovoAluno from "./pages/NovoAluno";
 import NovoResponsavel from "./pages/NovoResponsavel";
+import Contratos from "./pages/contratos/Contratos";
+import NovoContrato from "./pages/contratos/NovoContrato";
+import ContratoDetalhe from "./pages/contratos/ContratoDetalhe";
 
 export const router = createBrowserRouter([
   {
@@ -31,6 +34,8 @@ export const router = createBrowserRouter([
       { path: "/abastecimentos", element: <Abastecimentos /> },
       { path: "/configuracoes", element: <Configuracoes /> },
       { path: "/contratos", element: <Contratos /> },
+      { path: "/contratos/novo", element: <NovoContrato /> },
+      { path: "/contratos/:id", element: <ContratoDetalhe /> },
       { path: "/despesas", element: <Despesas /> },
       { path: "/financeiro", element: <Financeiro /> },
       { path: "/manutencoes", element: <Manutencoes /> },

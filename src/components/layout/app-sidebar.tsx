@@ -52,7 +52,7 @@ const grupos: {
       { title: "Dashboard", url: "/", icon: LayoutDashboard, exact: true, disabled: true },
       { title: "Alunos", url: "/alunos", icon: GraduationCap },
       { title: "Responsáveis", url: "/responsaveis", icon: Users },
-      { title: "Contratos", url: "/contratos", icon: FileSignature, disabled: true},
+      { title: "Contratos", url: "/contratos", icon: FileSignature },
       {
         title: "Agenda",
         url: "/agenda",
