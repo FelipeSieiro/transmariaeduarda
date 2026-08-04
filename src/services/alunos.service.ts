@@ -1,25 +1,32 @@
 import api from "@/lib/api";
-import { Aluno, CadastroAlunoCompleto } from "@/types";
-
+import type {
+  AgendamentoRotaItem,
+  Aluno,
+  ApiResponse,
+  CadastroAlunoCompleto,
+} from "@/types";
+import { agendamentoRotasService } from "./agendamento-rotas.service";
 
 export async function criarAluno(aluno: Partial<Aluno>): Promise<Aluno> {
-  const response = await api.post("/alunos", aluno);
-  return response.data.data as Aluno;
+  const response = await api.post<ApiResponse<Aluno>>("/alunos", aluno);
+  return response.data.data;
 }
 
-export async function criarAlunoCompleto(payload: CadastroAlunoCompleto): Promise<Aluno> {
-  const response = await api.post("/alunos/completo", payload);
-  return response.data.data as Aluno;
+export async function criarAlunoCompleto(
+  payload: CadastroAlunoCompleto
+): Promise<Aluno> {
+  const response = await api.post<ApiResponse<Aluno>>("/alunos/completo", payload);
+  return response.data.data;
 }
 
 export async function listarAlunos(): Promise<Aluno[]> {
-  const response = await api.get("/alunos");
-  return response.data.data as Aluno[];
+  const response = await api.get<ApiResponse<Aluno[]>>("/alunos");
+  return response.data.data;
 }
 
 export async function buscarAluno(id: string): Promise<Aluno> {
-  const response = await api.get(`/alunos/${id}`);
-  const aluno = response.data.data as Aluno;
+  const response = await api.get<ApiResponse<Aluno>>(`/alunos/${id}`);
+  const aluno = response.data.data;
 
   if (aluno.contratos && aluno.contratos.length > 0) {
     aluno.contrato = aluno.contratos[0];
@@ -29,17 +36,30 @@ export async function buscarAluno(id: string): Promise<Aluno> {
   return aluno;
 }
 
-export async function atualizarAluno(id: string, aluno: Partial<Aluno>): Promise<Aluno> {
-  const response = await api.put(`/alunos/${id}`, aluno);
-  return response.data.data as Aluno;
+export async function atualizarAluno(
+  id: string,
+  aluno: Partial<Aluno>
+): Promise<Aluno> {
+  const response = await api.put<ApiResponse<Aluno>>(`/alunos/${id}`, aluno);
+  return response.data.data;
 }
 
-export async function removerAluno(id: string): Promise<any> {
-  const response = await api.delete(`/alunos/${id}`);
-  return response.data;
+export async function removerAluno(id: string): Promise<void> {
+  await api.delete<ApiResponse<unknown>>(`/alunos/${id}`);
 }
 
-export async function obterAgendamentosRotasDoAluno(alunoId: string) {
-  const response = await api.get(`/alunos/${alunoId}/agendamentos-rotas`);
-  return response.data?.data ?? response.data ?? [];
+export async function obterAgendamentosRotasDoAluno(
+  alunoId: string
+): Promise<AgendamentoRotaItem[]> {
+  return agendamentoRotasService.getByAlunoId(alunoId);
 }
+
+export const alunosService = {
+  criarAluno,
+  criarAlunoCompleto,
+  listarAlunos,
+  buscarAluno,
+  atualizarAluno,
+  removerAluno,
+  obterAgendamentosRotasDoAluno,
+};

@@ -1,10 +1,15 @@
 import api from "@/lib/api";
-import { AgendamentoRotaItem, SyncAgendamentosPayload } from "@/types";
-
+import type {
+  AgendamentoRotaItem,
+  ApiResponse,
+  SyncAgendamentosPayload,
+} from "@/types";
 
 export const agendamentoRotasService = {
   async getByAlunoId(alunoId: string): Promise<AgendamentoRotaItem[]> {
-    const response = await api.get(`/alunos/${alunoId}/agendamentos-rotas`);
+    const response = await api.get<ApiResponse<AgendamentoRotaItem[]>>(
+      `/alunos/${alunoId}/agendamentos-rotas`
+    );
     return response.data.data;
   },
 
@@ -12,7 +17,7 @@ export const agendamentoRotasService = {
     alunoId: string,
     payload: SyncAgendamentosPayload
   ): Promise<AgendamentoRotaItem[]> {
-    const response = await api.put(
+    const response = await api.put<ApiResponse<AgendamentoRotaItem[]>>(
       `/alunos/${alunoId}/agendamentos-rotas`,
       payload
     );
