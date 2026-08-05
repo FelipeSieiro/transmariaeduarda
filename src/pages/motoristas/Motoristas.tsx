@@ -1,31 +1,11 @@
 // src/pages/Motoristas.tsx
 import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-
-import {
-  ArrowUpDown,
-  Download,
-  Filter,
-  IdCard,
-  MoreHorizontal,
-  Plus,
-  Search,
-  SlidersHorizontal,
-} from "lucide-react";
-
+import { useNavigate } from "react-router-dom";
+import { MoreHorizontal, Plus, Search, Download, ArrowUpDown } from "lucide-react";
 import { toast } from "sonner";
 
-import { EmptyState, SectionCard, StatusPill } from "@/components/ui-kit/primitives";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -40,17 +20,18 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { StatusPill } from "@/components/ui-kit/primitives";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 import { motoristasService, type Motorista } from "@/services/motoristas.service";
 
 const PAGE_SIZE = 8;
-const TODOS = "__todos__";
 
 export default function Motoristas() {
-  const [motoristas, setMotoristas] = useState<Motorista[]>([]);
   const navigate = useNavigate();
+
+  const [motoristas, setMotoristas] = useState<Motorista[]>([]);
   const [busca, setBusca] = useState("");
-  const [status, setStatus] = useState(TODOS);
   const [ordem, setOrdem] = useState<"nome" | "id">("nome");
   const [pagina, setPagina] = useState(1);
 
@@ -60,7 +41,7 @@ export default function Motoristas() {
         const dados = await motoristasService.getAll();
         setMotoristas(dados || []);
       } catch (error) {
-        console.error("Erro ao buscar motoristas", error);
+        console.error(error);
         toast.error("Erro ao carregar motoristas");
       }
     }
@@ -69,13 +50,15 @@ export default function Motoristas() {
   }, []);
 
   async function excluirMotorista(id: string) {
-    if (!window.confirm("Tem certeza que deseja excluir este motorista?")) {
-      return;
-    }
+    const confirmar = window.confirm(
+      "Tem certeza que deseja excluir este motorista?"
+    );
+
+    if (!confirmar) return;
 
     try {
       await motoristasService.delete(id);
-      setMotoristas((prev) => prev.filter((motorista) => motorista.id !== id));
+      setMotoristas((prev) => prev.filter((item) => item.id !== id));
       toast.success("Motorista excluído com sucesso");
     } catch (error) {
       console.error(error);
@@ -83,27 +66,24 @@ export default function Motoristas() {
     }
   }
 
-  const filtrados = useMemo(() => {
-    const q = busca.toLowerCase().trim();
+  const filtrados = motoristas
+    .filter((motorista) => {
+      const termo = busca.toLowerCase().trim();
 
-    const resultado = motoristas.filter((motorista) => {
-      const pesquisa =
-        !q ||
-        motorista.nome?.toLowerCase().includes(q) ||
-        motorista.cpf?.toLowerCase().includes(q) ||
-        motorista.cnh?.toLowerCase().includes(q) ||
-        motorista.telefone?.toLowerCase().includes(q);
-
-      return pesquisa && (status === TODOS || motorista.status === status);
-    });
-
-    return resultado.sort((a, b) => {
+      return (
+        !termo ||
+        motorista.nome?.toLowerCase().includes(termo) ||
+        motorista.cpf?.toLowerCase().includes(termo) ||
+        motorista.telefone?.toLowerCase().includes(termo) ||
+        motorista.cnh?.toLowerCase().includes(termo)
+      );
+    })
+    .sort((a, b) => {
       if (ordem === "nome") {
         return (a.nome || "").localeCompare(b.nome || "");
       }
       return String(a.id).localeCompare(String(b.id));
     });
-  }, [motoristas, busca, status, ordem]);
 
   const totalPaginas = Math.max(1, Math.ceil(filtrados.length / PAGE_SIZE));
   const paginaAtual = Math.min(pagina, totalPaginas);
@@ -114,159 +94,138 @@ export default function Motoristas() {
 
   function limpar() {
     setBusca("");
-    setStatus(TODOS);
     setPagina(1);
   }
 
   return (
-    <div className="mx-auto max-w-[1600px] space-y-6">
-      <header className="flex flex-wrap items-center justify-between gap-4">
-        <div className="space-y-1">
-          <h1 className="font-display flex items-center gap-2.5 text-3xl font-semibold tracking-tight text-foreground">
-            <IdCard className="size-7 text-primary" />
+    <div className="mx-auto max-w-6xl space-y-6 py-2">
+      {/* Header Minimalista */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border/40 pb-6">
+        <div>
+          <h1 className="text-xl font-semibold tracking-tight text-foreground">
             Motoristas
           </h1>
-          <p className="text-sm text-muted-foreground">
-            {filtrados.length} de {motoristas.length} motoristas cadastrados
+          <p className="text-xs text-muted-foreground mt-0.5">
+            {filtrados.length} {filtrados.length === 1 ? "motorista cadastrado" : "motoristas cadastrados"}
           </p>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2">
           <Button
             variant="outline"
-            className="rounded-xl"
+            size="sm"
+            className="h-9 rounded-lg text-xs"
             onClick={() => toast.success("Exportação iniciada")}
           >
-            <Download className="size-4 mr-2" />
+            <Download className="size-3.5 mr-1.5 opacity-70" />
             Exportar
           </Button>
 
-          <Button
-            className="rounded-xl"
-            onClick={() => navigate("/motoristas/novo")}
-          >
-            <Plus className="size-4 mr-2" />
-            Novo motorista
+          <Button asChild size="sm" className="h-9 rounded-lg text-xs">
+            <button onClick={() => navigate("/motoristas/novo")}>
+              <Plus className="size-3.5 mr-1.5" />
+              Novo motorista
+            </button>
           </Button>
         </div>
-      </header>
+      </div>
 
-      <SectionCard
-        title="Filtros"
-        description="Pesquisa por nome, CPF, CNH ou telefone"
-        action={
-          <Button variant="ghost" size="sm" onClick={limpar} className="rounded-lg text-muted-foreground hover:text-foreground">
-            <Filter className="size-4 mr-2" />
-            Limpar
-          </Button>
-        }
-      >
-        <div className="grid gap-3 md:grid-cols-2">
-          <div className="relative">
-            <Search className="absolute left-3 top-3 size-4 text-muted-foreground" />
-            <Input
-              value={busca}
-              onChange={(e) => {
-                setBusca(e.target.value);
-                setPagina(1);
-              }}
-              placeholder="Buscar motorista..."
-              className="pl-9 rounded-xl"
-            />
-          </div>
-
-          <Select value={status} onValueChange={setStatus}>
-            <SelectTrigger className="rounded-xl">
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
-            <SelectContent className="rounded-xl">
-              <SelectItem value={TODOS}>Todos os status</SelectItem>
-              <SelectItem value="ativo">Ativo</SelectItem>
-              <SelectItem value="inativo">Inativo</SelectItem>
-            </SelectContent>
-          </Select>
+      {/* Barra de Filtros e Busca */}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-2.5">
+        <div className="relative w-full sm:max-w-xs">
+          <Search className="absolute left-3 top-2.5 size-3.5 text-muted-foreground/70" />
+          <Input
+            placeholder="Buscar por nome, CPF, telefone..."
+            value={busca}
+            onChange={(e) => {
+              setBusca(e.target.value);
+              setPagina(1);
+            }}
+            className="pl-9 h-9 text-xs rounded-lg bg-background/50 border-border/60"
+          />
         </div>
-      </SectionCard>
 
-      <SectionCard
-        title="Lista de motoristas"
-        description="Dados cadastrais e profissionais"
-        bodyClassName="p-0"
-        action={
+        <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setOrdem(ordem === "nome" ? "id" : "nome")}
-            className="rounded-lg text-muted-foreground hover:text-foreground"
+            className="h-9 px-2.5 text-xs text-muted-foreground hover:text-foreground"
           >
-            <ArrowUpDown className="size-4 mr-2" />
+            <ArrowUpDown className="size-3.5 mr-1.5 opacity-70" />
             Ordenar por {ordem === "nome" ? "Nome" : "ID"}
           </Button>
-        }
-      >
+
+          {(busca || pagina > 1) && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={limpar}
+              className="h-9 px-2.5 text-xs text-muted-foreground hover:text-foreground"
+            >
+              Limpar
+            </Button>
+          )}
+        </div>
+      </div>
+
+      {/* Tabela Minimalista */}
+      <div className="rounded-xl border border-border/60 bg-card/50 overflow-hidden shadow-2xs">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-border/40 bg-muted/20">
+          <span className="text-xs font-medium text-muted-foreground">
+            Listagem principal
+          </span>
+        </div>
+
         {visiveis.length === 0 ? (
-          <div className="p-8">
-            <EmptyState
-              icon={IdCard}
-              title="Nenhum motorista encontrado"
-              description="Cadastre um motorista ou ajuste os filtros aplicados."
-              action={
-                <Button variant="outline" onClick={limpar} className="rounded-xl">
-                  <SlidersHorizontal className="size-4 mr-2" />
-                  Limpar filtros
-                </Button>
-              }
-            />
+          <div className="p-12 text-center text-xs text-muted-foreground">
+            Nenhum motorista encontrado.
           </div>
         ) : (
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead className="pl-6">Motorista</TableHead>
-                  <TableHead>CPF</TableHead>
-                  <TableHead>Telefone</TableHead>
-                  <TableHead>CNH / Cat.</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="w-16 pr-6 text-right">Ações</TableHead>
+                <TableRow className="border-border/40 hover:bg-transparent">
+                  <TableHead className="pl-4 text-xs font-medium text-muted-foreground">Motorista</TableHead>
+                  <TableHead className="text-xs font-medium text-muted-foreground">CPF</TableHead>
+                  <TableHead className="text-xs font-medium text-muted-foreground">Telefone</TableHead>
+                  <TableHead className="text-xs font-medium text-muted-foreground">CNH / Cat.</TableHead>
+                  <TableHead className="text-xs font-medium text-muted-foreground">Status</TableHead>
+                  <TableHead className="w-12 pr-4 text-right"></TableHead>
                 </TableRow>
               </TableHeader>
 
               <TableBody>
                 {visiveis.map((motorista) => (
-                  <TableRow key={motorista.id}>
-                    <TableCell className="pl-6">
-                      <Link
-                        to={`/motoristas/${motorista.id}`}
-                        className="flex items-center gap-3 group"
-                      >
-                        <Avatar className="rounded-xl">
+                  <TableRow key={motorista.id} className="border-border/40 transition-colors group">
+                    <TableCell className="pl-4 py-3">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="size-8 rounded-lg">
                           <AvatarImage src={motorista.foto_url ?? undefined} />
-                          <AvatarFallback className="rounded-xl bg-primary/10 text-primary font-medium text-xs">
+                          <AvatarFallback className="rounded-lg bg-primary/10 text-primary font-medium text-[10px]">
                             {(motorista.nome || "MO").slice(0, 2).toUpperCase()}
                           </AvatarFallback>
                         </Avatar>
-
                         <div>
-                          <p className="font-medium text-foreground group-hover:text-primary transition-colors">
+                          <p className="font-medium text-xs text-foreground">
                             {motorista.nome}
                           </p>
-                          <p className="text-xs text-muted-foreground">
+                          <p className="text-[11px] text-muted-foreground">
                             {motorista.cidade ?? "—"}
                           </p>
                         </div>
-                      </Link>
+                      </div>
                     </TableCell>
 
-                    <TableCell className="text-muted-foreground">
-                      {motorista.cpf || "—"}
+                    <TableCell className="py-3 text-xs text-muted-foreground/80 font-mono">
+                      {motorista.cpf ?? "—"}
                     </TableCell>
 
-                    <TableCell className="text-muted-foreground">
-                      {motorista.telefone || "—"}
+                    <TableCell className="py-3 text-xs text-muted-foreground/80 font-mono">
+                      {motorista.telefone ?? "—"}
                     </TableCell>
 
-                    <TableCell className="text-muted-foreground">
+                    <TableCell className="py-3 text-xs text-muted-foreground/80">
                       {motorista.cnh
                         ? `${motorista.cnh} ${
                             motorista.categoria_cnh
@@ -276,43 +235,49 @@ export default function Motoristas() {
                         : "—"}
                     </TableCell>
 
-                    <TableCell>
+                    <TableCell className="py-3">
                       <StatusPill status={motorista.status ?? "ativo"} />
                     </TableCell>
 
-                    <TableCell className="pr-6 text-right">
+                    <TableCell className="pr-4 py-3 text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="rounded-lg text-muted-foreground hover:text-foreground"
+                            className="size-7 rounded-md text-muted-foreground hover:text-foreground"
                           >
-                            <MoreHorizontal className="size-4" />
+                            <MoreHorizontal className="size-3.5" />
                           </Button>
                         </DropdownMenuTrigger>
 
-                        <DropdownMenuContent align="end" className="rounded-xl">
-                          <DropdownMenuItem
-                            onClick={() => navigate(`/motoristas/${motorista.id}`)}
-                            className="rounded-lg cursor-pointer"
-                          >
-                            Visualizar detalhes
-                          </DropdownMenuItem>
+                        <DropdownMenuContent align="end" className="rounded-xl text-xs">
                           <DropdownMenuItem
                             onClick={() =>
-                              navigate(`/motoristas/${motorista.id}/editar`)
+                              navigate(`/motoristas/${motorista.id}`)
                             }
-                            className="rounded-lg cursor-pointer"
+                            className="rounded-md cursor-pointer"
                           >
-                            Editar cadastro
+                            Visualizar
                           </DropdownMenuItem>
+
+                          <DropdownMenuItem
+                            onClick={() =>
+                              navigate(
+                                `/motoristas/${motorista.id}/editar`
+                              )
+                            }
+                            className="rounded-md cursor-pointer"
+                          >
+                            Editar
+                          </DropdownMenuItem>
+
                           {motorista.status === "ativo" && (
                             <DropdownMenuItem
+                              className="rounded-md text-destructive focus:text-destructive cursor-pointer"
                               onClick={() => excluirMotorista(motorista.id)}
-                              className="rounded-lg text-destructive focus:text-destructive cursor-pointer"
                             >
-                              Excluir motorista
+                              Excluir
                             </DropdownMenuItem>
                           )}
                         </DropdownMenuContent>
@@ -324,7 +289,36 @@ export default function Motoristas() {
             </Table>
           </div>
         )}
-      </SectionCard>
+      </div>
+
+      {/* Paginação Simples */}
+      {totalPaginas > 1 && (
+        <div className="flex items-center justify-between px-2 pt-2 text-xs text-muted-foreground">
+          <span>
+            Página {paginaAtual} de {totalPaginas}
+          </span>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 rounded-lg text-xs"
+              onClick={() => setPagina((p) => Math.max(1, p - 1))}
+              disabled={paginaAtual === 1}
+            >
+              Anterior
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 rounded-lg text-xs"
+              onClick={() => setPagina((p) => Math.min(totalPaginas, p + 1))}
+              disabled={paginaAtual === totalPaginas}
+            >
+              Próxima
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

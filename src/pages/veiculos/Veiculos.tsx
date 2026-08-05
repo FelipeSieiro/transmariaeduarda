@@ -1,31 +1,11 @@
 // src/pages/Veiculos.tsx
 import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import {
-  ArrowUpDown,
-  Bus,
-  Download,
-  Filter,
-  MoreHorizontal,
-  Plus,
-  Search,
-  SlidersHorizontal,
-  Wrench,
-  CheckCircle2,
-  Users2,
-} from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { MoreHorizontal, Plus, Search, Download, ArrowUpDown, Bus, CheckCircle2, Wrench, Users2 } from "lucide-react";
 import { toast } from "sonner";
 
-import { EmptyState, SectionCard, StatusPill } from "@/components/ui-kit/primitives";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -40,17 +20,17 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { StatusPill } from "@/components/ui-kit/primitives";
 
 import { veiculosService, type Veiculo } from "@/services/veiculos.service";
 
 const PAGE_SIZE = 8;
-const TODOS = "__todos__";
 
 export default function Veiculos() {
-  const [veiculos, setVeiculos] = useState<Veiculo[]>([]);
   const navigate = useNavigate();
+
+  const [veiculos, setVeiculos] = useState<Veiculo[]>([]);
   const [busca, setBusca] = useState("");
-  const [status, setStatus] = useState(TODOS);
   const [ordem, setOrdem] = useState<"modelo" | "placa">("modelo");
   const [pagina, setPagina] = useState(1);
 
@@ -60,7 +40,7 @@ export default function Veiculos() {
         const dados = await veiculosService.getAll();
         setVeiculos(dados || []);
       } catch (error) {
-        console.error("Erro ao buscar veículos", error);
+        console.error(error);
         toast.error("Erro ao carregar veículos");
       }
     }
@@ -69,13 +49,15 @@ export default function Veiculos() {
   }, []);
 
   async function excluirVeiculo(id: string) {
-    if (!window.confirm("Tem certeza que deseja excluir este veículo?")) {
-      return;
-    }
+    const confirmar = window.confirm(
+      "Tem certeza que deseja excluir este veículo?"
+    );
+
+    if (!confirmar) return;
 
     try {
       await veiculosService.delete(id);
-      setVeiculos((prev) => prev.filter((v) => v.id !== id));
+      setVeiculos((prev) => prev.filter((item) => item.id !== id));
       toast.success("Veículo excluído com sucesso");
     } catch (error) {
       console.error(error);
@@ -93,26 +75,23 @@ export default function Veiculos() {
     return { total, ativos, manutencao, capacidadeTotal };
   }, [veiculos]);
 
-  const filtrados = useMemo(() => {
-    const q = busca.toLowerCase().trim();
+  const filtrados = veiculos
+    .filter((veiculo) => {
+      const termo = busca.toLowerCase().trim();
 
-    const resultado = veiculos.filter((veiculo) => {
-      const pesquisa =
-        !q ||
-        veiculo.modelo?.toLowerCase().includes(q) ||
-        veiculo.placa?.toLowerCase().includes(q) ||
-        veiculo.marca?.toLowerCase().includes(q);
-
-      return pesquisa && (status === TODOS || veiculo.status?.toLowerCase() === status.toLowerCase());
-    });
-
-    return resultado.sort((a, b) => {
+      return (
+        !termo ||
+        veiculo.modelo?.toLowerCase().includes(termo) ||
+        veiculo.placa?.toLowerCase().includes(termo) ||
+        veiculo.marca?.toLowerCase().includes(termo)
+      );
+    })
+    .sort((a, b) => {
       if (ordem === "modelo") {
         return (a.modelo || "").localeCompare(b.modelo || "");
       }
       return (a.placa || "").localeCompare(b.placa || "");
     });
-  }, [veiculos, busca, status, ordem]);
 
   const totalPaginas = Math.max(1, Math.ceil(filtrados.length / PAGE_SIZE));
   const paginaAtual = Math.min(pagina, totalPaginas);
@@ -123,242 +102,220 @@ export default function Veiculos() {
 
   function limpar() {
     setBusca("");
-    setStatus(TODOS);
     setPagina(1);
   }
 
   return (
-    <div className="mx-auto max-w-[1600px] space-y-6">
-      
-      {/* Header Limpo */}
-      <header className="flex flex-wrap items-center justify-between gap-4">
-        <div className="space-y-1">
-          <h1 className="font-display flex items-center gap-2.5 text-3xl font-semibold tracking-tight text-foreground">
-            <Bus className="size-7 text-primary" />
+    <div className="mx-auto max-w-6xl space-y-6 py-2">
+      {/* Header Minimalista */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border/40 pb-6">
+        <div>
+          <h1 className="text-xl font-semibold tracking-tight text-foreground">
             Veículos & Frota
           </h1>
-          <p className="text-sm text-muted-foreground">
-            Gerenciamento geral da frota de transporte escolar
+          <p className="text-xs text-muted-foreground mt-0.5">
+            {filtrados.length} {filtrados.length === 1 ? "veículo cadastrado" : "veículos cadastrados"}
           </p>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2">
           <Button
             variant="outline"
-            className="rounded-xl gap-2 h-10"
+            size="sm"
+            className="h-9 rounded-lg text-xs"
             onClick={() => toast.success("Exportação iniciada")}
           >
-            <Download className="size-4" />
+            <Download className="size-3.5 mr-1.5 opacity-70" />
             Exportar
           </Button>
 
-          <Button
-            className="rounded-xl gap-2 h-10 font-semibold shadow-md shadow-primary/20"
-            onClick={() => navigate("/veiculos/novo")}
-          >
-            <Plus className="size-4" />
-            Novo veículo
+          <Button asChild size="sm" className="h-9 rounded-lg text-xs">
+            <button onClick={() => navigate("/veiculos/novo")}>
+              <Plus className="size-3.5 mr-1.5" />
+              Novo veículo
+            </button>
           </Button>
         </div>
-      </header>
+      </div>
 
-      {/* Cards de Resumo da Frota (Indicadores de Veículos) */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="bg-card border border-border/60 rounded-2xl p-4 flex items-center gap-4 shadow-2xs">
-          <div className="size-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-            <Bus className="size-6" />
+      {/* Cards de Resumo da Frota */}
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="bg-card/50 border border-border/60 rounded-xl p-3.5 flex items-center gap-3 shadow-2xs">
+          <div className="size-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
+            <Bus className="size-4" />
           </div>
           <div>
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Total na Frota</p>
-            <p className="text-2xl font-black text-foreground mt-0.5">{metricas.total}</p>
+            <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Total na Frota</p>
+            <p className="text-lg font-bold text-foreground leading-tight">{metricas.total}</p>
           </div>
         </div>
 
-        <div className="bg-card border border-border/60 rounded-2xl p-4 flex items-center gap-4 shadow-2xs">
-          <div className="size-12 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">
-            <CheckCircle2 className="size-6" />
+        <div className="bg-card/50 border border-border/60 rounded-xl p-3.5 flex items-center gap-3 shadow-2xs">
+          <div className="size-9 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">
+            <CheckCircle2 className="size-4" />
           </div>
           <div>
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Veículos Ativos</p>
-            <p className="text-2xl font-black text-foreground mt-0.5">{metricas.ativos}</p>
+            <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Veículos Ativos</p>
+            <p className="text-lg font-bold text-foreground leading-tight">{metricas.ativos}</p>
           </div>
         </div>
 
-        <div className="bg-card border border-border/60 rounded-2xl p-4 flex items-center gap-4 shadow-2xs">
-          <div className="size-12 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
-            <Wrench className="size-6" />
+        <div className="bg-card/50 border border-border/60 rounded-xl p-3.5 flex items-center gap-3 shadow-2xs">
+          <div className="size-9 rounded-lg bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
+            <Wrench className="size-4" />
           </div>
           <div>
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Em Manutenção</p>
-            <p className="text-2xl font-black text-foreground mt-0.5">{metricas.manutencao}</p>
+            <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Em Manutenção</p>
+            <p className="text-lg font-bold text-foreground leading-tight">{metricas.manutencao}</p>
           </div>
         </div>
 
-        <div className="bg-card border border-border/60 rounded-2xl p-4 flex items-center gap-4 shadow-2xs">
-          <div className="size-12 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0">
-            <Users2 className="size-6" />
+        <div className="bg-card/50 border border-border/60 rounded-xl p-3.5 flex items-center gap-3 shadow-2xs">
+          <div className="size-9 rounded-lg bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0">
+            <Users2 className="size-4" />
           </div>
           <div>
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Capacidade Total</p>
-            <p className="text-2xl font-black text-foreground mt-0.5">{metricas.capacidadeTotal} <span className="text-xs font-normal text-muted-foreground">lugares</span></p>
+            <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Capacidade Total</p>
+            <p className="text-lg font-bold text-foreground leading-tight">{metricas.capacidadeTotal} <span className="text-[10px] font-normal text-muted-foreground">lugares</span></p>
           </div>
         </div>
       </div>
 
-      {/* Filtros */}
-      <SectionCard
-        title="Filtros"
-        description="Pesquisa rápida por modelo, placa ou marca"
-        action={
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={limpar}
-            className="rounded-lg text-muted-foreground hover:text-foreground"
-          >
-            <Filter className="size-4 mr-2" />
-            Limpar
-          </Button>
-        }
-      >
-        <div className="grid gap-3 md:grid-cols-2">
-          <div className="relative">
-            <Search className="absolute left-3 top-3 size-4 text-muted-foreground" />
-            <Input
-              value={busca}
-              onChange={(e) => {
-                setBusca(e.target.value);
-                setPagina(1);
-              }}
-              placeholder="Buscar veículo..."
-              className="pl-9 rounded-xl h-10"
-            />
-          </div>
-
-          <Select value={status} onValueChange={setStatus}>
-            <SelectTrigger className="rounded-xl h-10">
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
-            <SelectContent className="rounded-xl">
-              <SelectItem value={TODOS}>Todos os status</SelectItem>
-              <SelectItem value="ativo">Ativo</SelectItem>
-              <SelectItem value="inativo">Inativo</SelectItem>
-              <SelectItem value="manutencao">Em Manutenção</SelectItem>
-            </SelectContent>
-          </Select>
+      {/* Barra de Filtros e Busca */}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-2.5">
+        <div className="relative w-full sm:max-w-xs">
+          <Search className="absolute left-3 top-2.5 size-3.5 text-muted-foreground/70" />
+          <Input
+            placeholder="Buscar por modelo, placa..."
+            value={busca}
+            onChange={(e) => {
+              setBusca(e.target.value);
+              setPagina(1);
+            }}
+            className="pl-9 h-9 text-xs rounded-lg bg-background/50 border-border/60"
+          />
         </div>
-      </SectionCard>
 
-      {/* Lista de veículos */}
-      <SectionCard
-        title="Lista de veículos"
-        description="Frota cadastrada no sistema"
-        bodyClassName="p-0"
-        action={
+        <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setOrdem(ordem === "modelo" ? "placa" : "modelo")}
-            className="rounded-lg text-muted-foreground hover:text-foreground"
+            className="h-9 px-2.5 text-xs text-muted-foreground hover:text-foreground"
           >
-            <ArrowUpDown className="size-4 mr-2" />
+            <ArrowUpDown className="size-3.5 mr-1.5 opacity-70" />
             Ordenar por {ordem === "modelo" ? "Placa" : "Modelo"}
           </Button>
-        }
-      >
+
+          {(busca || pagina > 1) && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={limpar}
+              className="h-9 px-2.5 text-xs text-muted-foreground hover:text-foreground"
+            >
+              Limpar
+            </Button>
+          )}
+        </div>
+      </div>
+
+      {/* Tabela Minimalista */}
+      <div className="rounded-xl border border-border/60 bg-card/50 overflow-hidden shadow-2xs">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-border/40 bg-muted/20">
+          <span className="text-xs font-medium text-muted-foreground">
+            Listagem principal
+          </span>
+        </div>
+
         {visiveis.length === 0 ? (
-          <div className="p-8">
-            <EmptyState
-              icon={Bus}
-              title="Nenhum veículo encontrado"
-              description="Cadastre um veículo ou ajuste os filtros aplicados."
-              action={
-                <Button variant="outline" onClick={limpar} className="rounded-xl">
-                  <SlidersHorizontal className="size-4 mr-2" />
-                  Limpar filtros
-                </Button>
-              }
-            />
+          <div className="p-12 text-center text-xs text-muted-foreground">
+            Nenhum veículo encontrado.
           </div>
         ) : (
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead className="pl-6">Veículo / Modelo</TableHead>
-                  <TableHead>Placa</TableHead>
-                  <TableHead>Capacidade</TableHead>
-                  <TableHead>Ano</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="w-16 pr-6 text-right">Ações</TableHead>
+                <TableRow className="border-border/40 hover:bg-transparent">
+                  <TableHead className="pl-4 text-xs font-medium text-muted-foreground">Veículo / Modelo</TableHead>
+                  <TableHead className="text-xs font-medium text-muted-foreground">Placa</TableHead>
+                  <TableHead className="text-xs font-medium text-muted-foreground">Capacidade</TableHead>
+                  <TableHead className="text-xs font-medium text-muted-foreground">Ano</TableHead>
+                  <TableHead className="text-xs font-medium text-muted-foreground">Status</TableHead>
+                  <TableHead className="w-12 pr-4 text-right"></TableHead>
                 </TableRow>
               </TableHeader>
 
               <TableBody>
                 {visiveis.map((veiculo) => (
-                  <TableRow key={veiculo.id}>
-                    <TableCell className="pl-6">
-                      <Link
-                        to={`/veiculos/${veiculo.id}`}
-                        className="flex items-center gap-3 group"
-                      >
-                        <div className="flex size-9 items-center justify-center rounded-xl bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary transition-colors">
-                          <Bus className="size-4" />
+                  <TableRow key={veiculo.id} className="border-border/40 transition-colors group">
+                    <TableCell className="pl-4 py-3">
+                      <div className="flex items-center gap-3">
+                        <div className="flex size-8 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+                          <Bus className="size-3.5" />
                         </div>
                         <div>
-                          <p className="font-medium text-foreground group-hover:underline">
+                          <p className="font-medium text-xs text-foreground">
                             {veiculo.modelo}
                           </p>
-                          <p className="text-xs text-muted-foreground">
+                          <p className="text-[11px] text-muted-foreground">
                             {veiculo.marca ?? "Marca não informada"}
                           </p>
                         </div>
-                      </Link>
+                      </div>
                     </TableCell>
 
-                    <TableCell className="font-mono font-medium text-foreground">
+                    <TableCell className="py-3 text-xs text-foreground font-mono font-medium">
                       {veiculo.placa}
                     </TableCell>
 
-                    <TableCell className="text-muted-foreground">
+                    <TableCell className="py-3 text-xs text-muted-foreground/80">
                       {veiculo.capacidade ? `${veiculo.capacidade} lugares` : "—"}
                     </TableCell>
 
-                    <TableCell className="text-muted-foreground">
+                    <TableCell className="py-3 text-xs text-muted-foreground/80">
                       {veiculo.ano ?? "—"}
                     </TableCell>
 
-                    <TableCell>
+                    <TableCell className="py-3">
                       <StatusPill status={veiculo.status ? veiculo.status.toLowerCase() : "ativo"} />
                     </TableCell>
 
-                    <TableCell className="pr-6 text-right">
+                    <TableCell className="pr-4 py-3 text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="rounded-lg text-muted-foreground hover:text-foreground"
+                            className="size-7 rounded-md text-muted-foreground hover:text-foreground"
                           >
-                            <MoreHorizontal className="size-4" />
+                            <MoreHorizontal className="size-3.5" />
                           </Button>
                         </DropdownMenuTrigger>
 
-                        <DropdownMenuContent align="end" className="rounded-xl">
+                        <DropdownMenuContent align="end" className="rounded-xl text-xs">
                           <DropdownMenuItem
-                            onClick={() => navigate(`/veiculos/${veiculo.id}`)}
-                            className="rounded-lg cursor-pointer"
+                            onClick={() =>
+                              navigate(`/veiculos/${veiculo.id}`)
+                            }
+                            className="rounded-md cursor-pointer"
                           >
                             Visualizar
                           </DropdownMenuItem>
+
                           <DropdownMenuItem
-                            onClick={() => navigate(`/veiculos/${veiculo.id}/editar`)}
-                            className="rounded-lg cursor-pointer"
+                            onClick={() =>
+                              navigate(
+                                `/veiculos/${veiculo.id}/editar`
+                              )
+                            }
+                            className="rounded-md cursor-pointer"
                           >
                             Editar
                           </DropdownMenuItem>
+
                           <DropdownMenuItem
-                            className="rounded-lg text-destructive focus:text-destructive cursor-pointer"
+                            className="rounded-md text-destructive focus:text-destructive cursor-pointer"
                             onClick={() => excluirVeiculo(veiculo.id)}
                           >
                             Excluir
@@ -372,7 +329,36 @@ export default function Veiculos() {
             </Table>
           </div>
         )}
-      </SectionCard>
+      </div>
+
+      {/* Paginação Simples */}
+      {totalPaginas > 1 && (
+        <div className="flex items-center justify-between px-2 pt-2 text-xs text-muted-foreground">
+          <span>
+            Página {paginaAtual} de {totalPaginas}
+          </span>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 rounded-lg text-xs"
+              onClick={() => setPagina((p) => Math.max(1, p - 1))}
+              disabled={paginaAtual === 1}
+            >
+              Anterior
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 rounded-lg text-xs"
+              onClick={() => setPagina((p) => Math.min(totalPaginas, p + 1))}
+              disabled={paginaAtual === totalPaginas}
+            >
+              Próxima
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

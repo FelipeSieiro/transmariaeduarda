@@ -48,7 +48,7 @@ const navigationGroups: {
   {
     label: "Operação",
     items: [
-      { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard, exact: true },
+      { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard, disabled: true},
       { title: "Alunos", url: "/alunos", icon: GraduationCap },
       { title: "Responsáveis", url: "/responsaveis", icon: Users },
       { title: "Contratos", url: "/contratos", icon: FileSignature },
