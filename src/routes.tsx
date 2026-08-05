@@ -38,8 +38,8 @@ import NovoVeiculo from "@/pages/veiculos/NovoVeiculo";
 import VeiculoDetalhes from "@/pages/veiculos/VeiculoDetalhes";
 
 // Importação das novas telas de autenticação separadas
-import Login from "@/pages/auth/Login";
 import Register from "@/pages/auth/Register";
+import Login from "./pages/auth/login";
 
 function PrivateRoute({
   children,
