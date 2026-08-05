@@ -1,3 +1,5 @@
+// src/router.ts
+
 import { createBrowserRouter, Navigate } from "react-router-dom";
 
 import AppLayout from "@/AppLayout";
@@ -34,7 +36,10 @@ import RotaDetalhes from "@/pages/rotas/RotaDetalhes";
 import Veiculos from "@/pages/veiculos/Veiculos";
 import NovoVeiculo from "@/pages/veiculos/NovoVeiculo";
 import VeiculoDetalhes from "@/pages/veiculos/VeiculoDetalhes";
-import Login from "./pages/login";
+
+// Importação das novas telas de autenticação separadas
+import Login from "@/pages/auth/Login";
+import Register from "@/pages/auth/Register";
 
 function PrivateRoute({
   children,
@@ -54,6 +59,10 @@ export const router = createBrowserRouter([
   {
     path: "/login",
     element: <Login />,
+  },
+  {
+    path: "/register",
+    element: <Register />,
   },
 
   {
