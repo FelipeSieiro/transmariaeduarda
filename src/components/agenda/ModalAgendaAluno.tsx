@@ -130,7 +130,7 @@ export function ModalAgendaAluno({
     <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
       <div className="bg-slate-900 border border-slate-800 w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-slate-800 bg-slate-900/50">
+        <div className="flex flex-col gap-4 p-5 border-b border-slate-800 bg-slate-900/50 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="text-lg font-bold text-slate-100">Grade Semanal de Transporte</h2>
             <p className="text-xs text-slate-400">
@@ -164,7 +164,7 @@ export function ModalAgendaAluno({
                       <span className="w-2 h-2 rounded-full bg-blue-500" />
                       {dia.label}
                     </h3>
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap gap-2">
                       <Button
                         type="button"
                         variant="outline"
@@ -228,7 +228,7 @@ export function ModalAgendaAluno({
                             </Select>
                           </div>
 
-                          <div className="flex items-center gap-1.5 w-32">
+                          <div className="flex w-full max-w-[9rem] items-center gap-1.5">
                             <Clock className="w-3.5 h-3.5 text-slate-400" />
                             <Input
                               type="time"
@@ -236,7 +236,7 @@ export function ModalAgendaAluno({
                               onChange={(e) =>
                                 handleUpdateItem(item.originalIndex, "horario", e.target.value)
                               }
-                              className="h-8 bg-slate-800 border-slate-700 text-xs text-slate-200"
+                              className="h-8 w-full w-full bg-slate-800 border-slate-700 text-xs text-slate-200"
                             />
                           </div>
 

@@ -54,7 +54,7 @@ export function AlunoResponsaveis({ aluno }: AlunoResponsaveisProps) {
               <div key={key} className="space-y-3">
                 {index > 0 && <Separator className="my-4" />}
 
-                <div className="flex items-start justify-between gap-3">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div className="flex min-w-0 items-center gap-3">
                     <Avatar className="size-10 shrink-0 border border-border">
                       <AvatarImage src={resp.foto || resp.avatar_url} alt={resp.nome} />

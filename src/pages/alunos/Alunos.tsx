@@ -15,6 +15,9 @@ import {
   ChevronRight,
   Clock,
   MapPin,
+  Eye,
+  Edit,
+  Trash2,
 } from "lucide-react";
 
 import { toast } from "sonner";
@@ -144,7 +147,7 @@ export default function Alunos() {
   }
 
   return (
-    <div className="mx-auto max-w-[1600px] space-y-6">
+    <div className="w-full space-y-6">
       <header className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="font-display text-3xl font-semibold tracking-tight text-foreground">
@@ -249,7 +252,109 @@ export default function Alunos() {
           </div>
         ) : (
           <div>
-            <div className="overflow-x-auto">
+            {/* VISÃO MOBILE: CARDS (Visível apenas em telas pequenas) */}
+            <div className="grid grid-cols-1 gap-3 p-4 sm:hidden">
+              {visiveis.map((aluno) => {
+                const escolaNome = obterNomeEscola(aluno);
+                const fotoUrl = aluno.foto || aluno.foto_url || aluno.avatar_url;
+                const matriculaExibicao = aluno.matricula || `ALU-${aluno.id.slice(0, 8).toUpperCase()}`;
+                const statusNormalizado = aluno.status?.toLowerCase() === "ativo" ? "ativo" : "inativo";
+
+                return (
+                  <div
+                    key={aluno.id}
+                    className="rounded-xl border border-border/70 bg-card p-4 shadow-sm space-y-3 transition-all hover:border-border"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <Link
+                        to={`/alunos/${aluno.id}`}
+                        className="flex items-center gap-3 group min-w-0"
+                      >
+                        <Avatar className="size-10 shrink-0 border border-border">
+                          <AvatarImage src={fotoUrl ?? undefined} alt={aluno.nome} />
+                          <AvatarFallback className="bg-primary/10 text-primary font-semibold text-xs">
+                            {getIniciais(aluno.nome)}
+                          </AvatarFallback>
+                        </Avatar>
+
+                        <div className="min-w-0">
+                          <p className="font-medium text-foreground group-hover:text-primary transition-colors truncate text-sm">
+                            {aluno.nome}
+                          </p>
+                          {escolaNome ? (
+                            <p className="text-xs text-muted-foreground flex items-center gap-1 truncate">
+                              <MapPin className="size-3 shrink-0 text-muted-foreground/70" />
+                              <span className="truncate">{escolaNome}</span>
+                            </p>
+                          ) : (
+                            <p className="text-xs text-muted-foreground truncate">
+                              {aluno.cidade ?? "Sem escola informada"}
+                            </p>
+                          )}
+                        </div>
+                      </Link>
+
+                      <div>
+                        <StatusPill status={statusNormalizado} />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-2 pt-2 border-t border-border/40 text-xs">
+                      <div>
+                        <span className="text-muted-foreground block">Matrícula</span>
+                        <span className="font-mono font-medium text-foreground truncate block">
+                          {matriculaExibicao}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground block">Série</span>
+                        <span className="font-medium text-foreground truncate block">
+                          {aluno.serie ?? "-"}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground block">Turno</span>
+                        <span className="font-medium text-foreground truncate block">
+                          {aluno.turno ?? "-"}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-end gap-1.5 pt-2 border-t border-border/40">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="rounded-xl h-8 text-xs gap-1 flex-1"
+                        onClick={() => navigate(`/alunos/${aluno.id}`)}
+                      >
+                        <Eye className="size-3.5 text-primary" /> Visualizar
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="rounded-xl h-8 text-xs gap-1 flex-1"
+                        onClick={() => navigate(`/alunos/${aluno.id}/editar`)}
+                      >
+                        <Edit className="size-3.5 text-muted-foreground" /> Editar
+                      </Button>
+                      {statusNormalizado === "ativo" && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="rounded-xl h-8 text-xs gap-1 text-destructive hover:text-destructive"
+                          onClick={() => excluirAluno(aluno.id)}
+                        >
+                          <Trash2 className="size-3.5" /> Excluir
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* VISÃO DESKTOP: TABELA TRADICIONAL (Oculta em mobile, visível em sm+) */}
+            <div className="hidden sm:block overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>

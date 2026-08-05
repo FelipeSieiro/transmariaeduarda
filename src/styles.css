@@ -6,9 +6,9 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * Design System — "Emerald Orange ERP"
+ * Design System — "School Transport ERP"
  * Headings: Outfit · Body: Figtree
- * Semantic tokens only. Never hardcode colors in components.
+ * Palette: School Bus Yellow, Safety Orange, and Asphalt Dark Surfaces.
  */
 
 @theme inline {
@@ -23,7 +23,6 @@
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
 
-
   --color-background: var(--background);
   --color-foreground: var(--foreground);
 
@@ -33,54 +32,42 @@
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
 
-
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
-
 
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
 
-
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
-
 
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
 
-
   --color-orange: var(--orange);
   --color-orange-foreground: var(--orange-foreground);
-
 
   --color-success: var(--success);
   --color-success-foreground: var(--success-foreground);
 
-
   --color-warning: var(--warning);
   --color-warning-foreground: var(--warning-foreground);
-
 
   --color-info: var(--info);
   --color-info-foreground: var(--info-foreground);
 
-
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
-
 
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-
 
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
-
 
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
@@ -94,430 +81,185 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
-
-
   --shadow-card:
-    0 1px 2px oklch(0.25 0.05 155 / 0.06),
-    0 8px 24px -12px oklch(0.25 0.05 155 / 0.18);
-
+    0 1px 3px oklch(0.20 0.05 75 / 0.06),
+    0 8px 24px -12px oklch(0.20 0.05 75 / 0.15);
 
   --shadow-elevated:
-    0 2px 4px oklch(0.25 0.05 155 / 0.06),
-    0 18px 40px -18px oklch(0.25 0.05 155 / 0.30);
+    0 4px 12px oklch(0.20 0.05 75 / 0.08),
+    0 20px 48px -16px oklch(0.20 0.05 75 / 0.22);
 }
-
-
 
 :root {
-
   --radius: 0.875rem;
 
+  /* Background & Core (Modo Claro limpo) */
+  --background: oklch(0.985 0.003 85);
+  --foreground: oklch(0.22 0.03 260);
 
-  /* Background */
-
-  --background: oklch(0.985 0.008 150);
-  --foreground: oklch(0.22 0.035 150);
-
-
-
-  /* Cards */
-
+  /* Cards & Popovers */
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.22 0.035 150);
-
+  --card-foreground: oklch(0.22 0.03 260);
 
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.22 0.035 150);
+  --popover-foreground: oklch(0.22 0.03 260);
 
+  /* Amarelo Ônibus Escolar (Primary) */
+  --primary: oklch(0.82 0.19 80);
+  --primary-foreground: oklch(0.20 0.03 70);
 
+  /* Amarelo Suave (Secondary) */
+  --secondary: oklch(0.95 0.025 85);
+  --secondary-foreground: oklch(0.32 0.08 75);
 
-  /* Verde principal */
+  /* Neutros */
+  --muted: oklch(0.96 0.005 85);
+  --muted-foreground: oklch(0.52 0.02 260);
 
-  --primary:
-    oklch(0.48 0.14 155);
+  /* Laranja de Segurança (Accent) */
+  --accent: oklch(0.72 0.20 50);
+  --accent-foreground: white;
 
-  --primary-foreground:
-    oklch(0.98 0.01 140);
-
-
-
-  /* Verde secundário */
-
-  --secondary:
-    oklch(0.94 0.035 150);
-
-  --secondary-foreground:
-    oklch(0.3 0.08 155);
-
-
-
-  --muted:
-    oklch(0.96 0.02 150);
-
-  --muted-foreground:
-    oklch(0.5 0.04 150);
-
-
-
-  /* Accent */
-
-  --accent:
-    oklch(0.93 0.08 65);
-
-  --accent-foreground:
-    oklch(0.35 0.08 50);
-
-
-
-  /* Laranja */
-
-  --orange:
-    oklch(0.7 0.18 55);
-
-  --orange-foreground:
-    oklch(0.98 0.01 50);
-
-
+  --orange: oklch(0.75 0.19 55);
+  --orange-foreground: white;
 
   /* Status */
+  --success: oklch(0.65 0.17 145);
+  --success-foreground: white;
 
-  --success:
-    oklch(0.6 0.15 150);
+  --warning: oklch(0.84 0.18 85);
+  --warning-foreground: oklch(0.25 0.05 80);
 
-  --success-foreground:
-    oklch(0.98 0.01 150);
+  --info: oklch(0.65 0.15 240);
+  --info-foreground: white;
 
+  --destructive: oklch(0.60 0.22 25);
+  --destructive-foreground: white;
 
-
-  --warning:
-    oklch(0.72 0.17 65);
-
-  --warning-foreground:
-    oklch(0.3 0.08 60);
-
-
-
-  --info:
-    oklch(0.6 0.1 230);
-
-  --info-foreground:
-    oklch(0.98 0.01 230);
-
-
-
-  --destructive:
-    oklch(0.58 0.19 25);
-
-  --destructive-foreground:
-    oklch(0.98 0.01 25);
-
-
-
-  /* Borders */
-
-  --border:
-    oklch(0.9 0.02 150);
-
-  --input:
-    oklch(0.9 0.02 150);
-
-  --ring:
-    oklch(0.48 0.14 155);
-
-
+  /* Borders & Inputs */
+  --border: oklch(0.90 0.01 250);
+  --input: oklch(0.90 0.01 250);
+  --ring: var(--primary);
 
   /* Charts */
+  --chart-1: var(--primary);
+  --chart-2: var(--accent);
+  --chart-3: oklch(0.68 0.15 200);
+  --chart-4: oklch(0.70 0.18 145);
+  --chart-5: oklch(0.65 0.20 25);
 
-  --chart-1:
-    oklch(0.48 0.14 155);
+  /* Sidebar (Grafite Profissional) */
+  --sidebar: oklch(0.20 0.03 260);
+  --sidebar-foreground: oklch(0.95 0.01 85);
 
-  --chart-2:
-    oklch(0.7 0.18 55);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: oklch(0.20 0.03 70);
 
-  --chart-3:
-    oklch(0.65 0.12 180);
+  --sidebar-accent: oklch(0.28 0.035 260);
+  --sidebar-accent-foreground: white;
 
-  --chart-4:
-    oklch(0.55 0.15 130);
-
-  --chart-5:
-    oklch(0.6 0.13 35);
-
-
-
-  /* Sidebar */
-
-  --sidebar:
-    oklch(0.22 0.06 155);
-
-  --sidebar-foreground:
-    oklch(0.95 0.02 150);
-
-
-  --sidebar-primary:
-    oklch(0.7 0.18 55);
-
-  --sidebar-primary-foreground:
-    oklch(0.2 0.05 150);
-
-
-  --sidebar-accent:
-    oklch(0.32 0.08 155);
-
-  --sidebar-accent-foreground:
-    oklch(0.98 0.02 150);
-
-
-  --sidebar-border:
-    oklch(0.32 0.06 155);
-
-  --sidebar-ring:
-    oklch(0.7 0.18 55);
-
+  --sidebar-border: oklch(0.28 0.035 260);
+  --sidebar-ring: var(--primary);
 }
-
-
-
-
 
 .dark {
+  /* Dark Mode Estilo "Asfalto Moderno" (Suave, sem preto chapado) */
+  --background: oklch(0.17 0.018 255);
+  --foreground: oklch(0.95 0.01 85);
 
+  --card: oklch(0.22 0.022 255);
+  --card-foreground: oklch(0.97 0.005 85);
 
-  --background:
-    oklch(0.16 0.03 155);
+  --popover: oklch(0.22 0.022 255);
+  --popover-foreground: oklch(0.97 0.005 85);
 
-  --foreground:
-    oklch(0.95 0.015 150);
+  /* Amarelo Escolar Vivo no Dark Mode */
+  --primary: oklch(0.85 0.18 82);
+  --primary-foreground: black;
 
+  --secondary: oklch(0.29 0.03 255);
+  --secondary-foreground: oklch(0.95 0.01 85);
 
+  --muted: oklch(0.26 0.02 255);
+  --muted-foreground: oklch(0.75 0.015 85);
 
-  --card:
-    oklch(0.21 0.035 155);
+  --accent: oklch(0.76 0.20 50);
+  --accent-foreground: black;
 
-  --card-foreground:
-    oklch(0.95 0.015 150);
+  --orange: oklch(0.78 0.18 55);
+  --orange-foreground: black;
 
+  --success: oklch(0.68 0.17 145);
+  --success-foreground: black;
 
+  --warning: oklch(0.87 0.17 88);
+  --warning-foreground: black;
 
-  --popover:
-    oklch(0.21 0.035 155);
+  --info: oklch(0.72 0.15 240);
+  --info-foreground: black;
 
-  --popover-foreground:
-    oklch(0.95 0.015 150);
+  --destructive: oklch(0.65 0.21 25);
+  --destructive-foreground: white;
 
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 12%);
+  --ring: var(--primary);
 
+  --chart-1: var(--primary);
+  --chart-2: var(--accent);
+  --chart-3: oklch(0.70 0.14 200);
+  --chart-4: oklch(0.72 0.17 145);
+  --chart-5: oklch(0.70 0.19 25);
 
-  --primary:
-    oklch(0.7 0.15 155);
+  /* Sidebar Dark */
+  --sidebar: oklch(0.13 0.02 255);
+  --sidebar-foreground: oklch(0.95 0.01 85);
 
-  --primary-foreground:
-    oklch(0.16 0.03 155);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: black;
 
+  --sidebar-accent: oklch(0.20 0.025 255);
+  --sidebar-accent-foreground: white;
 
-
-  --secondary:
-    oklch(0.26 0.04 155);
-
-  --secondary-foreground:
-    oklch(0.95 0.02 150);
-
-
-
-  --muted:
-    oklch(0.25 0.035 155);
-
-  --muted-foreground:
-    oklch(0.7 0.04 150);
-
-
-
-  --accent:
-    oklch(0.3 0.06 60);
-
-  --accent-foreground:
-    oklch(0.95 0.03 60);
-
-
-
-  --orange:
-    oklch(0.78 0.18 55);
-
-  --orange-foreground:
-    oklch(0.2 0.05 55);
-
-
-
-  --success:
-    oklch(0.7 0.15 150);
-
-  --success-foreground:
-    oklch(0.15 0.03 150);
-
-
-
-  --warning:
-    oklch(0.8 0.17 65);
-
-  --warning-foreground:
-    oklch(0.2 0.05 65);
-
-
-
-  --info:
-    oklch(0.7 0.1 230);
-
-  --info-foreground:
-    oklch(0.18 0.03 230);
-
-
-
-  --destructive:
-    oklch(0.65 0.18 25);
-
-  --destructive-foreground:
-    oklch(0.98 0.01 25);
-
-
-
-  --border:
-    oklch(1 0 0 / 10%);
-
-  --input:
-    oklch(1 0 0 / 14%);
-
-  --ring:
-    oklch(0.7 0.15 155);
-
-
-
-  --chart-1:
-    oklch(0.7 0.15 155);
-
-  --chart-2:
-    oklch(0.78 0.18 55);
-
-  --chart-3:
-    oklch(0.7 0.12 180);
-
-  --chart-4:
-    oklch(0.65 0.14 130);
-
-  --chart-5:
-    oklch(0.7 0.15 35);
-
-
-
-  --sidebar:
-    oklch(0.13 0.035 155);
-
-  --sidebar-foreground:
-    oklch(0.92 0.02 150);
-
-
-
-  --sidebar-primary:
-    oklch(0.78 0.18 55);
-
-  --sidebar-primary-foreground:
-    oklch(0.15 0.03 155);
-
-
-
-  --sidebar-accent:
-    oklch(0.25 0.05 155);
-
-  --sidebar-accent-foreground:
-    oklch(0.95 0.02 150);
-
-
-
-  --sidebar-border:
-    oklch(1 0 0 / 8%);
-
-  --sidebar-ring:
-    oklch(0.78 0.18 55);
-
+  --sidebar-border: oklch(1 0 0 / 8%);
+  --sidebar-ring: var(--primary);
 }
 
-
-
-
-
 @layer base {
-
   * {
     border-color: var(--color-border);
   }
 
-
   body {
-
-    background-color:
-      var(--color-background);
-
-    color:
-      var(--color-foreground);
-
-    font-family:
-      var(--font-sans);
-
-    -webkit-font-smoothing:
-      antialiased;
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
   }
-
-
 
   h1,
   h2,
   h3,
   h4,
   h5 {
-
-    font-family:
-      var(--font-display);
-
-    letter-spacing:
-      -0.018em;
+    font-family: var(--font-display);
+    letter-spacing: -0.018em;
   }
-
 }
-
-
-
-
 
 @utility surface-card {
-
-  background-color:
-    var(--color-card);
-
-  border:
-    1px solid var(--color-border);
-
-  border-radius:
-    var(--radius-2xl);
-
-  box-shadow:
-    var(--shadow-card);
-
+  background-color: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-card);
 }
 
-
-
-
-
 @utility text-gradient-brand {
-
-  background-image:
-    linear-gradient(
-      100deg,
-      var(--color-primary),
-      var(--color-orange)
-    );
-
-  background-clip:
-    text;
-
-  color:
-    transparent;
+  background-image: linear-gradient(
+    100deg,
+    var(--color-primary),
+    var(--color-accent)
+  );
+  background-clip: text;
+  color: transparent;
 }

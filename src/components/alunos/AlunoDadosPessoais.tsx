@@ -8,11 +8,11 @@ interface CampoProps {
 
 function Campo({ label, value }: CampoProps) {
   return (
-    <div className="min-w-0">
+    <div className="min-w-0 space-y-0.5">
       <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
         {label}
       </p>
-      <p className="mt-0.5 truncate text-sm font-medium text-foreground">
+      <p className="text-sm font-medium text-foreground break-words leading-snug">
         {value && value.trim() !== "" ? value : "-"}
       </p>
     </div>
@@ -44,13 +44,13 @@ export function AlunoDadosPessoais({ aluno }: AlunoDadosPessoaisProps) {
     ? `ALU-${dados.id.slice(0, 8).toUpperCase()}`
     : "-";
 
-  // Trata escola se vier como string direta ou como objeto aninhado antigo
+  // Trata escola se vier como string direta ou como objeto aninhado
   const nomeEscola = 
     typeof dados.escola === "string" 
       ? dados.escola 
       : dados.escola?.nome ?? dados.escolas?.nome ?? "-";
 
-  // Mapeando para as chaves reais que vieram no seu console.log (`nascimento` e `desde`)
+  // Mapeamento para as chaves reais (`nascimento` e `desde`)
   const dataNascimento = dados.nascimento || dados.data_nascimento;
   const alunoDesde = dados.desde || dados.data_inicio;
 
@@ -59,7 +59,7 @@ export function AlunoDadosPessoais({ aluno }: AlunoDadosPessoaisProps) {
       title="Dados pessoais"
       description="Informações cadastrais do aluno"
     >
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-3">
         <Campo label="Matrícula" value={matricula} />
         <Campo label="Nascimento" value={formatarData(dataNascimento)} />
         <Campo label="Escola" value={nomeEscola} />
