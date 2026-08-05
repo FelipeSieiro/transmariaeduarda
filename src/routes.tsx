@@ -1,7 +1,6 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
 
 import AppLayout from "@/AppLayout";
-import Login from "@/pages/Login";
 
 import Responsaveis from "@/pages/responsaveis/Responsaveis";
 import NovoResponsavel from "@/pages/responsaveis/NovoResponsavel";
@@ -35,6 +34,7 @@ import RotaDetalhes from "@/pages/rotas/RotaDetalhes";
 import Veiculos from "@/pages/veiculos/Veiculos";
 import NovoVeiculo from "@/pages/veiculos/NovoVeiculo";
 import VeiculoDetalhes from "@/pages/veiculos/VeiculoDetalhes";
+import Login from "./pages/login";
 
 function PrivateRoute({
   children,
