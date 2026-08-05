@@ -1,6 +1,6 @@
 // src/pages/RotaDetalhes.tsx
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, Link } from "react-router-dom";
 import {
   ArrowLeft,
   Bus,
@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-import { SectionCard, StatusPill } from "@/components/ui-kit/primitives";
+import { StatusPill } from "@/components/ui-kit/primitives";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -92,9 +92,9 @@ export default function RotaDetalhes() {
 
   if (loading) {
     return (
-      <div className="mx-auto max-w-4xl space-y-6">
-        <Skeleton className="h-10 w-48 rounded-xl" />
-        <Skeleton className="h-64 rounded-xl" />
+      <div className="mx-auto max-w-4xl space-y-6 py-2">
+        <Skeleton className="h-9 w-32 rounded-lg" />
+        <Skeleton className="h-48 rounded-xl" />
       </div>
     );
   }
@@ -102,153 +102,160 @@ export default function RotaDetalhes() {
   if (!rota) return null;
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6">
-      <header className="flex flex-wrap items-center justify-between gap-4">
+    <div className="mx-auto max-w-4xl space-y-6 py-2">
+      {/* Header Minimalista */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border/40 pb-6">
         <div className="flex items-center gap-3">
           <Button
             variant="ghost"
             size="icon"
-            className="rounded-xl text-muted-foreground hover:text-foreground"
+            className="size-8 rounded-lg text-muted-foreground hover:text-foreground"
             onClick={() => navigate("/rotas")}
           >
             <ArrowLeft className="size-4" />
           </Button>
-          <div className="flex items-center gap-3">
-            <div className="inline-flex p-2 rounded-xl bg-primary/10 text-primary">
-              <Bus className="size-5" />
+
+          <div>
+            <div className="flex items-center gap-2.5">
+              <h1 className="text-xl font-semibold tracking-tight text-foreground">
+                {rota.nome}
+              </h1>
+              <StatusPill status={rota.status ? rota.status.toLowerCase() : "ativa"} />
             </div>
-            <div className="space-y-0.5">
-              <div className="flex items-center gap-2.5">
-                <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
-                  {rota.nome}
-                </h1>
-                <StatusPill status={rota.status ? rota.status.toLowerCase() : "ativa"} />
-              </div>
-              <p className="text-xs font-mono text-muted-foreground">
-                ID: {rota.id}
-              </p>
-            </div>
+            <p className="text-xs text-muted-foreground font-mono mt-0.5">
+              ID: {rota.id}
+            </p>
           </div>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2">
           <Button
             variant="outline"
-            className="rounded-xl"
-            onClick={() => navigate(`/rotas/${rota.id}/editar`)}
+            size="sm"
+            className="h-9 rounded-lg text-xs"
+            asChild
           >
-            <Edit className="size-4 mr-2" />
-            Editar
+            <Link to={`/rotas/${rota.id}/editar`}>
+              <Edit className="size-3.5 mr-1.5 opacity-70" />
+              Editar
+            </Link>
           </Button>
+
           <Button
-            variant="destructive"
-            className="rounded-xl"
+            variant="ghost"
+            size="sm"
+            className="h-9 rounded-lg text-xs text-destructive hover:text-destructive hover:bg-destructive/10"
             onClick={handleExcluir}
           >
-            <Trash2 className="size-4 mr-2" />
+            <Trash2 className="size-3.5 mr-1.5" />
             Excluir
           </Button>
         </div>
-      </header>
+      </div>
 
+      {/* Grid Minimalista de Conteúdo */}
       <div className="grid gap-6 md:grid-cols-3">
-        <SectionCard
-          title="Informações da Rota"
-          description="Visão geral e horários do trajeto"
-          className="md:col-span-2"
-        >
-          <div className="grid gap-6 sm:grid-cols-2">
-            <div className="space-y-1.5">
-              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+        {/* Informações Principais */}
+        <div className="md:col-span-2 rounded-xl border border-border/60 bg-card/50 p-6 space-y-6">
+          <div>
+            <h2 className="text-sm font-medium text-foreground">Informações da Rota</h2>
+            <p className="text-xs text-muted-foreground mt-0.5">Visão geral e horários do trajeto</p>
+          </div>
+
+          <div className="grid gap-6 sm:grid-cols-2 pt-2 border-t border-border/40">
+            <div className="space-y-1">
+              <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground/70">
                 Nome da Rota
               </span>
-              <p className="text-base font-medium text-foreground">{rota.nome}</p>
+              <p className="text-xs font-medium text-foreground">{rota.nome}</p>
             </div>
 
-            <div className="space-y-1.5">
-              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            <div className="space-y-1">
+              <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground/70">
                 Bairro / Região
               </span>
-              <div className="flex items-center gap-2 font-medium text-foreground">
-                <MapPin className="size-4 text-muted-foreground" />
+              <div className="flex items-center gap-1.5 text-xs font-medium text-foreground">
+                <MapPin className="size-3.5 text-muted-foreground/70" />
                 {rota.bairro || "Não informado"}
               </div>
             </div>
 
-            <div className="space-y-1.5">
-              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            <div className="space-y-1">
+              <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground/70">
                 Horário de Saída
               </span>
-              <div className="flex items-center gap-2 font-medium text-foreground">
-                <Clock className="size-4 text-muted-foreground" />
+              <div className="flex items-center gap-1.5 text-xs font-medium text-foreground">
+                <Clock className="size-3.5 text-muted-foreground/70" />
                 {rota.horario_saida ? rota.horario_saida.slice(0, 5) : "—"}
               </div>
             </div>
 
-            <div className="space-y-1.5">
-              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            <div className="space-y-1">
+              <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground/70">
                 Horário de Retorno
               </span>
-              <div className="flex items-center gap-2 font-medium text-foreground">
-                <Clock className="size-4 text-muted-foreground" />
+              <div className="flex items-center gap-1.5 text-xs font-medium text-foreground">
+                <Clock className="size-3.5 text-muted-foreground/70" />
                 {rota.horario_retorno ? rota.horario_retorno.slice(0, 5) : "—"}
               </div>
             </div>
 
-            <div className="sm:col-span-2 space-y-1.5">
-              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            <div className="sm:col-span-2 space-y-1 pt-2">
+              <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground/70">
                 Descrição / Observações
               </span>
-              <p className="text-sm text-muted-foreground leading-relaxed">
+              <p className="text-xs text-muted-foreground/90 leading-relaxed">
                 {rota.descricao || "Nenhuma descrição informada."}
               </p>
             </div>
           </div>
-        </SectionCard>
+        </div>
 
-        <SectionCard
-          title="Alocações"
-          description="Motorista e veículo designados"
-        >
-          <div className="space-y-5">
+        {/* Alocações */}
+        <div className="rounded-xl border border-border/60 bg-card/50 p-6 space-y-6">
+          <div>
+            <h2 className="text-sm font-medium text-foreground">Alocações</h2>
+            <p className="text-xs text-muted-foreground mt-0.5">Equipe e veículo</p>
+          </div>
+
+          <div className="space-y-4 pt-2 border-t border-border/40">
             <div className="flex items-start gap-3">
-              <div className="inline-flex p-2 rounded-xl bg-muted/60 text-muted-foreground mt-0.5">
-                <UserCheck className="size-4" />
+              <div className="grid size-7 shrink-0 place-items-center rounded-md bg-muted/50 text-muted-foreground mt-0.5">
+                <UserCheck className="size-3.5" />
               </div>
               <div className="space-y-0.5">
-                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground/70 block">
                   Motorista
-                </p>
-                <p className="font-medium text-foreground">
+                </span>
+                <p className="text-xs font-medium text-foreground">
                   {nomeMotorista || (rota.motorista_id ? "Carregando..." : "Sem motorista")}
                 </p>
               </div>
             </div>
 
             <div className="flex items-start gap-3">
-              <div className="inline-flex p-2 rounded-xl bg-muted/60 text-muted-foreground mt-0.5">
-                <Bus className="size-4" />
+              <div className="grid size-7 shrink-0 place-items-center rounded-md bg-muted/50 text-muted-foreground mt-0.5">
+                <Bus className="size-3.5" />
               </div>
               <div className="space-y-0.5">
-                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground/70 block">
                   Veículo
-                </p>
-                <p className="font-medium text-foreground">
+                </span>
+                <p className="text-xs font-medium text-foreground">
                   {nomeVeiculo || (rota.veiculo_id ? "Carregando..." : "Sem veículo")}
                 </p>
               </div>
             </div>
 
             {rota.created_at && (
-              <div className="pt-4 border-t border-border/60">
-                <p className="text-[11px] text-muted-foreground">
-                  Cadastrado em:{" "}
-                  {new Date(rota.created_at).toLocaleDateString("pt-BR")}
-                </p>
+              <div className="pt-4 border-t border-border/40">
+                <span className="text-[10px] text-muted-foreground/70 block">
+                  Cadastrado em {new Date(rota.created_at).toLocaleDateString("pt-BR")}
+                </span>
               </div>
             )}
           </div>
-        </SectionCard>
+        </div>
       </div>
     </div>
   );

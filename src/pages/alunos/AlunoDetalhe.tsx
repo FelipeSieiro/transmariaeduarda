@@ -210,7 +210,7 @@ export default function AlunoDetalhe() {
     return (
       <div className="mx-auto flex min-h-[50vh] items-center justify-center px-4">
         <div className="text-center animate-pulse">
-          <p className="text-sm text-muted-foreground">
+          <p className="text-xs text-muted-foreground">
             Carregando detalhes do aluno...
           </p>
         </div>
@@ -221,18 +221,18 @@ export default function AlunoDetalhe() {
   if (!aluno) {
     return (
       <div className="mx-auto flex min-h-[60vh] max-w-xl flex-col items-center justify-center space-y-4 px-4 text-center">
-        <h1 className="font-display text-2xl font-semibold">
+        <h1 className="text-lg font-semibold tracking-tight text-foreground">
           Aluno não encontrado
         </h1>
 
-        <p className="text-sm text-muted-foreground">
-          Verifique a URL ou volte para a lista geral
-          de alunos.
+        <p className="text-xs text-muted-foreground">
+          Verifique a URL ou volte para a lista geral de alunos.
         </p>
 
         <Button
           asChild
-          className="rounded-xl"
+          size="sm"
+          className="h-9 rounded-lg text-xs"
         >
           <Link to="/alunos">
             Voltar para alunos
@@ -243,16 +243,15 @@ export default function AlunoDetalhe() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-[1400px] space-y-6 py-4">
-
+    <div className="mx-auto w-full max-w-6xl space-y-6 py-2">
       <Button
         asChild
         variant="ghost"
         size="sm"
-        className="w-fit rounded-xl text-muted-foreground hover:text-foreground"
+        className="w-fit h-8 rounded-lg text-xs text-muted-foreground hover:text-foreground px-2"
       >
         <Link to="/alunos">
-          <ArrowLeft className="mr-2 h-4 w-4" />
+          <ArrowLeft className="mr-1.5 size-3.5 opacity-70" />
           Voltar para alunos
         </Link>
       </Button>
@@ -278,60 +277,61 @@ export default function AlunoDetalhe() {
             overflow-x-auto
             rounded-xl
             border
-            border-border/50
-            bg-muted/50
-            p-1.5
-            gap-1.5
+            border-border/60
+            bg-card/50
+            p-1
+            gap-1
             h-auto
             scrollbar-none
+            shadow-2xs
           "
         >
           <TabsTrigger
             value="transporte"
-            className="flex-shrink-0 justify-center gap-2 rounded-lg px-3.5 py-2 text-xs sm:text-sm font-medium"
+            className="flex-shrink-0 justify-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium data-[state=active]:bg-muted data-[state=active]:text-foreground text-muted-foreground transition-all"
           >
-            <Bus className="h-4 w-4" />
+            <Bus className="size-3.5 opacity-70" />
             Transporte / Rotas
           </TabsTrigger>
 
           <TabsTrigger
             value="contrato"
-            className="flex-shrink-0 justify-center rounded-lg px-3.5 py-2 text-xs sm:text-sm font-medium"
+            className="flex-shrink-0 justify-center rounded-lg px-3 py-2 text-xs font-medium data-[state=active]:bg-muted data-[state=active]:text-foreground text-muted-foreground transition-all"
           >
             Contrato
           </TabsTrigger>
 
           <TabsTrigger
             value="mensalidades"
-            className="flex-shrink-0 justify-center rounded-lg px-3.5 py-2 text-xs sm:text-sm font-medium"
+            className="flex-shrink-0 justify-center rounded-lg px-3 py-2 text-xs font-medium data-[state=active]:bg-muted data-[state=active]:text-foreground text-muted-foreground transition-all"
           >
             Mensalidades
           </TabsTrigger>
 
           <TabsTrigger
             value="ocorrencias"
-            className="flex-shrink-0 justify-center rounded-lg px-3.5 py-2 text-xs sm:text-sm font-medium"
+            className="flex-shrink-0 justify-center rounded-lg px-3 py-2 text-xs font-medium data-[state=active]:bg-muted data-[state=active]:text-foreground text-muted-foreground transition-all"
           >
             Ocorrências
           </TabsTrigger>
 
           <TabsTrigger
             value="historico"
-            className="flex-shrink-0 justify-center rounded-lg px-3.5 py-2 text-xs sm:text-sm font-medium"
+            className="flex-shrink-0 justify-center rounded-lg px-3 py-2 text-xs font-medium data-[state=active]:bg-muted data-[state=active]:text-foreground text-muted-foreground transition-all"
           >
             Histórico
           </TabsTrigger>
 
           <TabsTrigger
             value="documentos"
-            className="flex-shrink-0 justify-center rounded-lg px-3.5 py-2 text-xs sm:text-sm font-medium"
+            className="flex-shrink-0 justify-center rounded-lg px-3 py-2 text-xs font-medium data-[state=active]:bg-muted data-[state=active]:text-foreground text-muted-foreground transition-all"
           >
             Documentos
           </TabsTrigger>
 
           <TabsTrigger
             value="fotos"
-            className="flex-shrink-0 justify-center rounded-lg px-3.5 py-2 text-xs sm:text-sm font-medium"
+            className="flex-shrink-0 justify-center rounded-lg px-3 py-2 text-xs font-medium data-[state=active]:bg-muted data-[state=active]:text-foreground text-muted-foreground transition-all"
           >
             Fotos
           </TabsTrigger>
@@ -369,9 +369,8 @@ export default function AlunoDetalhe() {
                 contratoId={contrato.id}
               />
             ) : (
-              <p className="py-8 text-center text-sm text-muted-foreground">
-                Nenhum contrato ativo encontrado para
-                carregar as mensalidades.
+              <p className="py-8 text-center text-xs text-muted-foreground">
+                Nenhum contrato ativo encontrado para carregar as mensalidades.
               </p>
             )}
           </SectionCard>

@@ -5,23 +5,21 @@ import {
   ArrowLeft,
   Bus,
   CalendarDays,
-  FileSignature,
   School,
   User,
 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import { SectionCard } from "@/components/ui-kit/primitives";
 import { buscarContrato, type Contrato } from "@/services/contratos.service";
 
 function Campo({ label, value }: { label: string; value: string }) {
   return (
-    <div className="space-y-0.5">
-      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+    <div className="space-y-1">
+      <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground/70">
         {label}
-      </p>
-      <p className="text-sm font-medium text-foreground">{value || "—"}</p>
+      </span>
+      <p className="text-xs font-medium text-foreground">{value || "—"}</p>
     </div>
   );
 }
@@ -57,7 +55,7 @@ export default function ContratoDetalhe() {
 
   if (carregando) {
     return (
-      <div className="mx-auto max-w-6xl p-12 text-center text-sm text-muted-foreground animate-pulse">
+      <div className="mx-auto max-w-4xl p-12 text-center text-xs text-muted-foreground animate-pulse">
         Carregando detalhes do contrato...
       </div>
     );
@@ -65,15 +63,15 @@ export default function ContratoDetalhe() {
 
   if (!contrato) {
     return (
-      <div className="mx-auto max-w-6xl py-16 text-center space-y-4">
-        <h1 className="font-display text-2xl font-semibold text-foreground">
+      <div className="mx-auto max-w-4xl py-16 text-center space-y-4">
+        <h1 className="text-xl font-semibold text-foreground">
           Contrato não encontrado
         </h1>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-xs text-muted-foreground">
           Verifique a URL ou volte para a lista geral de contratos.
         </p>
         <div>
-          <Button asChild className="rounded-xl">
+          <Button asChild size="sm" className="h-9 rounded-lg text-xs">
             <Link to="/contratos">Voltar para contratos</Link>
           </Button>
         </div>
@@ -82,32 +80,42 @@ export default function ContratoDetalhe() {
   }
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6">
-      <Button
-        asChild
-        variant="ghost"
-        size="sm"
-        className="-ml-2 rounded-xl text-muted-foreground hover:text-foreground"
-      >
-        <Link to="/contratos">
-          <ArrowLeft className="size-4 mr-2" />
-          Voltar para contratos
-        </Link>
-      </Button>
+    <div className="mx-auto max-w-4xl space-y-6 py-2">
+      {/* Header Minimalista */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border/40 pb-6">
+        <div className="flex items-center gap-3">
+          <Button
+            asChild
+            variant="ghost"
+            size="icon"
+            className="size-8 rounded-lg text-muted-foreground hover:text-foreground"
+          >
+            <Link to="/contratos">
+              <ArrowLeft className="size-4" />
+            </Link>
+          </Button>
 
-      <header className="space-y-1">
-        <h1 className="font-display flex items-center gap-2.5 text-3xl font-semibold tracking-tight text-foreground">
-          <FileSignature className="size-7 text-primary" />
-          Contrato {contrato.numero}
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Detalhes comerciais, financeiros e vínculos do contrato
-        </p>
-      </header>
+          <div>
+            <h1 className="text-xl font-semibold tracking-tight text-foreground">
+              Contrato {contrato.numero}
+            </h1>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Detalhes comerciais, financeiros e vínculos
+            </p>
+          </div>
+        </div>
+      </div>
 
-      <div className="grid gap-4 lg:grid-cols-3">
-        <SectionCard title="Contrato" description="Informações financeiras">
-          <div className="space-y-4">
+      {/* Grid Minimalista de Conteúdo */}
+      <div className="grid gap-6 md:grid-cols-3">
+        {/* Informações Financeiras */}
+        <div className="rounded-xl border border-border/60 bg-card/50 p-6 space-y-6">
+          <div>
+            <h2 className="text-sm font-medium text-foreground">Contrato</h2>
+            <p className="text-xs text-muted-foreground mt-0.5">Informações financeiras</p>
+          </div>
+
+          <div className="space-y-4 pt-2 border-t border-border/40">
             <Campo label="Número" value={contrato.numero} />
             <Campo
               label="Valor mensalidade"
@@ -123,68 +131,91 @@ export default function ContratoDetalhe() {
             />
             <Campo label="Status" value={contrato.status ?? "—"} />
           </div>
-        </SectionCard>
+        </div>
 
-        <SectionCard title="Aluno" description="Aluno vinculado">
-          <div className="space-y-4">
-            <div className="inline-flex p-2 rounded-xl bg-primary/10 text-primary">
-              <User className="size-5" />
+        {/* Aluno Vinculado */}
+        <div className="rounded-xl border border-border/60 bg-card/50 p-6 space-y-6">
+          <div>
+            <h2 className="text-sm font-medium text-foreground">Aluno</h2>
+            <p className="text-xs text-muted-foreground mt-0.5">Aluno vinculado</p>
+          </div>
+
+          <div className="space-y-4 pt-2 border-t border-border/40">
+            <div className="flex items-center gap-2.5">
+              <div className="grid size-7 shrink-0 place-items-center rounded-md bg-muted/50 text-muted-foreground">
+                <User className="size-3.5" />
+              </div>
+              <span className="text-xs font-medium text-foreground">
+                {contrato.alunos?.nome ?? "—"}
+              </span>
             </div>
-            <Campo label="Nome" value={contrato.alunos?.nome ?? "—"} />
             <Campo
               label="Matrícula"
               value={contrato.alunos?.matricula ?? "—"}
             />
           </div>
-        </SectionCard>
+        </div>
 
-        <SectionCard title="Datas" description="Vigência do contrato">
-          <div className="space-y-4">
-            <div className="inline-flex p-2 rounded-xl bg-primary/10 text-primary">
-              <CalendarDays className="size-5" />
+        {/* Vigência */}
+        <div className="rounded-xl border border-border/60 bg-card/50 p-6 space-y-6">
+          <div>
+            <h2 className="text-sm font-medium text-foreground">Datas</h2>
+            <p className="text-xs text-muted-foreground mt-0.5">Vigência do contrato</p>
+          </div>
+
+          <div className="space-y-4 pt-2 border-t border-border/40">
+            <div className="flex items-center gap-2.5">
+              <div className="grid size-7 shrink-0 place-items-center rounded-md bg-muted/50 text-muted-foreground">
+                <CalendarDays className="size-3.5" />
+              </div>
+              <span className="text-xs font-medium text-foreground">Período</span>
             </div>
             <Campo label="Início" value={contrato.data_inicio} />
             <Campo label="Fim" value={contrato.data_fim ?? "Indeterminado"} />
           </div>
-        </SectionCard>
+        </div>
       </div>
 
-      <SectionCard
-        title="Relacionamentos"
-        description="Dados institucionais vinculados ao aluno"
-      >
-        <div className="grid gap-6 md:grid-cols-2">
-          <div className="flex items-start gap-3.5">
-            <div className="p-2 rounded-xl bg-primary/10 text-primary shrink-0">
-              <School className="size-5" />
+      {/* Relacionamentos & Observações */}
+      <div className="grid gap-6 md:grid-cols-2">
+        <div className="rounded-xl border border-border/60 bg-card/50 p-6 space-y-4">
+          <h2 className="text-sm font-medium text-foreground">Vínculos Institucionais</h2>
+          <div className="grid gap-4 pt-2 border-t border-border/40 sm:grid-cols-2">
+            <div className="flex items-start gap-2.5">
+              <div className="grid size-7 shrink-0 place-items-center rounded-md bg-muted/50 text-muted-foreground mt-0.5">
+                <School className="size-3.5" />
+              </div>
+              <div className="w-full">
+                <Campo
+                  label="Escola"
+                  value={contrato.alunos?.escolas?.nome ?? "—"}
+                />
+              </div>
             </div>
-            <div className="w-full">
-              <Campo
-                label="Escola"
-                value={contrato.alunos?.escolas?.nome ?? "—"}
-              />
-            </div>
-          </div>
 
-          <div className="flex items-start gap-3.5">
-            <div className="p-2 rounded-xl bg-primary/10 text-primary shrink-0">
-              <Bus className="size-5" />
-            </div>
-            <div className="w-full">
-              <Campo
-                label="Rota"
-                value={contrato.alunos?.rotas?.nome ?? "—"}
-              />
+            <div className="flex items-start gap-2.5">
+              <div className="grid size-7 shrink-0 place-items-center rounded-md bg-muted/50 text-muted-foreground mt-0.5">
+                <Bus className="size-3.5" />
+              </div>
+              <div className="w-full">
+                <Campo
+                  label="Rota"
+                  value={contrato.alunos?.rotas?.nome ?? "—"}
+                />
+              </div>
             </div>
           </div>
         </div>
-      </SectionCard>
 
-      <SectionCard title="Observações" description="Informações adicionais do contrato">
-        <p className="text-sm text-muted-foreground leading-relaxed">
-          {contrato.observacoes ?? "Nenhuma observação cadastrada para este contrato."}
-        </p>
-      </SectionCard>
+        <div className="rounded-xl border border-border/60 bg-card/50 p-6 space-y-4">
+          <h2 className="text-sm font-medium text-foreground">Observações</h2>
+          <div className="pt-2 border-t border-border/40">
+            <p className="text-xs text-muted-foreground/90 leading-relaxed">
+              {contrato.observacoes ?? "Nenhuma observação cadastrada para este contrato."}
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

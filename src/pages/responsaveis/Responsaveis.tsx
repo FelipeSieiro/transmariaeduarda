@@ -1,7 +1,7 @@
 // src/pages/Responsaveis.tsx
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { MoreHorizontal, Plus, Search, Users, Download, ArrowUpDown, SlidersHorizontal } from "lucide-react";
+import { MoreHorizontal, Plus, Search, Download, ArrowUpDown } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -20,7 +20,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { EmptyState, SectionCard } from "@/components/ui-kit/primitives";
 
 import {
   listarResponsaveis,
@@ -101,151 +100,144 @@ export default function Responsaveis() {
   }
 
   return (
-    <div className="mx-auto max-w-[1600px] space-y-6">
-      <header className="flex flex-wrap items-center justify-between gap-4">
-        <div className="space-y-1">
-          <h1 className="font-display flex items-center gap-2.5 text-3xl font-semibold tracking-tight text-foreground">
-            <Users className="size-7 text-primary" />
+    <div className="mx-auto max-w-6xl space-y-6 py-2">
+      {/* Header Minimalista */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border/40 pb-6">
+        <div>
+          <h1 className="text-xl font-semibold tracking-tight text-foreground">
             Responsáveis
           </h1>
-          <p className="text-sm text-muted-foreground">
-            {filtrados.length} de {responsaveis.length} responsáveis cadastrados
+          <p className="text-xs text-muted-foreground mt-0.5">
+            {filtrados.length} {filtrados.length === 1 ? "responsável cadastrado" : "responsáveis cadastrados"}
           </p>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2">
           <Button
             variant="outline"
-            className="rounded-xl"
+            size="sm"
+            className="h-9 rounded-lg text-xs"
             onClick={() => toast.success("Exportação iniciada")}
           >
-            <Download className="size-4 mr-2" />
+            <Download className="size-3.5 mr-1.5 opacity-70" />
             Exportar
           </Button>
 
-          <Button
-            className="rounded-xl"
-            onClick={() => navigate("/responsaveis/novo")}
-          >
-            <Plus className="size-4 mr-2" />
-            Novo responsável
+          <Button asChild size="sm" className="h-9 rounded-lg text-xs">
+            <button onClick={() => navigate("/responsaveis/novo")}>
+              <Plus className="size-3.5 mr-1.5" />
+              Novo responsável
+            </button>
           </Button>
         </div>
-      </header>
+      </div>
 
-      <SectionCard
-        title="Filtros"
-        description="Pesquisa por nome, CPF, telefone ou e-mail"
-        action={
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={limpar}
-            className="rounded-lg text-muted-foreground hover:text-foreground"
-          >
-            Limpar
-          </Button>
-        }
-      >
-        <div className="relative">
-          <Search className="absolute left-3 top-3 size-4 text-muted-foreground" />
+      {/* Barra de Filtros e Busca */}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-2.5">
+        <div className="relative w-full sm:max-w-xs">
+          <Search className="absolute left-3 top-2.5 size-3.5 text-muted-foreground/70" />
           <Input
-            placeholder="Buscar responsável..."
+            placeholder="Buscar por nome, CPF, telefone..."
             value={busca}
             onChange={(e) => {
               setBusca(e.target.value);
               setPagina(1);
             }}
-            className="rounded-xl pl-9"
+            className="pl-9 h-9 text-xs rounded-lg bg-background/50 border-border/60"
           />
         </div>
-      </SectionCard>
 
-      <SectionCard
-        title="Responsáveis cadastrados"
-        description="Lista de responsáveis financeiros e contatos autorizados"
-        bodyClassName="p-0"
-        action={
+        <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setOrdem(ordem === "nome" ? "id" : "nome")}
-            className="rounded-lg text-muted-foreground hover:text-foreground"
+            className="h-9 px-2.5 text-xs text-muted-foreground hover:text-foreground"
           >
-            <ArrowUpDown className="size-4 mr-2" />
+            <ArrowUpDown className="size-3.5 mr-1.5 opacity-70" />
             Ordenar por {ordem === "nome" ? "Nome" : "ID"}
           </Button>
-        }
-      >
+
+          {(busca || pagina > 1) && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={limpar}
+              className="h-9 px-2.5 text-xs text-muted-foreground hover:text-foreground"
+            >
+              Limpar
+            </Button>
+          )}
+        </div>
+      </div>
+
+      {/* Tabela Minimalista */}
+      <div className="rounded-xl border border-border/60 bg-card/50 overflow-hidden shadow-2xs">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-border/40 bg-muted/20">
+          <span className="text-xs font-medium text-muted-foreground">
+            Listagem principal
+          </span>
+        </div>
+
         {visiveis.length === 0 ? (
-          <div className="p-8">
-            <EmptyState
-              icon={Users}
-              title="Nenhum responsável encontrado"
-              description="Cadastre um responsável ou ajuste os filtros aplicados."
-              action={
-                <Button variant="outline" onClick={limpar} className="rounded-xl">
-                  <SlidersHorizontal className="size-4 mr-2" />
-                  Limpar filtros
-                </Button>
-              }
-            />
+          <div className="p-12 text-center text-xs text-muted-foreground">
+            Nenhum responsável encontrado.
           </div>
         ) : (
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead className="pl-6">Nome</TableHead>
-                  <TableHead>CPF</TableHead>
-                  <TableHead>Telefone</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Endereço</TableHead>
-                  <TableHead className="w-16 pr-6 text-right">Ações</TableHead>
+                <TableRow className="border-border/40 hover:bg-transparent">
+                  <TableHead className="pl-4 text-xs font-medium text-muted-foreground">Nome</TableHead>
+                  <TableHead className="text-xs font-medium text-muted-foreground">CPF</TableHead>
+                  <TableHead className="text-xs font-medium text-muted-foreground">Telefone</TableHead>
+                  <TableHead className="text-xs font-medium text-muted-foreground">Email</TableHead>
+                  <TableHead className="text-xs font-medium text-muted-foreground">Endereço</TableHead>
+                  <TableHead className="w-12 pr-4 text-right"></TableHead>
                 </TableRow>
               </TableHeader>
 
               <TableBody>
                 {visiveis.map((responsavel) => (
-                  <TableRow key={responsavel.id}>
-                    <TableCell className="pl-6 font-medium text-foreground">
+                  <TableRow key={responsavel.id} className="border-border/40 transition-colors group">
+                    <TableCell className="pl-4 py-3 font-medium text-xs text-foreground">
                       {responsavel.nome}
                     </TableCell>
 
-                    <TableCell className="text-muted-foreground">
+                    <TableCell className="py-3 text-xs text-muted-foreground/80 font-mono">
                       {responsavel.cpf ?? "—"}
                     </TableCell>
 
-                    <TableCell className="text-muted-foreground">
+                    <TableCell className="py-3 text-xs text-muted-foreground/80 font-mono">
                       {responsavel.telefone ?? "—"}
                     </TableCell>
 
-                    <TableCell className="text-muted-foreground">
+                    <TableCell className="py-3 text-xs text-muted-foreground/80">
                       {responsavel.email ?? "—"}
                     </TableCell>
 
-                    <TableCell className="text-muted-foreground max-w-xs truncate">
+                    <TableCell className="py-3 text-xs text-muted-foreground/80 max-w-xs truncate">
                       {responsavel.endereco ?? "—"}
                     </TableCell>
 
-                    <TableCell className="pr-6 text-right">
+                    <TableCell className="pr-4 py-3 text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="rounded-lg text-muted-foreground hover:text-foreground"
+                            className="size-7 rounded-md text-muted-foreground hover:text-foreground"
                           >
-                            <MoreHorizontal className="size-4" />
+                            <MoreHorizontal className="size-3.5" />
                           </Button>
                         </DropdownMenuTrigger>
 
-                        <DropdownMenuContent align="end" className="rounded-xl">
+                        <DropdownMenuContent align="end" className="rounded-xl text-xs">
                           <DropdownMenuItem
                             onClick={() =>
                               navigate(`/responsaveis/${responsavel.id}`)
                             }
-                            className="rounded-lg cursor-pointer"
+                            className="rounded-md cursor-pointer"
                           >
                             Visualizar
                           </DropdownMenuItem>
@@ -256,13 +248,13 @@ export default function Responsaveis() {
                                 `/responsaveis/${responsavel.id}/editar`
                               )
                             }
-                            className="rounded-lg cursor-pointer"
+                            className="rounded-md cursor-pointer"
                           >
                             Editar
                           </DropdownMenuItem>
 
                           <DropdownMenuItem
-                            className="rounded-lg text-destructive focus:text-destructive cursor-pointer"
+                            className="rounded-md text-destructive focus:text-destructive cursor-pointer"
                             onClick={() => excluirResponsavel(responsavel.id)}
                           >
                             Excluir
@@ -276,7 +268,36 @@ export default function Responsaveis() {
             </Table>
           </div>
         )}
-      </SectionCard>
+      </div>
+
+      {/* Paginação Simples */}
+      {totalPaginas > 1 && (
+        <div className="flex items-center justify-between px-2 pt-2 text-xs text-muted-foreground">
+          <span>
+            Página {paginaAtual} de {totalPaginas}
+          </span>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 rounded-lg text-xs"
+              onClick={() => setPagina((p) => Math.max(1, p - 1))}
+              disabled={paginaAtual === 1}
+            >
+              Anterior
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 rounded-lg text-xs"
+              onClick={() => setPagina((p) => Math.min(totalPaginas, p + 1))}
+              disabled={paginaAtual === totalPaginas}
+            >
+              Próxima
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

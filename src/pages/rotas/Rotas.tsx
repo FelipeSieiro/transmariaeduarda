@@ -1,6 +1,6 @@
 // src/pages/RotasPage.tsx
 import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 import {
   ArrowUpDown,
@@ -10,12 +10,11 @@ import {
   MoreHorizontal,
   Plus,
   Search,
-  SlidersHorizontal,
 } from "lucide-react";
 
 import { toast } from "sonner";
 
-import { EmptyState, SectionCard, StatusPill } from "@/components/ui-kit/primitives";
+import { EmptyState, StatusPill } from "@/components/ui-kit/primitives";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -51,7 +50,6 @@ const TODOS = "__todos__";
 
 export default function RotasPage() {
   const [rotas, setRotas] = useState<Rota[]>([]);
-  const navigate = useNavigate();
   const [busca, setBusca] = useState("");
   const [status, setStatus] = useState(TODOS);
   const [ordem, setOrdem] = useState<"nome" | "id">("nome");
@@ -121,104 +119,102 @@ export default function RotasPage() {
   }
 
   return (
-    <div className="mx-auto max-w-[1600px] space-y-6">
-      <header className="flex flex-wrap items-center justify-between gap-4">
-        <div className="space-y-1">
-          <h1 className="font-display flex items-center gap-2.5 text-3xl font-semibold tracking-tight text-foreground">
-            <Bus className="size-7 text-primary" />
-            Gestão de Rotas
+    <div className="mx-auto max-w-6xl space-y-8 py-2">
+      {/* Header Minimalista */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border/40 pb-6">
+        <div>
+          <h1 className="text-xl font-semibold tracking-tight text-foreground">
+            Rotas
           </h1>
-          <p className="text-sm text-muted-foreground">
-            {filtrados.length} de {rotas.length} rotas cadastradas
+          <p className="text-xs text-muted-foreground mt-0.5">
+            {filtrados.length} {filtrados.length === 1 ? "rota cadastrada" : "rotas cadastradas"}
           </p>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2">
           <Button
             variant="outline"
-            className="rounded-xl"
+            size="sm"
+            className="h-9 rounded-lg text-xs"
             onClick={() => toast.success("Exportação iniciada")}
           >
-            <Download className="size-4 mr-2" />
+            <Download className="size-3.5 mr-1.5 opacity-70" />
             Exportar
           </Button>
 
-          <Button asChild className="rounded-xl">
+          <Button asChild size="sm" className="h-9 rounded-lg text-xs">
             <Link to="/rotas/nova">
-              <Plus className="size-4 mr-2" />
+              <Plus className="size-3.5 mr-1.5" />
               Nova rota
             </Link>
           </Button>
         </div>
-      </header>
+      </div>
 
-      <SectionCard
-        title="Filtros"
-        description="Pesquisa por nome, descrição ou bairro"
-        action={
+      {/* Filtros Limpos */}
+      <div className="flex flex-col sm:flex-row items-center gap-3">
+        <div className="relative w-full sm:max-w-xs">
+          <Search className="absolute left-3 top-2.5 size-3.5 text-muted-foreground/70" />
+          <Input
+            value={busca}
+            onChange={(e) => {
+              setBusca(e.target.value);
+              setPagina(1);
+            }}
+            placeholder="Buscar por nome ou bairro..."
+            className="pl-9 h-9 text-xs rounded-lg bg-background/50 border-border/60"
+          />
+        </div>
+
+        <Select value={status} onValueChange={setStatus}>
+          <SelectTrigger className="w-full sm:w-[150px] h-9 text-xs rounded-lg bg-background/50 border-border/60">
+            <SelectValue placeholder="Status" />
+          </SelectTrigger>
+          <SelectContent className="rounded-xl text-xs">
+            <SelectItem value={TODOS}>Todos os status</SelectItem>
+            <SelectItem value="ativa">Ativa</SelectItem>
+            <SelectItem value="inativa">Inativa</SelectItem>
+          </SelectContent>
+        </Select>
+
+        {(busca || status !== TODOS) && (
           <Button
             variant="ghost"
             size="sm"
             onClick={limpar}
-            className="rounded-lg text-muted-foreground hover:text-foreground"
+            className="h-9 px-2.5 text-xs text-muted-foreground hover:text-foreground ml-auto"
           >
-            <Filter className="size-4 mr-2" />
-            Limpar
+            <Filter className="size-3.5 mr-1.5" />
+            Limpar filtros
           </Button>
-        }
-      >
-        <div className="grid gap-3 md:grid-cols-2">
-          <div className="relative">
-            <Search className="absolute left-3 top-3 size-4 text-muted-foreground" />
-            <Input
-              value={busca}
-              onChange={(e) => {
-                setBusca(e.target.value);
-                setPagina(1);
-              }}
-              placeholder="Buscar rota..."
-              className="pl-9 rounded-xl h-10"
-            />
-          </div>
+        )}
+      </div>
 
-          <Select value={status} onValueChange={setStatus}>
-            <SelectTrigger className="rounded-xl h-10">
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
-            <SelectContent className="rounded-xl">
-              <SelectItem value={TODOS}>Todos os status</SelectItem>
-              <SelectItem value="ativa">Ativa</SelectItem>
-              <SelectItem value="inativa">Inativa</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </SectionCard>
-
-      <SectionCard
-        title="Lista de rotas"
-        description="Rotas de transporte escolar cadastradas no sistema"
-        bodyClassName="p-0"
-        action={
+      {/* Tabela Minimalista */}
+      <div className="rounded-xl border border-border/60 bg-card/50 overflow-hidden shadow-2xs">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-border/40 bg-muted/20">
+          <span className="text-xs font-medium text-muted-foreground">
+            Listagem principal
+          </span>
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setOrdem(ordem === "nome" ? "id" : "nome")}
-            className="rounded-lg text-muted-foreground hover:text-foreground"
+            className="h-7 px-2 text-[11px] text-muted-foreground hover:text-foreground"
           >
-            <ArrowUpDown className="size-4 mr-2" />
-            Ordenar por {ordem === "nome" ? "Nome" : "ID"}
+            <ArrowUpDown className="size-3 mr-1.5 opacity-70" />
+            Ordenar por: <span className="font-medium text-foreground ml-1">{ordem === "nome" ? "Nome" : "ID"}</span>
           </Button>
-        }
-      >
+        </div>
+
         {visiveis.length === 0 ? (
-          <div className="p-8">
+          <div className="p-12">
             <EmptyState
               icon={Bus}
               title="Nenhuma rota encontrada"
-              description="Cadastre uma rota ou ajuste os filtros aplicados."
+              description="Ajuste os filtros ou cadastre uma nova rota."
               action={
-                <Button variant="outline" onClick={limpar} className="rounded-xl">
-                  <SlidersHorizontal className="size-4 mr-2" />
+                <Button variant="outline" size="sm" onClick={limpar} className="rounded-lg text-xs h-8">
                   Limpar filtros
                 </Button>
               }
@@ -228,62 +224,55 @@ export default function RotasPage() {
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead className="pl-6">Nome</TableHead>
-                  <TableHead>Descrição</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="w-16 pr-6 text-right">Ações</TableHead>
+                <TableRow className="border-border/40 hover:bg-transparent">
+                  <TableHead className="pl-4 text-xs font-medium text-muted-foreground">Nome</TableHead>
+                  <TableHead className="text-xs font-medium text-muted-foreground">Descrição</TableHead>
+                  <TableHead className="text-xs font-medium text-muted-foreground">Status</TableHead>
+                  <TableHead className="w-12 pr-4 text-right"></TableHead>
                 </TableRow>
               </TableHeader>
 
               <TableBody>
                 {visiveis.map((rota) => (
-                  <TableRow key={rota.id}>
-                    <TableCell className="pl-6">
+                  <TableRow key={rota.id} className="border-border/40 transition-colors group">
+                    <TableCell className="pl-4 py-3">
                       <Link
                         to={`/rotas/${rota.id}`}
-                        className="flex items-center gap-3 group"
+                        className="font-medium text-xs text-foreground hover:underline inline-block"
                       >
-                        <div className="flex size-9 items-center justify-center rounded-xl bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary transition-colors">
-                          <Bus className="size-4" />
-                        </div>
-                        <div>
-                          <p className="font-medium text-foreground group-hover:underline">
-                            {rota.nome}
-                          </p>
-                        </div>
+                        {rota.nome}
                       </Link>
                     </TableCell>
 
-                    <TableCell className="text-muted-foreground max-w-md truncate">
+                    <TableCell className="text-xs text-muted-foreground/80 max-w-sm truncate py-3">
                       {rota.descricao || "—"}
                     </TableCell>
 
-                    <TableCell>
+                    <TableCell className="py-3">
                       <StatusPill status={rota.status ? rota.status.toLowerCase() : "ativa"} />
                     </TableCell>
 
-                    <TableCell className="pr-6 text-right">
+                    <TableCell className="pr-4 py-3 text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="rounded-lg text-muted-foreground hover:text-foreground"
+                            className="size-7 rounded-md text-muted-foreground hover:text-foreground"
                           >
-                            <MoreHorizontal className="size-4" />
+                            <MoreHorizontal className="size-3.5" />
                           </Button>
                         </DropdownMenuTrigger>
 
-                        <DropdownMenuContent align="end" className="rounded-xl">
-                          <DropdownMenuItem asChild className="rounded-lg cursor-pointer">
+                        <DropdownMenuContent align="end" className="rounded-xl text-xs">
+                          <DropdownMenuItem asChild className="rounded-md cursor-pointer">
                             <Link to={`/rotas/${rota.id}`}>Visualizar</Link>
                           </DropdownMenuItem>
-                          <DropdownMenuItem asChild className="rounded-lg cursor-pointer">
+                          <DropdownMenuItem asChild className="rounded-md cursor-pointer">
                             <Link to={`/rotas/${rota.id}/editar`}>Editar</Link>
                           </DropdownMenuItem>
                           <DropdownMenuItem
-                            className="rounded-lg text-destructive focus:text-destructive cursor-pointer"
+                            className="rounded-md text-destructive focus:text-destructive cursor-pointer"
                             onClick={() => excluirRota(rota.id)}
                           >
                             Excluir
@@ -297,7 +286,7 @@ export default function RotasPage() {
             </Table>
           </div>
         )}
-      </SectionCard>
+      </div>
     </div>
   );
 }
