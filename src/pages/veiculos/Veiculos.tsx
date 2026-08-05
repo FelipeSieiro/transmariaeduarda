@@ -10,6 +10,9 @@ import {
   Plus,
   Search,
   SlidersHorizontal,
+  Wrench,
+  CheckCircle2,
+  Users2,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -80,6 +83,16 @@ export default function Veiculos() {
     }
   }
 
+  // Métricas rápidas da frota
+  const metricas = useMemo(() => {
+    const total = veiculos.length;
+    const ativos = veiculos.filter((v) => (v.status || "").toLowerCase() === "ativo").length;
+    const manutencao = veiculos.filter((v) => (v.status || "").toLowerCase() === "manutencao" || (v.status || "").toLowerCase() === "em manutenção").length;
+    const capacidadeTotal = veiculos.reduce((acc, v) => acc + (Number(v.capacidade) || 0), 0);
+
+    return { total, ativos, manutencao, capacidadeTotal };
+  }, [veiculos]);
+
   const filtrados = useMemo(() => {
     const q = busca.toLowerCase().trim();
 
@@ -116,40 +129,86 @@ export default function Veiculos() {
 
   return (
     <div className="mx-auto max-w-[1600px] space-y-6">
+      
+      {/* Header Limpo */}
       <header className="flex flex-wrap items-center justify-between gap-4">
         <div className="space-y-1">
           <h1 className="font-display flex items-center gap-2.5 text-3xl font-semibold tracking-tight text-foreground">
             <Bus className="size-7 text-primary" />
-            Veículos
+            Veículos & Frota
           </h1>
           <p className="text-sm text-muted-foreground">
-            {filtrados.length} de {veiculos.length} veículos cadastrados
+            Gerenciamento geral da frota de transporte escolar
           </p>
         </div>
 
         <div className="flex gap-2">
           <Button
             variant="outline"
-            className="rounded-xl"
+            className="rounded-xl gap-2 h-10"
             onClick={() => toast.success("Exportação iniciada")}
           >
-            <Download className="size-4 mr-2" />
+            <Download className="size-4" />
             Exportar
           </Button>
 
           <Button
-            className="rounded-xl"
+            className="rounded-xl gap-2 h-10 font-semibold shadow-md shadow-primary/20"
             onClick={() => navigate("/veiculos/novo")}
           >
-            <Plus className="size-4 mr-2" />
+            <Plus className="size-4" />
             Novo veículo
           </Button>
         </div>
       </header>
 
+      {/* Cards de Resumo da Frota (Indicadores de Veículos) */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="bg-card border border-border/60 rounded-2xl p-4 flex items-center gap-4 shadow-2xs">
+          <div className="size-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+            <Bus className="size-6" />
+          </div>
+          <div>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Total na Frota</p>
+            <p className="text-2xl font-black text-foreground mt-0.5">{metricas.total}</p>
+          </div>
+        </div>
+
+        <div className="bg-card border border-border/60 rounded-2xl p-4 flex items-center gap-4 shadow-2xs">
+          <div className="size-12 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">
+            <CheckCircle2 className="size-6" />
+          </div>
+          <div>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Veículos Ativos</p>
+            <p className="text-2xl font-black text-foreground mt-0.5">{metricas.ativos}</p>
+          </div>
+        </div>
+
+        <div className="bg-card border border-border/60 rounded-2xl p-4 flex items-center gap-4 shadow-2xs">
+          <div className="size-12 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
+            <Wrench className="size-6" />
+          </div>
+          <div>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Em Manutenção</p>
+            <p className="text-2xl font-black text-foreground mt-0.5">{metricas.manutencao}</p>
+          </div>
+        </div>
+
+        <div className="bg-card border border-border/60 rounded-2xl p-4 flex items-center gap-4 shadow-2xs">
+          <div className="size-12 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0">
+            <Users2 className="size-6" />
+          </div>
+          <div>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Capacidade Total</p>
+            <p className="text-2xl font-black text-foreground mt-0.5">{metricas.capacidadeTotal} <span className="text-xs font-normal text-muted-foreground">lugares</span></p>
+          </div>
+        </div>
+      </div>
+
+      {/* Filtros */}
       <SectionCard
         title="Filtros"
-        description="Pesquisa por modelo, placa ou marca"
+        description="Pesquisa rápida por modelo, placa ou marca"
         action={
           <Button
             variant="ghost"
@@ -190,9 +249,10 @@ export default function Veiculos() {
         </div>
       </SectionCard>
 
+      {/* Lista de veículos */}
       <SectionCard
         title="Lista de veículos"
-        description="Frota de veículos cadastrada no sistema"
+        description="Frota cadastrada no sistema"
         bodyClassName="p-0"
         action={
           <Button

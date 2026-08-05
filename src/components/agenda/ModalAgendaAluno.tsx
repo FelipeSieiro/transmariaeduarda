@@ -1,6 +1,7 @@
 // src/components/alunos/ModalAgendaAluno.tsx
+
 import { useEffect, useState } from "react";
-import { X, Save, Plus, Trash2, Clock, Bus } from "lucide-react";
+import { X, Save, Plus, Trash2, Clock, Bus, Sparkles, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -127,30 +128,40 @@ export function ModalAgendaAluno({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-slate-900 border border-slate-800 w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-        {/* Header */}
-        <div className="flex flex-col gap-4 p-5 border-b border-slate-800 bg-slate-900/50 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h2 className="text-lg font-bold text-slate-100">Grade Semanal de Transporte</h2>
-            <p className="text-xs text-slate-400">
-              Aluno: <span className="text-blue-400 font-medium">{alunoNome}</span>
+    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
+      <div className="bg-card border border-border/80 w-full max-w-4xl rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+        
+        {/* Header Modernizado */}
+        <div className="flex flex-col gap-2 p-6 border-b border-border/60 bg-muted/30 sm:flex-row sm:items-center sm:justify-between">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <CalendarDays className="size-4" />
+              </span>
+              <h2 className="text-xl font-bold tracking-tight text-foreground">Grade Semanal de Transporte</h2>
+            </div>
+            <p className="text-xs text-muted-foreground pl-10">
+              Configurando rotas e horários para: <span className="font-semibold text-foreground">{alunoNome}</span>
             </p>
           </div>
+
           <Button
             variant="ghost"
             size="icon"
             onClick={onClose}
-            className="text-slate-400 hover:text-white rounded-lg"
+            className="rounded-xl h-10 w-10 text-muted-foreground hover:text-foreground hover:bg-muted"
           >
-            <X className="w-5 h-5" />
+            <X className="size-5" />
           </Button>
         </div>
 
         {/* Body */}
-        <div className="p-6 overflow-y-auto space-y-6 flex-1">
+        <div className="p-6 overflow-y-auto space-y-4 flex-1">
           {loading ? (
-            <div className="text-center py-8 text-slate-400">Carregando horários...</div>
+            <div className="flex flex-col items-center justify-center py-16 gap-3 text-muted-foreground">
+              <Loader2 className="size-6 animate-spin text-primary" />
+              <p className="text-sm font-medium">Carregando grade de horários...</p>
+            </div>
           ) : (
             DIAS_SEMANA_MODAL.map((dia) => {
               const agendamentosDia = agendamentos
@@ -158,67 +169,68 @@ export function ModalAgendaAluno({
                 .filter((item) => item.dia_semana === dia.id);
 
               return (
-                <div key={dia.id} className="bg-slate-800/40 border border-slate-800 rounded-xl p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="font-semibold text-slate-200 text-sm flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full bg-blue-500" />
+                <div key={dia.id} className="bg-muted/20 border border-border/60 rounded-2xl p-5 transition-all hover:bg-muted/40">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-bold text-foreground text-sm flex items-center gap-2.5">
+                      <span className="size-2.5 rounded-full bg-primary shadow-sm shadow-primary/50" />
                       {dia.label}
                     </h3>
+                    
                     <div className="flex flex-wrap gap-2">
                       <Button
                         type="button"
                         variant="outline"
                         size="sm"
                         onClick={() => handleAddHorario(dia.id, "ida")}
-                        className="text-xs bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20"
+                        className="h-8 text-xs font-semibold bg-emerald-500/10 text-emerald-500 border-emerald-500/20 hover:bg-emerald-500/20 rounded-xl"
                       >
-                        <Plus className="w-3 h-3 mr-1" /> + Ida (Entrada)
+                        <Plus className="size-3.5 mr-1" /> Ida (Entrada)
                       </Button>
                       <Button
                         type="button"
                         variant="outline"
                         size="sm"
                         onClick={() => handleAddHorario(dia.id, "volta")}
-                        className="text-xs bg-amber-500/10 text-amber-400 border-amber-500/20 hover:bg-amber-500/20"
+                        className="h-8 text-xs font-semibold bg-amber-500/10 text-amber-500 border-amber-500/20 hover:bg-amber-500/20 rounded-xl"
                       >
-                        <Plus className="w-3 h-3 mr-1" /> + Volta (Saída)
+                        <Plus className="size-3.5 mr-1" /> Volta (Saída)
                       </Button>
                     </div>
                   </div>
 
                   {agendamentosDia.length === 0 ? (
-                    <p className="text-xs text-slate-500 italic">
-                      Nenhum transporte configurado para este dia.
+                    <p className="text-xs text-muted-foreground/70 italic py-2">
+                      Nenhum transporte configurado para este dia da semana.
                     </p>
                   ) : (
-                    <div className="space-y-2">
+                    <div className="space-y-2.5">
                       {agendamentosDia.map((item) => (
                         <div
                           key={item.originalIndex}
-                          className="flex items-center gap-3 bg-slate-900/60 p-2.5 rounded-lg border border-slate-800"
+                          className="flex flex-col sm:flex-row items-center gap-3 bg-card p-3 rounded-xl border border-border/80 shadow-xs"
                         >
                           <span
-                            className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded ${
+                            className={`text-[10px] uppercase font-bold px-2.5 py-1 rounded-lg w-full sm:w-auto text-center ${
                               item.tipo_trajeto === "ida" || item.tipo_trajeto === "ENTRADA"
-                                ? "bg-emerald-500/20 text-emerald-400"
-                                : "bg-amber-500/20 text-amber-400"
+                                ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
+                                : "bg-amber-500/15 text-amber-600 dark:text-amber-400"
                             }`}
                           >
                             {item.tipo_trajeto}
                           </span>
 
-                          <div className="flex-1 flex items-center gap-1.5">
-                            <Bus className="w-3.5 h-3.5 text-slate-400" />
+                          <div className="flex-1 w-full flex items-center gap-2">
+                            <Bus className="size-4 text-muted-foreground shrink-0" />
                             <Select
                               value={item.rota_id}
                               onValueChange={(val) =>
                                 handleUpdateItem(item.originalIndex, "rota_id", val)
                               }
                             >
-                              <SelectTrigger className="h-8 bg-slate-800 border-slate-700 text-xs text-slate-200">
+                              <SelectTrigger className="h-10 bg-muted/40 border-border/80 text-xs rounded-xl">
                                 <SelectValue placeholder="Selecione a rota" />
                               </SelectTrigger>
-                              <SelectContent className="bg-slate-800 border-slate-700 text-slate-200">
+                              <SelectContent className="rounded-xl border-border/80 bg-card">
                                 {rotasDisponiveis.map((r) => (
                                   <SelectItem key={r.id} value={r.id}>
                                     {r.nome}
@@ -228,15 +240,15 @@ export function ModalAgendaAluno({
                             </Select>
                           </div>
 
-                          <div className="flex w-full max-w-[9rem] items-center gap-1.5">
-                            <Clock className="w-3.5 h-3.5 text-slate-400" />
+                          <div className="flex w-full sm:w-36 items-center gap-2">
+                            <Clock className="size-4 text-muted-foreground shrink-0" />
                             <Input
                               type="time"
                               value={item.horario || ""}
                               onChange={(e) =>
                                 handleUpdateItem(item.originalIndex, "horario", e.target.value)
                               }
-                              className="h-8 w-full w-full bg-slate-800 border-slate-700 text-xs text-slate-200"
+                              className="h-10 w-full bg-muted/40 border-border/80 text-xs rounded-xl"
                             />
                           </div>
 
@@ -245,9 +257,9 @@ export function ModalAgendaAluno({
                             variant="ghost"
                             size="icon"
                             onClick={() => handleRemoveItem(item.originalIndex)}
-                            className="text-slate-500 hover:text-red-400 transition-colors h-8 w-8"
+                            className="text-muted-foreground hover:text-red-500 hover:bg-red-500/10 transition-colors h-10 w-10 rounded-xl shrink-0 self-end sm:self-center"
                           >
-                            <Trash2 className="w-4 h-4" />
+                            <Trash2 className="size-4" />
                           </Button>
                         </div>
                       ))}
@@ -259,18 +271,27 @@ export function ModalAgendaAluno({
           )}
         </div>
 
-        {/* Footer */}
-        <div className="p-4 border-t border-slate-800 bg-slate-900/50 flex justify-end gap-3">
-          <Button variant="outline" onClick={onClose} className="rounded-xl">
+        {/* Footer Moderno */}
+        <div className="p-5 border-t border-border/60 bg-muted/30 flex items-center justify-end gap-3">
+          <Button variant="outline" onClick={onClose} className="rounded-xl h-11 px-6 font-semibold border-border/80">
             Cancelar
           </Button>
           <Button
             onClick={handleSave}
             disabled={saving}
-            className="bg-blue-600 hover:bg-blue-500 text-white rounded-xl shadow-lg shadow-blue-500/20"
+            className="rounded-xl h-11 px-6 font-bold shadow-lg shadow-primary/25"
           >
-            <Save className="w-4 h-4 mr-2" />
-            {saving ? "Salvando..." : "Salvar Horários"}
+            {saving ? (
+              <>
+                <Loader2 className="size-4 animate-spin mr-2" />
+                Salvando...
+              </>
+            ) : (
+              <>
+                <Save className="size-4 mr-2" />
+                Salvar Grade
+              </>
+            )}
           </Button>
         </div>
       </div>

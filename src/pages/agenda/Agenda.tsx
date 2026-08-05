@@ -1,4 +1,5 @@
 // src/pages/AgendaPorRotas.tsx
+
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -22,15 +23,13 @@ import {
   Download,
   Filter,
   MapPin,
-  MoreHorizontal,
   Search,
-  SlidersHorizontal,
   Users,
+  Loader2,
 } from "lucide-react";
 
 import { toast } from "sonner";
 
-import { EmptyState, SectionCard, StatusPill } from "@/components/ui-kit/primitives";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -42,12 +41,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
 import { listarAlunos, obterAgendamentosRotasDoAluno } from "@/services/alunos.service";
 import { listarRotas } from "@/services/rotas.service";
@@ -72,22 +65,18 @@ function obterNomeEscola(aluno: Aluno): string {
 export default function AgendaPorRotas() {
   const navigate = useNavigate();
 
-  // Estados de dados
   const [alunos, setAlunos] = useState<readonly Aluno[]>([]);
   const [rotas, setRotas] = useState<readonly Rota[]>([]);
   const [agendamentos, setAgendamentos] = useState<readonly AgendamentoRota[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Estados de controle e filtros
   const [busca, setBusca] = useState("");
   const [rotaFiltro, setRotaFiltro] = useState(TODOS);
   const [turnoFiltro, setTurnoFiltro] = useState(TODOS);
   
-  // Controle de data de referência da semana e do dia em destaque
   const [dataAtual, setDataAtual] = useState<Date>(new Date());
   const [diaSelecionado, setDiaSelecionado] = useState<Date>(new Date());
 
-  // Controle de datas da semana útil (Segunda a Sábado)
   const inicioDaSemana = startOfWeek(dataAtual, { weekStartsOn: 1 });
   const diasDaSemana = Array.from({ length: 6 }).map((_, index) =>
     addDays(inicioDaSemana, index)
@@ -106,7 +95,6 @@ export default function AgendaPorRotas() {
         setAlunos(alunosLista);
         setRotas(dadosRotas || []);
 
-        // Busca os agendamentos de todos os alunos em paralelo
         const chamadasAgendamentos = alunosLista.map((aluno) =>
           obterAgendamentosRotasDoAluno(aluno.id).catch(() => [])
         );
@@ -125,7 +113,6 @@ export default function AgendaPorRotas() {
     carregar();
   }, []);
 
-  // Navegação semanal
   const semanaAnterior = () => {
     const novaData = subWeeks(dataAtual, 1);
     setDataAtual(novaData);
@@ -150,22 +137,18 @@ export default function AgendaPorRotas() {
     setTurnoFiltro(TODOS);
   }
 
-  // Mapa de acesso rápido a dados do aluno por ID
   const alunosMap = useMemo(() => {
     const map = new Map<string, Aluno>();
     alunos.forEach((a) => map.set(a.id, a));
     return map;
   }, [alunos]);
 
-  // Set com os IDs dos alunos que possuem qualquer agendamento cadastrado
   const alunosComAgendamento = useMemo(() => {
     return new Set(agendamentos.map((ag) => ag.aluno_id));
   }, [agendamentos]);
 
-  // Índice numérico do dia da semana selecionado (0=Dom, 1=Seg, ..., 6=Sáb)
   const diaSemanaSelecionadoIndex = getDay(diaSelecionado);
 
-  // Processa rotas e alunos alocados no dia da semana atualmente selecionado
   const rotasDoDiaSelecionado = useMemo(() => {
     const q = busca.toLowerCase().trim();
 
@@ -177,7 +160,6 @@ export default function AgendaPorRotas() {
       .map((rota) => {
         const alunosDoDia: Aluno[] = [];
 
-        // 1. Processa agendamentos explícitos da rota para o dia selecionado
         agendamentos.forEach((ag) => {
           if (ag.rota_id !== rota.id) return;
           if (ag.dia_semana !== diaSemanaSelecionadoIndex) return;
@@ -199,8 +181,6 @@ export default function AgendaPorRotas() {
           }
         });
 
-        // 2. Fallback: Se o aluno NÃO tem nenhum agendamento cadastrado no sistema,
-        // mas a rota_id do cadastro do aluno corresponde a esta rota (apenas dias úteis 1-5)
         if (diaSemanaSelecionadoIndex >= 1 && diaSemanaSelecionadoIndex <= 5) {
           alunos.forEach((aluno) => {
             const temQualquerAgendamento = alunosComAgendamento.has(aluno.id);
@@ -247,15 +227,16 @@ export default function AgendaPorRotas() {
   ]);
 
   return (
-    <div className="mx-auto max-w-[1600px] space-y-6">
-      {/* Header principal */}
-      <header className="flex flex-wrap items-center justify-between gap-4">
+    <div className="mx-auto max-w-7xl space-y-6 pb-12">
+      
+      {/* Header Limpo */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-border/40 pb-5">
         <div>
-          <h1 className="font-display text-3xl font-semibold tracking-tight text-foreground">
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">
             Agenda por Rota
           </h1>
-          <p className="text-sm text-muted-foreground mt-0.5">
-            Escalonamento de transporte semanal •{" "}
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Escala diária de passageiros •{" "}
             <span className="font-medium text-foreground">
               {format(inicioDaSemana, "dd 'de' MMMM", { locale: ptBR })}
             </span>
@@ -265,36 +246,37 @@ export default function AgendaPorRotas() {
         <div className="flex items-center gap-2">
           <Button
             variant="outline"
-            className="rounded-xl gap-2"
-            onClick={() => toast.success("Exportação da agenda iniciada")}
+            size="sm"
+            className="rounded-lg h-9 gap-1.5 text-xs font-medium"
+            onClick={() => toast.success("Exportação iniciada")}
           >
-            <Download className="size-4" />
-            <span>Exportar</span>
+            <Download className="size-3.5" />
+            Exportar
           </Button>
 
-          {/* Navegador de Semanas */}
-          <div className="flex items-center gap-1 border-l border-border pl-2">
+          <div className="flex items-center gap-1 bg-muted/30 p-0.5 rounded-lg border border-border/40">
             <Button
-              variant="outline"
+              variant="ghost"
               size="icon"
-              className="rounded-xl size-9"
+              className="rounded-md size-8"
               onClick={semanaAnterior}
               title="Semana anterior"
             >
               <ChevronLeft className="size-4" />
             </Button>
             <Button
-              variant="outline"
-              className="rounded-xl h-9 px-3 text-xs"
+              variant="ghost"
+              size="sm"
+              className="rounded-md h-8 px-2.5 text-xs font-semibold"
               onClick={irParaHoje}
             >
-              <CalendarIcon className="size-3.5 mr-1.5 text-muted-foreground" />
+              <CalendarIcon className="size-3 mr-1 text-primary" />
               Hoje
             </Button>
             <Button
-              variant="outline"
+              variant="ghost"
               size="icon"
-              className="rounded-xl size-9"
+              className="rounded-md size-8"
               onClick={proximaSemana}
               title="Próxima semana"
             >
@@ -302,10 +284,10 @@ export default function AgendaPorRotas() {
             </Button>
           </div>
         </div>
-      </header>
+      </div>
 
-      {/* Seletor de Dias da Semana */}
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-6">
+      {/* Seletor de Dias da Semana Minimalista (Abas limpas) */}
+      <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3 lg:grid-cols-6 bg-muted/20 p-1.5 rounded-xl border border-border/40">
         {diasDaSemana.map((dia) => {
           const ehHoje = isSameDay(dia, new Date());
           const ehSelecionado = isSameDay(dia, diaSelecionado);
@@ -315,183 +297,107 @@ export default function AgendaPorRotas() {
               key={dia.toISOString()}
               type="button"
               onClick={() => setDiaSelecionado(dia)}
-              className={`flex flex-col items-start justify-between rounded-xl border p-3.5 transition-all text-left cursor-pointer ${
+              className={`flex items-center justify-between sm:flex-col sm:items-start p-2.5 rounded-lg transition-all text-left cursor-pointer ${
                 ehSelecionado
-                  ? "border-primary bg-primary text-primary-foreground shadow-md ring-2 ring-primary/25"
+                  ? "bg-primary text-primary-foreground shadow-xs font-semibold"
                   : ehHoje
-                  ? "border-primary/50 bg-primary/5 hover:bg-primary/10"
-                  : "bg-card border-border hover:bg-accent/50 hover:border-border"
+                  ? "bg-muted hover:bg-muted/80 text-foreground font-medium"
+                  : "hover:bg-muted/50 text-muted-foreground"
               }`}
             >
-              <div className="flex w-full items-center justify-between">
-                <span
-                  className={`text-[11px] font-semibold uppercase tracking-wider ${
-                    ehSelecionado
-                      ? "text-primary-foreground/85"
-                      : "text-muted-foreground"
-                  }`}
-                >
-                  {format(dia, "EEEE", { locale: ptBR })}
-                </span>
-                {ehHoje && (
-                  <Badge
-                    variant={ehSelecionado ? "secondary" : "default"}
-                    className="text-[9px] px-1.5 py-0 font-medium"
-                  >
-                    Hoje
-                  </Badge>
+              <span className="text-[10px] uppercase tracking-wider opacity-80">
+                {format(dia, "EEEE", { locale: ptBR })}
+              </span>
+              <div className="flex items-center gap-1.5 sm:mt-1">
+                <span className="text-sm font-bold">{format(dia, "dd/MM")}</span>
+                {ehHoje && !ehSelecionado && (
+                  <span className="text-[9px] px-1 rounded bg-primary/10 text-primary font-bold">Hoje</span>
                 )}
-              </div>
-
-              <div className="mt-2">
-                <p
-                  className={`text-xl font-bold tracking-tight ${
-                    ehSelecionado ? "text-primary-foreground" : "text-foreground"
-                  }`}
-                >
-                  {format(dia, "dd/MM")}
-                </p>
-              </div>
-
-              <div className="mt-3 flex items-center gap-1 text-[11px]">
-                <span
-                  className={`font-medium ${
-                    ehSelecionado
-                      ? "text-primary-foreground/90"
-                      : "text-muted-foreground"
-                  }`}
-                >
-                  {ehSelecionado ? "Visualizando" : "Selecionar dia"}
-                </span>
               </div>
             </button>
           );
         })}
       </div>
 
-      {/* Filtros */}
-      <SectionCard
-        title={
-          <div className="flex items-center gap-2">
-            <span>Filtros para</span>
-            <Badge variant="outline" className="text-xs font-semibold">
-              {format(diaSelecionado, "EEEE, dd 'de' MMMM", { locale: ptBR })}
-            </Badge>
-          </div>
-        }
-        description="Filtre os alunos agendados para este dia"
-        action={
-          <Button variant="ghost" size="sm" onClick={limparFiltros} className="gap-1.5">
-            <Filter className="size-3.5" />
-            Limpar
-          </Button>
-        }
-      >
-        <div className="grid gap-3 md:grid-cols-3">
-          <div className="relative">
-            <Search className="absolute left-3 top-3 size-4 text-muted-foreground" />
-            <Input
-              value={busca}
-              onChange={(e) => setBusca(e.target.value)}
-              placeholder="Buscar aluno na rota..."
-              className="pl-9 rounded-xl"
-            />
-          </div>
+      {/* Barra de Filtros Compacta */}
+      <div className="flex flex-col sm:flex-row items-center gap-2.5 bg-card p-3 rounded-xl border border-border/60 shadow-2xs">
+        <div className="relative flex-1 w-full">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
+          <Input
+            value={busca}
+            onChange={(e) => setBusca(e.target.value)}
+            placeholder="Buscar aluno ou matrícula..."
+            className="h-9 pl-9 rounded-lg bg-muted/20 border-border/60 text-xs"
+          />
+        </div>
 
+        <div className="flex items-center gap-2 w-full sm:w-auto">
           <Select value={rotaFiltro} onValueChange={setRotaFiltro}>
-            <SelectTrigger className="rounded-xl">
-              <SelectValue placeholder="Selecionar Rota" />
+            <SelectTrigger className="h-9 text-xs rounded-lg bg-muted/20 border-border/60 w-full sm:w-48">
+              <SelectValue placeholder="Todas as rotas" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="rounded-xl border-border/80 bg-card text-xs">
               <SelectItem value={TODOS}>Todas as rotas</SelectItem>
               {rotas.map((r) => (
-                <SelectItem key={r.id} value={r.id}>
-                  {r.nome}
-                </SelectItem>
+                <SelectItem key={r.id} value={r.id}>{r.nome}</SelectItem>
               ))}
             </SelectContent>
           </Select>
 
           <Select value={turnoFiltro} onValueChange={setTurnoFiltro}>
-            <SelectTrigger className="rounded-xl">
-              <SelectValue placeholder="Selecionar Turno" />
+            <SelectTrigger className="h-9 text-xs rounded-lg bg-muted/20 border-border/60 w-full sm:w-40">
+              <SelectValue placeholder="Todos turnos" />
             </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={TODOS}>Todos os turnos</SelectItem>
+            <SelectContent className="rounded-xl border-border/80 bg-card text-xs">
+              <SelectItem value={TODOS}>Todos turnos</SelectItem>
               <SelectItem value="Manhã">Manhã</SelectItem>
               <SelectItem value="Tarde">Tarde</SelectItem>
               <SelectItem value="Noite">Noite</SelectItem>
               <SelectItem value="Integral">Integral</SelectItem>
             </SelectContent>
           </Select>
-        </div>
-      </SectionCard>
 
-      {/* Exibição das Rotas no Dia Selecionado */}
+          {(busca || rotaFiltro !== TODOS || turnoFiltro !== TODOS) && (
+            <Button variant="ghost" size="sm" onClick={limparFiltros} className="h-9 px-2 text-xs text-muted-foreground hover:text-foreground">
+              <Filter className="size-3.5 mr-1" /> Limpar
+            </Button>
+          )}
+        </div>
+      </div>
+
+      {/* Conteúdo das Rotas (Estilo Tabela / Lista Enxuta) */}
       {loading ? (
-        <div className="py-12 text-center text-sm text-muted-foreground flex flex-col items-center justify-center gap-2">
-          <Clock className="size-5 animate-spin text-primary" />
-          <span>Carregando rotas e agendamentos...</span>
+        <div className="py-16 text-center text-xs text-muted-foreground flex items-center justify-center gap-2">
+          <Loader2 className="size-4 animate-spin text-primary" />
+          <span>Carregando escala...</span>
         </div>
       ) : rotasDoDiaSelecionado.length === 0 ? (
-        <EmptyState
-          icon={CalendarDays}
-          title="Nenhum agendamento encontrado"
-          description={`Não há rota com passageiros cadastrados para ${format(
-            diaSelecionado,
-            "EEEE (dd/MM)",
-            { locale: ptBR }
-          )} com os filtros atuais.`}
-          action={
-            <Button variant="outline" onClick={limparFiltros} className="rounded-xl gap-2">
-              <SlidersHorizontal className="size-4" />
-              Limpar Filtros
-            </Button>
-          }
-        />
+        <div className="py-16 text-center text-xs text-muted-foreground border border-dashed border-border/60 rounded-xl bg-card">
+          Nenhum agendamento encontrado para {format(diaSelecionado, "dd/MM", { locale: ptBR })}.
+        </div>
       ) : (
-        <div className="space-y-6">
+        <div className="space-y-4">
           {rotasDoDiaSelecionado.map((rota) => (
-            <SectionCard
-              key={rota.id}
-              title={
+            <div key={rota.id} className="bg-card border border-border/60 rounded-xl overflow-hidden shadow-2xs">
+              
+              {/* Cabeçalho da Rota */}
+              <div className="flex items-center justify-between px-4 py-3 bg-muted/20 border-b border-border/40">
                 <div className="flex items-center gap-2">
-                  <Bus className="size-5 text-primary" />
-                  <span>{rota.nome}</span>
+                  <Bus className="size-4 text-primary" />
+                  <span className="text-xs font-bold uppercase tracking-wide text-foreground">{rota.nome}</span>
                 </div>
-              }
-              description={
-                <span className="flex items-center gap-1.5">
-                  <Users className="size-3.5 text-muted-foreground" />
-                  {rota.totalPassageiros}{" "}
-                  {rota.totalPassageiros === 1
-                    ? "passageiro agendado"
-                    : "passageiros agendados"}
-                </span>
-              }
-              action={
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="rounded-xl">
-                      <MoreHorizontal className="size-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="rounded-xl">
-                    <DropdownMenuItem
-                      onClick={() => navigate(`/rotas/${rota.id}`)}
-                    >
-                      Ver detalhes da Rota
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              }
-            >
+                <Badge variant="secondary" className="text-[10px] font-semibold px-2 py-0.5">
+                  {rota.totalPassageiros} {rota.totalPassageiros === 1 ? "passageiro" : "passageiros"}
+                </Badge>
+              </div>
+
+              {/* Lista de Alunos em formato de Linhas Limpas */}
               {rota.alunos.length === 0 ? (
-                <div className="py-6 text-center text-xs text-muted-foreground italic border border-border/60 rounded-xl bg-muted/20">
-                  Nenhum aluno agendado para esta rota neste dia.
+                <div className="px-4 py-3 text-xs text-muted-foreground/70 italic">
+                  Nenhum aluno alocado nesta rota para este dia.
                 </div>
               ) : (
-                <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+                <div className="divide-y divide-border/40">
                   {rota.alunos.map((aluno) => {
                     const escolaNome = obterNomeEscola(aluno);
                     const fotoUrl = aluno.foto || aluno.foto_url || aluno.avatar_url;
@@ -500,47 +406,43 @@ export default function AgendaPorRotas() {
                       <div
                         key={aluno.id}
                         onClick={() => navigate(`/alunos/${aluno.id}`)}
-                        className="group cursor-pointer rounded-xl border border-border bg-card p-3 shadow-xs hover:border-primary/50 hover:shadow-md transition-all space-y-2 flex flex-col justify-between"
+                        className="flex items-center justify-between px-4 py-2.5 hover:bg-muted/30 transition-colors cursor-pointer group"
                       >
-                        <div className="space-y-2">
-                          <div className="flex items-center gap-2.5">
-                            <Avatar className="size-8 shrink-0 border border-border">
-                              <AvatarImage src={fotoUrl ?? undefined} alt={aluno.nome} />
-                              <AvatarFallback className="text-[11px] bg-primary/10 text-primary font-semibold">
-                                {getIniciais(aluno.nome)}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div className="min-w-0 flex-1">
-                              <p className="text-xs font-semibold truncate group-hover:text-primary transition-colors text-foreground">
-                                {aluno.nome}
-                              </p>
-                              <p className="text-[10px] text-muted-foreground truncate">
-                                Matrícula: {aluno.matricula || "N/A"}
-                              </p>
-                            </div>
+                        <div className="flex items-center gap-3 min-w-0">
+                          <Avatar className="size-7 shrink-0 border border-border/60">
+                            <AvatarImage src={fotoUrl ?? undefined} alt={aluno.nome} />
+                            <AvatarFallback className="text-[10px] bg-primary/10 text-primary font-bold">
+                              {getIniciais(aluno.nome)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="min-w-0">
+                            <p className="text-xs font-medium truncate group-hover:text-primary transition-colors text-foreground">
+                              {aluno.nome}
+                            </p>
+                            <p className="text-[10px] text-muted-foreground truncate font-mono">
+                              Mat: {aluno.matricula || "N/A"}
+                            </p>
                           </div>
-
-                          {escolaNome && (
-                            <div className="flex items-center gap-1 text-[11px] text-muted-foreground pt-1 border-t border-border/50">
-                              <MapPin className="size-3 shrink-0 text-muted-foreground/70" />
-                              <span className="truncate">{escolaNome}</span>
-                            </div>
-                          )}
                         </div>
 
-                        <div className="pt-2 flex items-center justify-between border-t border-border/50 text-[10px]">
-                          <span className="flex items-center gap-1 text-muted-foreground font-medium">
-                            <Clock className="size-3" />
+                        <div className="flex items-center gap-4 text-xs text-muted-foreground shrink-0">
+                          {escolaNome && (
+                            <span className="hidden md:flex items-center gap-1 max-w-xs truncate text-[11px]">
+                              <MapPin className="size-3 text-muted-foreground/60" />
+                              <span className="truncate">{escolaNome}</span>
+                            </span>
+                          )}
+                          <span className="flex items-center gap-1 text-[11px] font-medium bg-muted/40 px-2 py-0.5 rounded-md">
+                            <Clock className="size-3 text-primary" />
                             {aluno.turno || "Manhã"}
                           </span>
-                          <StatusPill status={aluno.status ?? "ativo"} />
                         </div>
                       </div>
                     );
                   })}
                 </div>
               )}
-            </SectionCard>
+            </div>
           ))}
         </div>
       )}
