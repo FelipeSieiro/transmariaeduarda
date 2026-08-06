@@ -40,10 +40,10 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useTheme } from "@/components/theme-provider";
-import { logout, getUser, type User } from "@/services/auth.service";
-import { listarAlunos } from "@/services/alunos.service";
-import { veiculosService } from "@/services/veiculos.service";
-import { listarRotas } from "@/services/rotas.service";
+import { logout, getUser, type User } from "@/features/auth/services/auth.service";
+import { listarAlunos } from "@/features/alunos/services/alunos.service";
+import { veiculosService } from "@/features/veiculos/services/veiculos.service";
+import { listarRotas } from "@/features/rotas/services/rotas.service";
 
 const notificacoes = [
   { titulo: "3 mensalidades venceram hoje", detalhe: "Financeiro · há 12 min", nivel: "destructive" },

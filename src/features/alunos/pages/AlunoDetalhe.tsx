@@ -1,0 +1,415 @@
+// src/pages/AlunoDetalhe.tsx
+
+import { useEffect, useMemo, useState } from "react";
+import { Link, useParams } from "react-router-dom";
+import { ArrowLeft, Bus } from "lucide-react";
+import { toast } from "sonner";
+
+import { buscarAluno } from "@/features/alunos/services/alunos.service";
+import { buscarContratoPorAluno } from "@/features/contratos/services/contratos.service";
+
+import { adaptarAlunoDetalhe } from "@/features/alunos/adapters/alunoDetalhe.adapter";
+
+import {
+  type Aluno,
+  alunos as alunosMock,
+  brlExato,
+} from "@/data/mock";
+
+import type { Contrato } from "@/types";
+
+import { Button } from "@/components/ui/button";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
+
+import { SectionCard } from "@/components/ui-kit/primitives";
+
+import { AlunoHeader } from "@/features/alunos/components/AlunoHeader";
+import { AlunoDadosPessoais } from "@/features/alunos/components/AlunoDadosPessoais";
+import { AlunoEndereco } from "@/features/alunos/components/AlunoEndereco";
+import { AlunoResponsaveis } from "@/features/alunos/components/AlunoResponsaveis";
+import { AlunoContrato } from "@/features/alunos/components/AlunoContrato";
+import { TabelaMensalidades } from "@/features/alunos/components/TabelaMensalidades";
+import { AlunoOcorrencias } from "@/features/alunos/components/AlunoOcorrencias";
+import {
+  AlunoHistorico,
+  type EventoHistorico,
+} from "@/features/alunos/components/AlunoHistorico";
+import { AlunoDocumentos } from "@/features/alunos/components/AlunoDocumentos";
+import { AlunoFotos } from "@/features/alunos/components/AlunoFotos";
+import { GradeSemanalRotas } from "@/features/agenda/components/GradeSemanalRotas";
+
+function converterParaTimestamp(dataStr?: string): number {
+  if (!dataStr) return 0;
+
+  if (dataStr.includes("-")) {
+    const timestamp = new Date(dataStr).getTime();
+    return Number.isNaN(timestamp) ? 0 : timestamp;
+  }
+
+  const partes = dataStr.split("/");
+
+  if (partes.length === 3) {
+    const [dia, mes, ano] = partes.map(Number);
+    return new Date(ano, mes - 1, dia).getTime();
+  }
+
+  return 0;
+}
+
+export default function AlunoDetalhe() {
+  const { alunoId } = useParams();
+
+  const [aluno, setAluno] =
+    useState<Aluno | null>(null);
+
+  const [carregando, setCarregando] =
+    useState(true);
+
+  const [contrato, setContrato] =
+    useState<Contrato | null>(null);
+
+  useEffect(() => {
+    async function carregarDados() {
+      if (!alunoId) return;
+
+      let alunoData: Aluno | null = null;
+
+      try {
+        const response = await buscarAluno(alunoId);
+
+        alunoData =
+          adaptarAlunoDetalhe(response);
+
+        setAluno(alunoData);
+      } catch (error) {
+        console.error(
+          "Erro ao buscar aluno API:",
+          error
+        );
+
+        const alunoMock = alunosMock.find(
+          (item) => item.id === alunoId
+        );
+
+        if (alunoMock) {
+          alunoData = alunoMock;
+          setAluno(alunoMock);
+        } else {
+          toast.error(
+            "Não foi possível carregar os dados do aluno."
+          );
+        }
+      }
+
+      try {
+        const contratoApi =
+          await buscarContratoPorAluno(alunoId);
+
+        setContrato(contratoApi);
+      } catch (error) {
+        console.error(
+          "Erro ao buscar contrato:",
+          error
+        );
+
+        setContrato(null);
+      } finally {
+        setCarregando(false);
+      }
+    }
+
+    carregarDados();
+  }, [alunoId]);
+
+  const historicoCompleto = useMemo(() => {
+    if (!aluno) return [];
+
+    const eventos: EventoHistorico[] = [];
+
+    if (aluno.desde) {
+      eventos.push({
+        id: `cad-${aluno.id}`,
+        data: aluno.desde,
+        tipo: "cadastro",
+        titulo: "Aluno Matriculado",
+        descricao: `Cadastro inicial realizado para a escola ${aluno.escola} (${aluno.serie} - ${aluno.turno})`,
+      });
+    }
+
+    const listaResponsaveis =
+      aluno.responsaveis &&
+      aluno.responsaveis.length > 0
+        ? aluno.responsaveis
+        : aluno.responsavel
+        ? [
+            {
+              nome: aluno.responsavel,
+              parentesco: aluno.parentesco,
+            },
+          ]
+        : [];
+        
+    listaResponsaveis.forEach((resp, idx) => {
+      eventos.push({
+        id: `resp-${idx}`,
+        data: aluno.desde || "—",
+        tipo: "responsavel",
+        titulo: `Responsável Vinculado: ${resp.nome}`,
+        descricao: `Grau de parentesco: ${
+          resp.parentesco || "Responsável legal"
+        }`,
+      });
+    });
+
+    if (contrato) {
+      eventos.push({
+        id: `cnt-${contrato.id}`,
+        data: contrato.data_inicio,
+        tipo: "contrato",
+        titulo: `Contrato ${contrato.numero} Vinculado`,
+        descricao: `Valor mensal de ${brlExato(
+          contrato.valor_mensalidade
+        )} com vencimento no dia ${
+          contrato.dia_vencimento
+        } (${contrato.forma_pagamento})`,
+      });
+    }
+
+    (aluno.ocorrencias || []).forEach((oc, idx) => {
+      eventos.push({
+        id: `oc-${idx}`,
+        data: oc.data,
+        tipo: "ocorrencia",
+        titulo: `Ocorrência: ${oc.tipo}`,
+        descricao: oc.descricao,
+      });
+    });
+
+    (aluno.historico || []).forEach((h, idx) => {
+      eventos.push({
+        id: `sys-${idx}`,
+        data: h.data,
+        tipo: "sistema",
+        titulo: h.evento,
+      });
+    });
+
+    return eventos.sort(
+      (a, b) =>
+        converterParaTimestamp(b.data) -
+        converterParaTimestamp(a.data)
+    );
+  }, [aluno, contrato]);
+
+  if (carregando) {
+    return (
+      <div className="mx-auto flex min-h-[50vh] items-center justify-center px-4">
+        <div className="text-center animate-pulse">
+          <p className="text-xs text-muted-foreground">
+            Carregando detalhes do aluno...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!aluno) {
+    return (
+      <div className="mx-auto flex min-h-[60vh] max-w-xl flex-col items-center justify-center space-y-4 px-4 text-center">
+        <h1 className="text-lg font-semibold tracking-tight text-foreground">
+          Aluno não encontrado
+        </h1>
+
+        <p className="text-xs text-muted-foreground">
+          Verifique a URL ou volte para a lista geral de alunos.
+        </p>
+
+        <Button
+          asChild
+          size="sm"
+          className="h-9 rounded-lg text-xs"
+        >
+          <Link to="/alunos">
+            Voltar para alunos
+          </Link>
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mx-auto w-full max-w-6xl space-y-6 py-2">
+      <Button
+        asChild
+        variant="ghost"
+        size="sm"
+        className="w-fit h-8 rounded-lg text-xs text-muted-foreground hover:text-foreground px-2"
+      >
+        <Link to="/alunos">
+          <ArrowLeft className="mr-1.5 size-3.5 opacity-70" />
+          Voltar para alunos
+        </Link>
+      </Button>
+
+      <AlunoHeader aluno={aluno} />
+
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <AlunoDadosPessoais aluno={aluno} />
+        <AlunoEndereco aluno={aluno} />
+        <AlunoResponsaveis aluno={aluno} />
+      </div>
+
+      <Tabs
+        defaultValue="transporte"
+        className="space-y-4"
+      >
+        <TabsList
+          className="
+            flex
+            w-full
+            items-center
+            justify-start
+            overflow-x-auto
+            rounded-xl
+            border
+            border-border/60
+            bg-card/50
+            p-1
+            gap-1
+            h-auto
+            scrollbar-none
+            shadow-2xs
+          "
+        >
+          <TabsTrigger
+            value="transporte"
+            className="flex-shrink-0 justify-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium data-[state=active]:bg-muted data-[state=active]:text-foreground text-muted-foreground transition-all"
+          >
+            <Bus className="size-3.5 opacity-70" />
+            Transporte / Rotas
+          </TabsTrigger>
+
+          <TabsTrigger
+            value="contrato"
+            className="flex-shrink-0 justify-center rounded-lg px-3 py-2 text-xs font-medium data-[state=active]:bg-muted data-[state=active]:text-foreground text-muted-foreground transition-all"
+          >
+            Contrato
+          </TabsTrigger>
+
+          <TabsTrigger
+            value="mensalidades"
+            className="flex-shrink-0 justify-center rounded-lg px-3 py-2 text-xs font-medium data-[state=active]:bg-muted data-[state=active]:text-foreground text-muted-foreground transition-all"
+          >
+            Mensalidades
+          </TabsTrigger>
+
+          <TabsTrigger
+            value="ocorrencias"
+            className="flex-shrink-0 justify-center rounded-lg px-3 py-2 text-xs font-medium data-[state=active]:bg-muted data-[state=active]:text-foreground text-muted-foreground transition-all"
+          >
+            Ocorrências
+          </TabsTrigger>
+
+          <TabsTrigger
+            value="historico"
+            className="flex-shrink-0 justify-center rounded-lg px-3 py-2 text-xs font-medium data-[state=active]:bg-muted data-[state=active]:text-foreground text-muted-foreground transition-all"
+          >
+            Histórico
+          </TabsTrigger>
+
+          <TabsTrigger
+            value="documentos"
+            className="flex-shrink-0 justify-center rounded-lg px-3 py-2 text-xs font-medium data-[state=active]:bg-muted data-[state=active]:text-foreground text-muted-foreground transition-all"
+          >
+            Documentos
+          </TabsTrigger>
+
+          <TabsTrigger
+            value="fotos"
+            className="flex-shrink-0 justify-center rounded-lg px-3 py-2 text-xs font-medium data-[state=active]:bg-muted data-[state=active]:text-foreground text-muted-foreground transition-all"
+          >
+            Fotos
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent
+          value="transporte"
+          className="mt-4"
+        >
+          {alunoId && (
+            <GradeSemanalRotas
+              alunoId={alunoId}
+              nomeRotaPrincipal={aluno.rota}
+            />
+          )}
+        </TabsContent>
+
+        <TabsContent
+          value="contrato"
+          className="mt-4"
+        >
+          <AlunoContrato contrato={contrato} />
+        </TabsContent>
+
+        <TabsContent
+          value="mensalidades"
+          className="mt-4"
+        >
+          <SectionCard
+            title="Mensalidades"
+            description="Histórico de cobranças e baixas do contrato"
+          >
+            {contrato?.id ? (
+              <TabelaMensalidades
+                contratoId={contrato.id}
+              />
+            ) : (
+              <p className="py-8 text-center text-xs text-muted-foreground">
+                Nenhum contrato ativo encontrado para carregar as mensalidades.
+              </p>
+            )}
+          </SectionCard>
+        </TabsContent>
+
+        <TabsContent
+          value="ocorrencias"
+          className="mt-4"
+        >
+          <AlunoOcorrencias
+            ocorrencias={aluno.ocorrencias}
+          />
+        </TabsContent>
+
+        <TabsContent
+          value="historico"
+          className="mt-4"
+        >
+          <AlunoHistorico
+            historico={historicoCompleto}
+          />
+        </TabsContent>
+
+        <TabsContent
+          value="documentos"
+          className="mt-4"
+        >
+          <AlunoDocumentos
+            documentos={aluno.documentos}
+          />
+        </TabsContent>
+
+        <TabsContent
+          value="fotos"
+          className="mt-4"
+        >
+          <AlunoFotos />
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}

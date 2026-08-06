@@ -1,6 +1,4 @@
-export * from "./aluno.constants";
-export * from "./contrato.constants";
-export * from "./responsavel.constants";
-
-// Re-exportação de tipos auxiliares comuns de UI
-export type { SelectOption } from "./aluno.constants";
+// Barrel de constantes compartilhadas + reexport das constants de cada feature.
+export * from "@/features/alunos/constants/aluno.constants";
+export * from "@/features/contratos/constants/contrato.constants";
+export * from "@/features/responsaveis/constants/responsavel.constants";
