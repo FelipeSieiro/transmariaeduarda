@@ -19,7 +19,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { rotasService } from "@/features/rotas/services/rotas.service";
 import { motoristasService } from "@/features/motoristas/services/motoristas.service";
 import { veiculosService } from "@/features/veiculos/services/veiculos.service";
-import type { Rota } from "@/types/rota";
+import type { Rota } from "@/features/rotas/types/rota";
 
 export default function RotaDetalhes() {
   const { id } = useParams<{ id: string }>();

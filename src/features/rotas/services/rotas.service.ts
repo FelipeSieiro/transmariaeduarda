@@ -1,6 +1,11 @@
 // cspell:disable-next-line
 import api from "@/lib/api";
-import type { ApiResponse, CreateRotaDTO, Rota, UpdateRotaDTO } from "@/types";
+import type {
+  CreateRotaDTO,
+  Rota,
+  UpdateRotaDTO,
+} from "@/features/rotas/types/rota";
+import type { ApiResponse } from "@/types/shared";
 
 export async function listarRotas(): Promise<Rota[]> {
   const response = await api.get<ApiResponse<Rota[]>>("/rotas");

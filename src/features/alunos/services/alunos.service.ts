@@ -1,10 +1,7 @@
 import api from "@/lib/api";
-import type {
-  AgendamentoRotaItem,
-  Aluno,
-  ApiResponse,
-  CadastroAlunoCompleto,
-} from "@/types";
+import type { AgendamentoRota } from "@/features/agenda/types/agendamento";
+import type { Aluno, CadastroAlunoCompleto } from "@/features/alunos/types/alunos";
+import type { ApiResponse } from "@/types/shared";
 import { agendamentoRotasService } from "@/features/agenda/services/agendamento-rotas.service";
 
 export async function criarAluno(aluno: Partial<Aluno>): Promise<Aluno> {
@@ -50,7 +47,7 @@ export async function removerAluno(id: string): Promise<void> {
 
 export async function obterAgendamentosRotasDoAluno(
   alunoId: string
-): Promise<AgendamentoRotaItem[]> {
+): Promise<AgendamentoRota[]> {
   return agendamentoRotasService.getByAlunoId(alunoId);
 }
 

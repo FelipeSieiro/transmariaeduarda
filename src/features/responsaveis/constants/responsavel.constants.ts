@@ -1,3 +1,5 @@
+import type { SelectOption } from "@/types/ui";
+
 export enum Parentesco {
   PAI = "Pai",
   MAE = "Mãe",
@@ -10,12 +12,6 @@ export enum Parentesco {
   PADRASTO = "Padrasto",
   MADRASTA = "Madrasta",
   OUTRO = "Outro",
-}
-
-// Interface genérica para componentes de interface
-export interface SelectOption<T = string> {
-  readonly value: T;
-  readonly label: string;
 }
 
 // Array imutável para iteração direta

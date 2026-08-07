@@ -42,8 +42,8 @@ import {
 import {
   listarRotas,
   removerRota,
-  type Rota,
 } from "@/features/rotas/services/rotas.service";
+import type { Rota } from "@/features/rotas/types/rota";
 
 const PAGE_SIZE = 8;
 const TODOS = "__todos__";

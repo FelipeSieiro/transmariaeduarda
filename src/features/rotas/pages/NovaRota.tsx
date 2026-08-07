@@ -19,11 +19,11 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 
 import { rotasService } from "@/features/rotas/services/rotas.service";
-import type { Rota } from "@/types";
+import type { TipoTrajeto } from "@/types/transporte";
 import { motoristasService, type Motorista } from "@/features/motoristas/services/motoristas.service";
 import { veiculosService, type Veiculo } from "@/features/veiculos/services/veiculos.service";
 import { listarEscolas } from "@/services/escolas.service";
-import type { Escola } from "@/types";
+import type { Escola } from "@/types/escola";
 
 export default function NovaRota() {
   const { id } = useParams<{ id: string }>();
@@ -31,7 +31,7 @@ export default function NovaRota() {
   const navigate = useNavigate();
 
   const [nome, setNome] = useState("");
-  const [tipoTrajeto, setTipoTrajeto] = useState<"ENTRADA" | "SAIDA">("ENTRADA");
+  const [tipoTrajeto, setTipoTrajeto] = useState<TipoTrajeto>("ENTRADA");
   const [escolaId, setEscolaId] = useState<string>("");
   const [bairro, setBairro] = useState("");
   const [horarioSaida, setHorarioSaida] = useState("");
@@ -233,7 +233,7 @@ export default function NovaRota() {
               </Label>
               <Select
                 value={tipoTrajeto}
-                onValueChange={(val: "ENTRADA" | "SAIDA") => setTipoTrajeto(val)}
+                onValueChange={(val: TipoTrajeto) => setTipoTrajeto(val)}
                 disabled={submitting}
               >
                 <SelectTrigger id="tipo_trajeto" className="rounded-xl h-10">

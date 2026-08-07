@@ -1,5 +1,7 @@
 // src/constants/aluno.ts (ou src/constants/index.ts)
 
+import type { SelectOption } from "@/types/ui";
+
 export enum Serie {
   PRIMEIRO_FUNDAMENTAL = "1º Fundamental",
   SEGUNDO_FUNDAMENTAL = "2º Fundamental",
@@ -53,12 +55,6 @@ export enum Turno {
 export enum StatusAluno {
   ATIVO = "ativo",
   INATIVO = "inativo",
-}
-
-// Interface genérica para opções de UI (<Select />, <Dropdown />, etc)
-export interface SelectOption<T = string> {
-  readonly value: T;
-  readonly label: string;
 }
 
 // Arrays imutáveis para iteração

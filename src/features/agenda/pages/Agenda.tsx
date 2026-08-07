@@ -42,7 +42,9 @@ import {
 
 import { listarAlunos, obterAgendamentosRotasDoAluno } from "@/features/alunos/services/alunos.service";
 import { listarRotas } from "@/features/rotas/services/rotas.service";
-import type { Aluno, Rota, AgendamentoRota } from "@/types";
+import type { AgendamentoRota } from "@/features/agenda/types/agendamento";
+import type { Aluno } from "@/features/alunos/types/alunos";
+import type { Rota } from "@/features/rotas/types/rota";
 
 const TODOS = "__todos__";
 
@@ -98,8 +100,7 @@ export default function AgendaPorRotas() {
         );
 
         const resultados = await Promise.all(chamadasAgendamentos);
-        const todosAgendamentos = resultados.flat() as AgendamentoRota[];
-        setAgendamentos(todosAgendamentos);
+        setAgendamentos(resultados.flat());
       } catch (error) {
         console.error("Erro ao carregar dados da agenda", error);
         toast.error("Erro ao carregar agenda de rotas");
@@ -142,7 +143,9 @@ export default function AgendaPorRotas() {
   }, [alunos]);
 
   const alunosComAgendamento = useMemo(() => {
-    return new Set(agendamentos.map((ag) => ag.aluno_id));
+    return new Set(
+      agendamentos.flatMap((ag) => (ag.aluno_id ? [ag.aluno_id] : []))
+    );
   }, [agendamentos]);
 
   const diaSemanaSelecionadoIndex = getDay(diaSelecionado);
@@ -161,6 +164,7 @@ export default function AgendaPorRotas() {
         agendamentos.forEach((ag) => {
           if (ag.rota_id !== rota.id) return;
           if (ag.dia_semana !== diaSemanaSelecionadoIndex) return;
+          if (!ag.aluno_id) return;
 
           const aluno = alunosMap.get(ag.aluno_id);
           if (!aluno) return;
