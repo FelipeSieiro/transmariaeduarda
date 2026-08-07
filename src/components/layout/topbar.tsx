@@ -37,19 +37,44 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { useTheme } from "@/components/theme-provider";
-import { logout, getUser, type User } from "@/features/auth/services/auth.service";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { useTheme } from "@/providers/theme-provider";
+import { logout, getUser } from "@/features/auth/services/auth.service";
+import type { AuthUser } from "@/features/auth/types/auth";
 import { listarAlunos } from "@/features/alunos/services/alunos.service";
 import { veiculosService } from "@/features/veiculos/services/veiculos.service";
 import { listarRotas } from "@/features/rotas/services/rotas.service";
 
 const notificacoes = [
-  { titulo: "3 mensalidades venceram hoje", detalhe: "Financeiro · há 12 min", nivel: "destructive" },
-  { titulo: "Revisão da Van PAX-2C55 agendada", detalhe: "Manutenção · há 1 h", nivel: "warning" },
-  { titulo: "Novo aluno matriculado", detalhe: "Cadastro · há 3 h", nivel: "success" },
-  { titulo: "CNH de Roberto Salles vence em 12 dias", detalhe: "Motoristas · ontem", nivel: "warning" },
+  {
+    titulo: "3 mensalidades venceram hoje",
+    detalhe: "Financeiro · há 12 min",
+    nivel: "destructive",
+  },
+  {
+    titulo: "Revisão da Van PAX-2C55 agendada",
+    detalhe: "Manutenção · há 1 h",
+    nivel: "warning",
+  },
+  {
+    titulo: "Novo aluno matriculado",
+    detalhe: "Cadastro · há 3 h",
+    nivel: "success",
+  },
+  {
+    titulo: "CNH de Roberto Salles vence em 12 dias",
+    detalhe: "Motoristas · ontem",
+    nivel: "warning",
+  },
 ];
 
 export function Topbar() {
@@ -57,8 +82,7 @@ export function Topbar() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  // Obtém o usuário logado diretamente do localStorage usando a função do auth.service
-  const [usuario] = useState<User | null>(() => getUser());
+  const [usuario] = useState<AuthUser | null>(() => getUser());
 
   const [busca, setBusca] = useState(searchParams.get("q") || "");
   const [isOpenResults, setIsOpenResults] = useState(false);
@@ -75,7 +99,10 @@ export function Topbar() {
   // Fecha o popup ao clicar fora
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+      if (
+        searchRef.current &&
+        !searchRef.current.contains(event.target as Node)
+      ) {
         setIsOpenResults(false);
       }
     }
@@ -100,7 +127,13 @@ export function Topbar() {
   useEffect(() => {
     const query = busca.trim().toLowerCase();
     if (query.length < 2) {
-      setResultados({ alunos: [], veiculos: [], rotas: [], manutencoes: [], financeiro: [] });
+      setResultados({
+        alunos: [],
+        veiculos: [],
+        rotas: [],
+        manutencoes: [],
+        financeiro: [],
+      });
       setIsOpenResults(false);
       return;
     }
@@ -117,51 +150,86 @@ export function Topbar() {
           ]);
 
           // Filtragem de Alunos
-          const alunosFiltrados = (alunosRes || []).filter(
-            (a: any) =>
-              a.nome?.toLowerCase().includes(query) ||
-              a.matricula?.toLowerCase().includes(query) ||
-              a.responsavel?.toLowerCase().includes(query)
-          ).slice(0, 3);
+          const alunosFiltrados = (alunosRes || [])
+            .filter(
+              (a: any) =>
+                a.nome?.toLowerCase().includes(query) ||
+                a.matricula?.toLowerCase().includes(query) ||
+                a.responsavel?.toLowerCase().includes(query),
+            )
+            .slice(0, 3);
 
           // Filtragem de Veículos
-          const veiculosFiltrados = (veiculosRes || []).filter(
-            (v: any) =>
-              v.modelo?.toLowerCase().includes(query) ||
-              v.placa?.toLowerCase().includes(query) ||
-              v.marca?.toLowerCase().includes(query)
-          ).slice(0, 3);
+          const veiculosFiltrados = (veiculosRes || [])
+            .filter(
+              (v: any) =>
+                v.modelo?.toLowerCase().includes(query) ||
+                v.placa?.toLowerCase().includes(query) ||
+                v.marca?.toLowerCase().includes(query),
+            )
+            .slice(0, 3);
 
           // Filtragem de Rotas
-          const rotasFiltradas = (rotasRes || []).filter(
-            (r: any) =>
-              r.nome?.toLowerCase().includes(query) ||
-              r.periodo?.toLowerCase().includes(query)
-          ).slice(0, 3);
+          const rotasFiltradas = (rotasRes || [])
+            .filter(
+              (r: any) =>
+                r.nome?.toLowerCase().includes(query) ||
+                r.periodo?.toLowerCase().includes(query),
+            )
+            .slice(0, 3);
 
           // Filtro Integrado de Serviços de Manutenção & Oficina
           const servicosManutencaoMock = [
-            { id: "m1", titulo: "Revisão de Freios e Suspensão", veiculo: "Mercedes Sprinter (PAX-2C55)", status: "Agendado" },
-            { id: "m2", titulo: "Troca de Óleo e Filtros", veiculo: "Renault Master (VAN-8A12)", status: "Em Andamento" },
-            { id: "m3", titulo: "Inspeção Veicular Detran", veiculo: "Fiat Ducato (EDU-9901)", status: "Concluído" },
+            {
+              id: "m1",
+              titulo: "Revisão de Freios e Suspensão",
+              veiculo: "Mercedes Sprinter (PAX-2C55)",
+              status: "Agendado",
+            },
+            {
+              id: "m2",
+              titulo: "Troca de Óleo e Filtros",
+              veiculo: "Renault Master (VAN-8A12)",
+              status: "Em Andamento",
+            },
+            {
+              id: "m3",
+              titulo: "Inspeção Veicular Detran",
+              veiculo: "Fiat Ducato (EDU-9901)",
+              status: "Concluído",
+            },
           ];
-          const manutencoesFiltradas = servicosManutencaoMock.filter(
-            (m) =>
-              m.titulo.toLowerCase().includes(query) ||
-              m.veiculo.toLowerCase().includes(query) ||
-              m.status.toLowerCase().includes(query)
-          ).slice(0, 2);
+          const manutencoesFiltradas = servicosManutencaoMock
+            .filter(
+              (m) =>
+                m.titulo.toLowerCase().includes(query) ||
+                m.veiculo.toLowerCase().includes(query) ||
+                m.status.toLowerCase().includes(query),
+            )
+            .slice(0, 2);
 
           // Filtro Integrado de Serviços Financeiros / Mensalidades
           const servicosFinanceiroMock = [
-            { id: "f1", titulo: "Mensalidade Escolar - Aluno Pedro", valor: "R$ 450,00", status: "Pendente" },
-            { id: "f2", titulo: "Contrato de Transporte Anual", valor: "R$ 5.400,00", status: "Ativo" },
+            {
+              id: "f1",
+              titulo: "Mensalidade Escolar - Aluno Pedro",
+              valor: "R$ 450,00",
+              status: "Pendente",
+            },
+            {
+              id: "f2",
+              titulo: "Contrato de Transporte Anual",
+              valor: "R$ 5.400,00",
+              status: "Ativo",
+            },
           ];
-          const financeiroFiltrado = servicosFinanceiroMock.filter(
-            (f) =>
-              f.titulo.toLowerCase().includes(query) ||
-              f.valor.toLowerCase().includes(query)
-          ).slice(0, 2);
+          const financeiroFiltrado = servicosFinanceiroMock
+            .filter(
+              (f) =>
+                f.titulo.toLowerCase().includes(query) ||
+                f.valor.toLowerCase().includes(query),
+            )
+            .slice(0, 2);
 
           setResultados({
             alunos: alunosFiltrados,
@@ -228,15 +296,23 @@ export function Topbar() {
               <div className="p-1 rounded-lg bg-primary/10 text-primary">
                 <Building2 className="size-3.5" />
               </div>
-              <span className="max-w-[10rem] truncate font-medium">Trans Maria Eduarda</span>
+              <span className="max-w-[10rem] truncate font-medium">
+                Trans Maria Eduarda
+              </span>
               <ChevronDown className="size-3.5 opacity-50" />
             </Button>
           </DropdownMenuTrigger>
         </DropdownMenu>
 
         {/* Campo de Busca Multi-Serviços Avançado */}
-        <div ref={searchRef} className="relative ml-auto hidden w-full max-w-md items-center lg:flex">
-          <form onSubmit={handleSubmitSearch} className="w-full relative flex items-center">
+        <div
+          ref={searchRef}
+          className="relative ml-auto hidden w-full max-w-md items-center lg:flex"
+        >
+          <form
+            onSubmit={handleSubmitSearch}
+            className="w-full relative flex items-center"
+          >
             <Search className="pointer-events-none absolute left-3.5 size-4 text-muted-foreground/80" />
             <Input
               id="topbar-search-input"
@@ -263,12 +339,15 @@ export function Topbar() {
                   <Sparkles className="size-3.5 text-primary animate-pulse" />
                   <span>Filtrando Todos os Serviços</span>
                 </div>
-                {isPending && <Loader2 className="size-3 animate-spin text-primary" />}
+                {isPending && (
+                  <Loader2 className="size-3 animate-spin text-primary" />
+                )}
               </div>
 
               {totalResultados === 0 && !isPending ? (
                 <div className="py-8 text-center text-xs text-muted-foreground">
-                  Nenhum serviço ou registro correspondente a "<span className="text-foreground font-medium">{busca}</span>".
+                  Nenhum serviço ou registro correspondente a "
+                  <span className="text-foreground font-medium">{busca}</span>".
                 </div>
               ) : (
                 <div className="space-y-3 max-h-80 overflow-y-auto">
@@ -300,7 +379,12 @@ export function Topbar() {
                               </p>
                             </div>
                           </div>
-                          <Badge variant="secondary" className="text-[9px] shrink-0">Aluno</Badge>
+                          <Badge
+                            variant="secondary"
+                            className="text-[9px] shrink-0"
+                          >
+                            Aluno
+                          </Badge>
                         </div>
                       ))}
                     </div>
@@ -334,7 +418,12 @@ export function Topbar() {
                               </p>
                             </div>
                           </div>
-                          <Badge variant="outline" className="text-[9px] shrink-0 font-mono">{veiculo.placa}</Badge>
+                          <Badge
+                            variant="outline"
+                            className="text-[9px] shrink-0 font-mono"
+                          >
+                            {veiculo.placa}
+                          </Badge>
                         </div>
                       ))}
                     </div>
@@ -363,10 +452,17 @@ export function Topbar() {
                               <p className="text-xs font-medium text-foreground truncate group-hover:text-primary transition-colors">
                                 {rota.nome}
                               </p>
-                              <p className="text-[10px] text-muted-foreground">Período: {rota.periodo || "Integral"}</p>
+                              <p className="text-[10px] text-muted-foreground">
+                                Período: {rota.periodo || "Integral"}
+                              </p>
                             </div>
                           </div>
-                          <Badge variant="secondary" className="text-[9px] shrink-0">Rota</Badge>
+                          <Badge
+                            variant="secondary"
+                            className="text-[9px] shrink-0"
+                          >
+                            Rota
+                          </Badge>
                         </div>
                       ))}
                     </div>
@@ -395,10 +491,17 @@ export function Topbar() {
                               <p className="text-xs font-medium text-foreground truncate group-hover:text-primary transition-colors">
                                 {manut.titulo}
                               </p>
-                              <p className="text-[10px] text-muted-foreground">{manut.veiculo}</p>
+                              <p className="text-[10px] text-muted-foreground">
+                                {manut.veiculo}
+                              </p>
                             </div>
                           </div>
-                          <Badge variant="outline" className="text-[9px] shrink-0">{manut.status}</Badge>
+                          <Badge
+                            variant="outline"
+                            className="text-[9px] shrink-0"
+                          >
+                            {manut.status}
+                          </Badge>
                         </div>
                       ))}
                     </div>
@@ -427,10 +530,17 @@ export function Topbar() {
                               <p className="text-xs font-medium text-foreground truncate group-hover:text-primary transition-colors">
                                 {fin.titulo}
                               </p>
-                              <p className="text-[10px] text-muted-foreground font-mono">{fin.valor}</p>
+                              <p className="text-[10px] text-muted-foreground font-mono">
+                                {fin.valor}
+                              </p>
                             </div>
                           </div>
-                          <Badge variant="secondary" className="text-[9px] shrink-0">{fin.status}</Badge>
+                          <Badge
+                            variant="secondary"
+                            className="text-[9px] shrink-0"
+                          >
+                            {fin.status}
+                          </Badge>
                         </div>
                       ))}
                     </div>
@@ -444,7 +554,11 @@ export function Topbar() {
         <div className="ml-auto flex shrink-0 items-center gap-1.5 lg:ml-0">
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" className="rounded-xl lg:hidden hover:bg-muted/60">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="rounded-xl lg:hidden hover:bg-muted/60"
+              >
                 <Search className="size-4" />
               </Button>
             </TooltipTrigger>
@@ -454,31 +568,52 @@ export function Topbar() {
           {/* Notificações */}
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant="ghost" size="icon" className="relative rounded-xl hover:bg-muted/60">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="relative rounded-xl hover:bg-muted/60"
+              >
                 <Bell className="size-4" />
                 <span className="absolute right-2 top-2 size-2 rounded-full bg-destructive ring-2 ring-background animate-pulse" />
               </Button>
             </PopoverTrigger>
-            <PopoverContent align="end" className="w-80 p-0 rounded-2xl shadow-2xl border-border/80">
+            <PopoverContent
+              align="end"
+              className="w-80 p-0 rounded-2xl shadow-2xl border-border/80"
+            >
               <div className="flex items-center justify-between border-b border-border/60 px-4 py-3 bg-muted/20">
-                <p className="font-display text-xs font-bold uppercase tracking-wider">Notificações</p>
-                <Badge variant="secondary" className="text-[10px] font-semibold">4 novas</Badge>
+                <p className="font-display text-xs font-bold uppercase tracking-wider">
+                  Notificações
+                </p>
+                <Badge
+                  variant="secondary"
+                  className="text-[10px] font-semibold"
+                >
+                  4 novas
+                </Badge>
               </div>
               <ul className="max-h-80 divide-y divide-border/40 overflow-auto">
                 {notificacoes.map((n) => (
-                  <li key={n.titulo} className="flex gap-3 px-4 py-3 transition-colors hover:bg-muted/40 cursor-pointer">
+                  <li
+                    key={n.titulo}
+                    className="flex gap-3 px-4 py-3 transition-colors hover:bg-muted/40 cursor-pointer"
+                  >
                     <span
                       className={`mt-1.5 size-2 shrink-0 rounded-full ${
                         n.nivel === "destructive"
                           ? "bg-destructive"
                           : n.nivel === "warning"
-                          ? "bg-amber-500"
-                          : "bg-emerald-500"
+                            ? "bg-amber-500"
+                            : "bg-emerald-500"
                       }`}
                     />
                     <div className="min-w-0">
-                      <p className="truncate text-xs font-semibold text-foreground">{n.titulo}</p>
-                      <p className="truncate text-[11px] text-muted-foreground">{n.detalhe}</p>
+                      <p className="truncate text-xs font-semibold text-foreground">
+                        {n.titulo}
+                      </p>
+                      <p className="truncate text-[11px] text-muted-foreground">
+                        {n.detalhe}
+                      </p>
                     </div>
                   </li>
                 ))}
@@ -502,11 +637,22 @@ export function Topbar() {
 
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" className="rounded-xl hover:bg-muted/60" onClick={toggle}>
-                {theme === "dark" ? <Sun className="size-4" /> : <Moon className="size-4" />}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="rounded-xl hover:bg-muted/60"
+                onClick={toggle}
+              >
+                {theme === "dark" ? (
+                  <Sun className="size-4" />
+                ) : (
+                  <Moon className="size-4" />
+                )}
               </Button>
             </TooltipTrigger>
-            <TooltipContent>{theme === "dark" ? "Tema claro" : "Tema escuro"}</TooltipContent>
+            <TooltipContent>
+              {theme === "dark" ? "Tema claro" : "Tema escuro"}
+            </TooltipContent>
           </Tooltip>
 
           {/* Perfil do Usuário Dinâmico (Nome e Emai obtidos do Login) */}
@@ -514,27 +660,48 @@ export function Topbar() {
             <DropdownMenuTrigger asChild>
               <button className="ml-1 flex items-center gap-2 rounded-2xl p-1.5 pr-3 transition-all hover:bg-muted/80 border border-transparent hover:border-border/65">
                 <Avatar className="size-8 ring-2 ring-primary/20">
-                  <AvatarImage src={`https://api.dicebear.com/9.x/avataaars/svg?seed=${encodeURIComponent(nomeUsuario)}`} alt={nomeUsuario} />
-                  <AvatarFallback className="text-xs font-bold bg-primary/10 text-primary">{iniciaisUsuario}</AvatarFallback>
+                  <AvatarImage
+                    src={`https://api.dicebear.com/9.x/avataaars/svg?seed=${encodeURIComponent(nomeUsuario)}`}
+                    alt={nomeUsuario}
+                  />
+                  <AvatarFallback className="text-xs font-bold bg-primary/10 text-primary">
+                    {iniciaisUsuario}
+                  </AvatarFallback>
                 </Avatar>
                 <span className="hidden text-left text-xs leading-tight sm:block">
-                  <span className="block font-semibold text-foreground truncate max-w-[120px]">{nomeUsuario}</span>
-                  <span className="block text-[10px] text-muted-foreground capitalize">{perfilUsuario}</span>
+                  <span className="block font-semibold text-foreground truncate max-w-[120px]">
+                    {nomeUsuario}
+                  </span>
+                  <span className="block text-[10px] text-muted-foreground capitalize">
+                    {perfilUsuario}
+                  </span>
                 </span>
                 <ChevronDown className="size-3 opacity-50 ml-0.5 hidden sm:block" />
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-60 rounded-2xl shadow-2xl p-1.5 border-border/80">
+            <DropdownMenuContent
+              align="end"
+              className="w-60 rounded-2xl shadow-2xl p-1.5 border-border/80"
+            >
               <DropdownMenuLabel className="px-3 py-2.5">
-                <p className="text-xs font-semibold text-foreground truncate">{nomeUsuario}</p>
-                <p className="text-[10px] text-muted-foreground font-normal truncate mt-0.5">{emailUsuario}</p>
+                <p className="text-xs font-semibold text-foreground truncate">
+                  {nomeUsuario}
+                </p>
+                <p className="text-[10px] text-muted-foreground font-normal truncate mt-0.5">
+                  {emailUsuario}
+                </p>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem className="rounded-xl cursor-pointer text-xs font-medium py-2">
-                <UserRound className="size-3.5 mr-2 text-muted-foreground" /> Perfil da Conta
+                <UserRound className="size-3.5 mr-2 text-muted-foreground" />{" "}
+                Perfil da Conta
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate("/configuracoes")} className="rounded-xl cursor-pointer text-xs font-medium py-2">
-                <Settings className="size-3.5 mr-2 text-muted-foreground" /> Configurações
+              <DropdownMenuItem
+                onClick={() => navigate("/configuracoes")}
+                className="rounded-xl cursor-pointer text-xs font-medium py-2"
+              >
+                <Settings className="size-3.5 mr-2 text-muted-foreground" />{" "}
+                Configurações
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem

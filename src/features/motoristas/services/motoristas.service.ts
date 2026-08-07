@@ -1,5 +1,5 @@
 // cspell:disable-next-line
-import api from "@/lib/api";
+import api from "@/config/api";
 import type { ApiResponse, CreateMotoristaDTO, Motorista } from "@/types";
 
 export type UpdateMotoristaDTO = Partial<CreateMotoristaDTO>;

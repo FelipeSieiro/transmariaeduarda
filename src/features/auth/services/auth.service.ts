@@ -1,64 +1,59 @@
-// src/services/auth.service.ts
+import api from "@/config/api";
+import { ENDPOINTS } from "@/constants/endpoints";
+import {
+  clearSession,
+  getStoredUser,
+  saveSession,
+} from "@/features/auth/services/session.storage";
+import type {
+  AuthSession,
+  AuthUser,
+  LoginDTO,
+  RegisterDTO,
+} from "@/features/auth/types/auth";
+import type { ApiResponse } from "@/types/shared";
 
-import api from "@/lib/api";
+export async function login(payload: LoginDTO): Promise<AuthSession> {
+  const response = await api.post<ApiResponse<AuthSession>>(
+    ENDPOINTS.AUTH.LOGIN,
+    payload,
+  );
+  const sessao = response.data.data;
 
-export interface LoginDTO {
-  email: string;
-  password: string;
+  saveSession(sessao);
+
+  return sessao;
 }
 
-export interface RegisterDTO {
-  nome: string;
-  email: string;
-  password: string;
+export async function register(payload: RegisterDTO): Promise<AuthSession> {
+  const response = await api.post<ApiResponse<AuthSession>>(
+    ENDPOINTS.AUTH.REGISTER,
+    payload,
+  );
+  const sessao = response.data.data;
+
+  saveSession(sessao);
+
+  return sessao;
 }
 
-export interface User {
-  id: string;
-  nome: string;
-  email: string;
-  perfil: string;
-}
-
-interface AuthResponse {
-  success: boolean;
-  data: {
-    token: string;
-    user: User;
-  };
-}
-
-export async function login(data: LoginDTO) {
-  const response = await api.post<AuthResponse>("/auth/login", data);
-  const { token, user } = response.data.data;
-
-  localStorage.setItem("token", token);
-  localStorage.setItem("user", JSON.stringify(user));
-
+export async function me(): Promise<AuthUser> {
+  const response = await api.get<ApiResponse<AuthUser>>(ENDPOINTS.AUTH.ME);
   return response.data.data;
 }
 
-export async function register(data: RegisterDTO) {
-  const response = await api.post<AuthResponse>("/auth/register", data);
-  const { token, user } = response.data.data;
-
-  localStorage.setItem("token", token);
-  localStorage.setItem("user", JSON.stringify(user));
-
-  return response.data.data;
+export function logout(): void {
+  clearSession();
 }
 
-export async function me() {
-  const response = await api.get("/auth/me");
-  return response.data.data;
+export function getUser(): AuthUser | null {
+  return getStoredUser();
 }
 
-export function logout() {
-  localStorage.removeItem("token");
-  localStorage.removeItem("user");
-}
-
-export function getUser() {
-  const user = localStorage.getItem("user");
-  return user ? JSON.parse(user) : null;
-}
+export const authService = {
+  login,
+  register,
+  me,
+  logout,
+  getUser,
+};

@@ -1,13 +1,24 @@
-// src/pages/auth/Register.tsx
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { Bus, Eye, EyeOff, Loader2, Lock, Mail, User as UserIcon, ArrowRight } from "lucide-react";
+import {
+  Bus,
+  Eye,
+  EyeOff,
+  Loader2,
+  Lock,
+  Mail,
+  User as UserIcon,
+  ArrowRight,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { register } from "@/features/auth/services/auth.service";
-import { AuthLayout } from "./AuthLayout";
+import { isAuthenticated } from "@/features/auth/services/session.storage";
+import { ROUTES } from "@/constants/routes";
+import { AuthLayout } from "@/layouts/AuthLayout";
+import { getApiErrorMessage } from "@/utils/api-error";
 
 export default function Register() {
   const navigate = useNavigate();
@@ -21,9 +32,8 @@ export default function Register() {
   });
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      navigate("/", { replace: true });
+    if (isAuthenticated()) {
+      navigate(ROUTES.DASHBOARD, { replace: true });
     }
   }, [navigate]);
 
@@ -33,12 +43,14 @@ export default function Register() {
       setLoading(true);
       const data = await register(form);
       toast.success(`Conta criada com sucesso! Bem-vindo, ${data.user.nome}!`);
-      navigate("/", { replace: true });
-    } catch (error: any) {
+      navigate(ROUTES.DASHBOARD, { replace: true });
+    } catch (error) {
       console.error(error);
       toast.error(
-        error?.response?.data?.message ||
-          "Erro ao criar conta. Verifique os dados informados."
+        getApiErrorMessage(
+          error,
+          "Erro ao criar conta. Verifique os dados informados.",
+        ),
       );
     } finally {
       setLoading(false);
@@ -74,7 +86,9 @@ export default function Register() {
                 required
                 className="h-13 rounded-2xl pl-11 bg-muted/40 border-border/80 transition-all focus-visible:bg-background focus-visible:ring-2 focus-visible:ring-primary/20"
                 value={form.nome}
-                onChange={(e) => setForm((old) => ({ ...old, nome: e.target.value }))}
+                onChange={(e) =>
+                  setForm((old) => ({ ...old, nome: e.target.value }))
+                }
               />
             </div>
           </div>
@@ -92,7 +106,9 @@ export default function Register() {
                 required
                 className="h-13 rounded-2xl pl-11 bg-muted/40 border-border/80 transition-all focus-visible:bg-background focus-visible:ring-2 focus-visible:ring-primary/20"
                 value={form.email}
-                onChange={(e) => setForm((old) => ({ ...old, email: e.target.value }))}
+                onChange={(e) =>
+                  setForm((old) => ({ ...old, email: e.target.value }))
+                }
               />
             </div>
           </div>
@@ -110,14 +126,20 @@ export default function Register() {
                 required
                 className="h-13 rounded-2xl pl-11 pr-12 bg-muted/40 border-border/80 transition-all focus-visible:bg-background focus-visible:ring-2 focus-visible:ring-primary/20"
                 value={form.password}
-                onChange={(e) => setForm((old) => ({ ...old, password: e.target.value }))}
+                onChange={(e) =>
+                  setForm((old) => ({ ...old, password: e.target.value }))
+                }
               />
               <button
                 type="button"
                 onClick={() => setMostrarSenha((v) => !v)}
                 className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground p-1"
               >
-                {mostrarSenha ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                {mostrarSenha ? (
+                  <EyeOff className="size-4" />
+                ) : (
+                  <Eye className="size-4" />
+                )}
               </button>
             </div>
           </div>
@@ -143,7 +165,10 @@ export default function Register() {
 
         <div className="mt-7 text-center text-xs text-muted-foreground">
           Já possui uma conta?{" "}
-          <Link to="/login" className="font-bold text-primary hover:underline transition-all">
+          <Link
+            to={ROUTES.LOGIN}
+            className="font-bold text-primary hover:underline transition-all"
+          >
             Faça login
           </Link>
         </div>

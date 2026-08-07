@@ -1,4 +1,4 @@
-import api from "@/lib/api";
+import api from "@/config/api";
 import type { ApiResponse, Contrato, CriarContratoPayload } from "@/types";
 
 export async function listarContratos(): Promise<Contrato[]> {
