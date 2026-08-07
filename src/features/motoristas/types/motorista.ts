@@ -10,9 +10,14 @@ export interface Motorista {
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
+  // Campos opcionais retornados por alguns endpoints da API.
+  foto_url?: string | null;
+  cidade?: string | null;
 }
 
 export type CreateMotoristaDTO = Omit<
   Motorista,
-  "id" | "created_at" | "updated_at" | "deleted_at"
+  "id" | "created_at" | "updated_at" | "deleted_at" | "foto_url" | "cidade"
 >;
+
+export type UpdateMotoristaDTO = Partial<CreateMotoristaDTO>;

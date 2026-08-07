@@ -1,7 +1,13 @@
 // src/pages/NovaRota.tsx
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Save, Loader2, Lock, Route as RouteIcon } from "lucide-react";
+import {
+  ArrowLeft,
+  Save,
+  Loader2,
+  Lock,
+  Route as RouteIcon,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { SectionCard } from "@/components/ui-kit/primitives";
@@ -20,8 +26,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 import { rotasService } from "@/features/rotas/services/rotas.service";
 import type { TipoTrajeto } from "@/types/transporte";
-import { motoristasService, type Motorista } from "@/features/motoristas/services/motoristas.service";
-import { veiculosService, type Veiculo } from "@/features/veiculos/services/veiculos.service";
+import { motoristasService } from "@/features/motoristas/services/motoristas.service";
+import type { Motorista } from "@/features/motoristas/types/motorista";
+import { veiculosService } from "@/features/veiculos/services/veiculos.service";
+import type { Veiculo } from "@/features/veiculos/types/veiculos";
 import { listarEscolas } from "@/services/escolas.service";
 import type { Escola } from "@/types/escola";
 
@@ -53,11 +61,12 @@ export default function NovaRota() {
       try {
         setLoading(true);
 
-        const [listaMotoristas, listaVeiculos, listaEscolas] = await Promise.all([
-          motoristasService.getAll().catch(() => []),
-          veiculosService.getAll().catch(() => []),
-          listarEscolas().catch(() => []),
-        ]);
+        const [listaMotoristas, listaVeiculos, listaEscolas] =
+          await Promise.all([
+            motoristasService.getAll().catch(() => []),
+            veiculosService.getAll().catch(() => []),
+            listarEscolas().catch(() => []),
+          ]);
 
         setMotoristas(listaMotoristas || []);
         setVeiculos(listaVeiculos || []);
@@ -68,8 +77,12 @@ export default function NovaRota() {
           if (rota) {
             setNome(rota.nome || "");
             setBairro(rota.bairro || "");
-            setHorarioSaida(rota.horario_saida ? rota.horario_saida.slice(0, 5) : "");
-            setHorarioRetorno(rota.horario_retorno ? rota.horario_retorno.slice(0, 5) : "");
+            setHorarioSaida(
+              rota.horario_saida ? rota.horario_saida.slice(0, 5) : "",
+            );
+            setHorarioRetorno(
+              rota.horario_retorno ? rota.horario_retorno.slice(0, 5) : "",
+            );
             setMotoristaId(rota.motorista_id || "unassigned");
             setVeiculoId(rota.veiculo_id || "unassigned");
             setStatus(rota.status ? rota.status.toUpperCase() : "ATIVA");
@@ -90,24 +103,46 @@ export default function NovaRota() {
 
   useEffect(() => {
     const tipoTexto = tipoTrajeto === "ENTRADA" ? "Entrada" : "Saída";
-    
-    const escolaEncontrada = escolas.find((e) => e.id === escolaId && e.id !== "none");
+
+    const escolaEncontrada = escolas.find(
+      (e) => e.id === escolaId && e.id !== "none",
+    );
     const escolaTexto = escolaEncontrada ? escolaEncontrada.nome : "";
 
-    const horarioValor = tipoTrajeto === "ENTRADA" ? horarioSaida : horarioRetorno;
+    const horarioValor =
+      tipoTrajeto === "ENTRADA" ? horarioSaida : horarioRetorno;
     const horarioTexto = horarioValor ? `às ${horarioValor}` : "";
 
     const bairroTexto = bairro.trim() ? `(${bairro.trim()})` : "";
 
-    const motoristaEncontrado = motoristas.find((m) => m.id === motoristaId && m.id !== "unassigned");
-    const motoristaTexto = motoristaEncontrado ? `• ${motoristaEncontrado.nome}` : "";
+    const motoristaEncontrado = motoristas.find(
+      (m) => m.id === motoristaId && m.id !== "unassigned",
+    );
+    const motoristaTexto = motoristaEncontrado
+      ? `• ${motoristaEncontrado.nome}`
+      : "";
 
-    const nomeFormatado = [tipoTexto, escolaTexto, horarioTexto, bairroTexto, motoristaTexto]
+    const nomeFormatado = [
+      tipoTexto,
+      escolaTexto,
+      horarioTexto,
+      bairroTexto,
+      motoristaTexto,
+    ]
       .filter(Boolean)
       .join(" ");
 
     setNome(nomeFormatado);
-  }, [tipoTrajeto, escolaId, horarioSaida, horarioRetorno, bairro, motoristaId, escolas, motoristas]);
+  }, [
+    tipoTrajeto,
+    escolaId,
+    horarioSaida,
+    horarioRetorno,
+    bairro,
+    motoristaId,
+    escolas,
+    motoristas,
+  ]);
 
   const formatarHorario = (valor: string): string => {
     if (!valor) return "";
@@ -132,11 +167,16 @@ export default function NovaRota() {
 
       const payload: Record<string, any> = {
         nome: nome.trim(),
-        horario_saida: horarioSaida.trim() ? formatarHorario(horarioSaida) : null,
-        horario_retorno: horarioRetorno.trim() ? formatarHorario(horarioRetorno) : null,
+        horario_saida: horarioSaida.trim()
+          ? formatarHorario(horarioSaida)
+          : null,
+        horario_retorno: horarioRetorno.trim()
+          ? formatarHorario(horarioRetorno)
+          : null,
         bairro: bairro.trim() || null,
         escola_id: !escolaId || escolaId === "none" ? null : escolaId,
-        motorista_id: !motoristaId || motoristaId === "unassigned" ? null : motoristaId,
+        motorista_id:
+          !motoristaId || motoristaId === "unassigned" ? null : motoristaId,
         veiculo_id: !veiculoId || veiculoId === "unassigned" ? null : veiculoId,
         status: status.toUpperCase(),
         descricao: descricao.trim() || null,
@@ -208,7 +248,10 @@ export default function NovaRota() {
           description="Nome gerado automaticamente com base nos parâmetros preenchidos"
         >
           <div className="space-y-1.5">
-            <Label htmlFor="nome" className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            <Label
+              htmlFor="nome"
+              className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+            >
               <Lock className="size-3.5 text-muted-foreground" />
               Nome da Rota (Gerado Automático)
             </Label>
@@ -228,7 +271,10 @@ export default function NovaRota() {
         >
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-1.5">
-              <Label htmlFor="tipo_trajeto" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <Label
+                htmlFor="tipo_trajeto"
+                className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+              >
                 Tipo de Trajeto *
               </Label>
               <Select
@@ -247,7 +293,10 @@ export default function NovaRota() {
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="escola_id" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <Label
+                htmlFor="escola_id"
+                className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+              >
                 Escola
               </Label>
               <Select
@@ -271,7 +320,10 @@ export default function NovaRota() {
 
             {/* Ambos os campos de horário visíveis independentemente */}
             <div className="space-y-1.5">
-              <Label htmlFor="horario_saida" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <Label
+                htmlFor="horario_saida"
+                className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+              >
                 Horário de Saída
               </Label>
               <Input
@@ -285,7 +337,10 @@ export default function NovaRota() {
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="horario_retorno" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <Label
+                htmlFor="horario_retorno"
+                className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+              >
                 Horário de Retorno
               </Label>
               <Input
@@ -298,10 +353,11 @@ export default function NovaRota() {
               />
             </div>
 
-
-
             <div className="space-y-1.5">
-              <Label htmlFor="bairro" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <Label
+                htmlFor="bairro"
+                className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+              >
                 Bairro / Região
               </Label>
               <Input
@@ -315,7 +371,10 @@ export default function NovaRota() {
             </div>
 
             <div className="space-y-1.5 md:col-span-2">
-              <Label htmlFor="status" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <Label
+                htmlFor="status"
+                className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+              >
                 Status
               </Label>
               <Select
@@ -341,7 +400,10 @@ export default function NovaRota() {
         >
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-1.5">
-              <Label htmlFor="motorista_id" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <Label
+                htmlFor="motorista_id"
+                className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+              >
                 Motorista Responsável
               </Label>
               <Select
@@ -364,7 +426,10 @@ export default function NovaRota() {
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="veiculo_id" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <Label
+                htmlFor="veiculo_id"
+                className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+              >
                 Veículo Atribuído
               </Label>
               <Select
@@ -387,7 +452,10 @@ export default function NovaRota() {
             </div>
 
             <div className="space-y-1.5 md:col-span-2">
-              <Label htmlFor="descricao" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <Label
+                htmlFor="descricao"
+                className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+              >
                 Descrição / Observações
               </Label>
               <Textarea

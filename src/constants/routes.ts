@@ -15,6 +15,8 @@ export const ROUTES = {
 
   RESPONSAVEIS: "/responsaveis",
   RESPONSAVEL_NOVO: "/responsaveis/novo",
+  RESPONSAVEL_DETALHE: (id: string) => `/responsaveis/${id}`,
+  RESPONSAVEL_EDITAR: (id: string) => `/responsaveis/${id}/editar`,
 
   AGENDA: "/agenda",
 
