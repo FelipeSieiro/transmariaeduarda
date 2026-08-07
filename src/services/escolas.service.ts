@@ -1,4 +1,4 @@
-import api from "@/lib/api";
+import api from "@/config/api";
 import type { ApiResponse, Escola } from "@/types";
 
 export async function listarEscolas(): Promise<Escola[]> {

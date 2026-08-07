@@ -1,4 +1,4 @@
-import api from "@/lib/api";
+import api from "@/config/api";
 import type { ApiResponse, Mensalidade, PagarMensalidadePayload } from "@/types";
 
 // Buscar mensalidades por Contrato ID

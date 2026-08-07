@@ -2,7 +2,7 @@
 import { ReactNode } from "react";
 import { Moon, Sun, Sparkles, ShieldCheck, MapPin, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useTheme } from "@/components/theme-provider";
+import { useTheme } from "@/providers/theme-provider";
 
 interface AuthLayoutProps {
   children: ReactNode;
@@ -45,10 +45,13 @@ export function AuthLayout({ children }: AuthLayoutProps) {
               Gestão Inteligente de Frotas
             </div>
             <h1 className="text-4xl xl:text-5xl font-black tracking-tight leading-tight">
-              Revolucione o controle do seu <span className="text-primary">Transporte Escolar</span>
+              Revolucione o controle do seu{" "}
+              <span className="text-primary">Transporte Escolar</span>
             </h1>
             <p className="text-muted-foreground text-base leading-relaxed">
-              Monitore rotas em tempo real, gerencie contratos, otimize o financeiro e mantenha a comunicação com os responsáveis em um único lugar.
+              Monitore rotas em tempo real, gerencie contratos, otimize o
+              financeiro e mantenha a comunicação com os responsáveis em um
+              único lugar.
             </p>
           </div>
 
@@ -58,7 +61,9 @@ export function AuthLayout({ children }: AuthLayoutProps) {
                 <MapPin className="size-5" />
               </div>
               <h3 className="font-bold text-sm">Rotas Otimizadas</h3>
-              <p className="text-xs text-muted-foreground mt-1">Trajetos inteligentes para economia de tempo e combustível.</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Trajetos inteligentes para economia de tempo e combustível.
+              </p>
             </div>
 
             <div className="rounded-3xl border border-border/60 bg-card/40 p-5 backdrop-blur-xl transition-all hover:border-primary/40 shadow-sm">
@@ -66,13 +71,17 @@ export function AuthLayout({ children }: AuthLayoutProps) {
                 <Users className="size-5" />
               </div>
               <h3 className="font-bold text-sm">Gestão de Alunos</h3>
-              <p className="text-xs text-muted-foreground mt-1">Controle total de frequência, mensalidades e responsáveis.</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Controle total de frequência, mensalidades e responsáveis.
+              </p>
             </div>
           </div>
 
           <div className="flex items-center gap-3 text-xs text-muted-foreground/90 font-medium">
             <ShieldCheck className="size-5 text-emerald-500" />
-            <span>Plataforma 100% segura com criptografia de ponta a ponta</span>
+            <span>
+              Plataforma 100% segura com criptografia de ponta a ponta
+            </span>
           </div>
         </div>
 

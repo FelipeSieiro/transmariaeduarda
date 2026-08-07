@@ -1,5 +1,5 @@
 // cspell:disable-next-line
-import api from "@/lib/api";
+import api from "@/config/api";
 import type { ApiResponse, Responsavel } from "@/types";
 
 export async function listarResponsaveis(): Promise<Responsavel[]> {

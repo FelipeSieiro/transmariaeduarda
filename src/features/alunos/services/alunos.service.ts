@@ -1,4 +1,4 @@
-import api from "@/lib/api";
+import api from "@/config/api";
 import type { AgendamentoRota } from "@/features/agenda/types/agendamento";
 import type { Aluno, CadastroAlunoCompleto } from "@/features/alunos/types/alunos";
 import type { ApiResponse } from "@/types/shared";
