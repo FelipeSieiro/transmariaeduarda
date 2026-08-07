@@ -12,3 +12,5 @@ export * from "@/features/veiculos/types/veiculos";
 export * from "@/features/alunos/types/mensalidade";
 export * from "@/types/escola";
 export * from "@/types/shared";
+export * from "@/types/transporte";
+export * from "@/types/ui";

@@ -1,7 +1,16 @@
 // src/components/alunos/ModalAgendaAluno.tsx
 
 import { useEffect, useState } from "react";
-import { X, Save, Plus, Trash2, Clock, Bus, Sparkles, Loader2 } from "lucide-react";
+import {
+  X,
+  Save,
+  Plus,
+  Trash2,
+  Clock,
+  Bus,
+  CalendarDays,
+  Loader2,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -15,34 +24,18 @@ import {
 } from "@/components/ui/select";
 
 import { agendamentoRotasService } from "@/features/agenda/services/agendamento-rotas.service";
-import type { ItemAgendamento, TipoTrajeto } from "@/types";
-
-export interface OptionRota {
-  readonly id: string;
-  readonly nome: string;
-}
+import { DIAS_SEMANA } from "@/features/agenda/constants/agenda.constants";
+import type { AgendamentoRota } from "@/features/agenda/types/agendamento";
+import type { RotaResumida } from "@/features/rotas/types/rota";
+import type { DiaSemana, TipoTrajeto } from "@/types/transporte";
 
 interface ModalAgendaAlunoProps {
   alunoId: string;
   alunoNome: string;
   isOpen: boolean;
   onClose: () => void;
-  rotasDisponiveis: readonly OptionRota[];
+  rotasDisponiveis: readonly RotaResumida[];
 }
-
-export interface DiaOpcao {
-  readonly id: number;
-  readonly label: string;
-}
-
-export const DIAS_SEMANA_MODAL: readonly DiaOpcao[] = [
-  { id: 1, label: "Segunda-feira" },
-  { id: 2, label: "Terça-feira" },
-  { id: 3, label: "Quarta-feira" },
-  { id: 4, label: "Quinta-feira" },
-  { id: 5, label: "Sexta-feira" },
-  { id: 6, label: "Sábado" },
-] as const;
 
 export function ModalAgendaAluno({
   alunoId,
@@ -51,7 +44,7 @@ export function ModalAgendaAluno({
   onClose,
   rotasDisponiveis,
 }: ModalAgendaAlunoProps) {
-  const [agendamentos, setAgendamentos] = useState<ItemAgendamento[]>([]);
+  const [agendamentos, setAgendamentos] = useState<AgendamentoRota[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [saving, setSaving] = useState<boolean>(false);
 
@@ -74,7 +67,10 @@ export function ModalAgendaAluno({
     loadAgenda();
   }, [isOpen, alunoId]);
 
-  const handleAddHorario = (dia_semana: number, tipo_trajeto: TipoTrajeto) => {
+  const handleAddHorario = (
+    dia_semana: DiaSemana,
+    tipo_trajeto: TipoTrajeto
+  ) => {
     const defaultRota = rotasDisponiveis[0]?.id || "";
     setAgendamentos((prev) => [
       ...prev,
@@ -83,21 +79,19 @@ export function ModalAgendaAluno({
         rota_id: defaultRota,
         dia_semana,
         tipo_trajeto,
-        horario: tipo_trajeto === "ida" || tipo_trajeto === "ENTRADA" ? "07:00" : "12:00",
+        horario: tipo_trajeto === "ENTRADA" ? "07:00" : "12:00",
       },
     ]);
   };
 
-  const handleUpdateItem = <K extends keyof ItemAgendamento>(
+  const handleUpdateItem = <K extends keyof AgendamentoRota>(
     index: number,
     field: K,
-    value: ItemAgendamento[K]
+    value: AgendamentoRota[K]
   ) => {
-    setAgendamentos((prev) => {
-      const copy = [...prev];
-      copy[index] = { ...copy[index], [field]: value };
-      return copy;
-    });
+    setAgendamentos((prev) =>
+      prev.map((item, i) => (i === index ? { ...item, [field]: value } : item))
+    );
   };
 
   const handleRemoveItem = (index: number) => {
@@ -163,13 +157,13 @@ export function ModalAgendaAluno({
               <p className="text-sm font-medium">Carregando grade de horários...</p>
             </div>
           ) : (
-            DIAS_SEMANA_MODAL.map((dia) => {
+            DIAS_SEMANA.map((dia) => {
               const agendamentosDia = agendamentos
                 .map((item, originalIndex) => ({ ...item, originalIndex }))
-                .filter((item) => item.dia_semana === dia.id);
+                .filter((item) => item.dia_semana === dia.value);
 
               return (
-                <div key={dia.id} className="bg-muted/20 border border-border/60 rounded-2xl p-5 transition-all hover:bg-muted/40">
+                <div key={dia.value} className="bg-muted/20 border border-border/60 rounded-2xl p-5 transition-all hover:bg-muted/40">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="font-bold text-foreground text-sm flex items-center gap-2.5">
                       <span className="size-2.5 rounded-full bg-primary shadow-sm shadow-primary/50" />
@@ -181,7 +175,7 @@ export function ModalAgendaAluno({
                         type="button"
                         variant="outline"
                         size="sm"
-                        onClick={() => handleAddHorario(dia.id, "ida")}
+                        onClick={() => handleAddHorario(dia.value, "ENTRADA")}
                         className="h-8 text-xs font-semibold bg-emerald-500/10 text-emerald-500 border-emerald-500/20 hover:bg-emerald-500/20 rounded-xl"
                       >
                         <Plus className="size-3.5 mr-1" /> Ida (Entrada)
@@ -190,7 +184,7 @@ export function ModalAgendaAluno({
                         type="button"
                         variant="outline"
                         size="sm"
-                        onClick={() => handleAddHorario(dia.id, "volta")}
+                        onClick={() => handleAddHorario(dia.value, "SAIDA")}
                         className="h-8 text-xs font-semibold bg-amber-500/10 text-amber-500 border-amber-500/20 hover:bg-amber-500/20 rounded-xl"
                       >
                         <Plus className="size-3.5 mr-1" /> Volta (Saída)
@@ -211,7 +205,7 @@ export function ModalAgendaAluno({
                         >
                           <span
                             className={`text-[10px] uppercase font-bold px-2.5 py-1 rounded-lg w-full sm:w-auto text-center ${
-                              item.tipo_trajeto === "ida" || item.tipo_trajeto === "ENTRADA"
+                              item.tipo_trajeto === "ENTRADA"
                                 ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
                                 : "bg-amber-500/15 text-amber-600 dark:text-amber-400"
                             }`}

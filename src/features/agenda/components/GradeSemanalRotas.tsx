@@ -19,25 +19,12 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { rotasService } from "@/features/rotas/services/rotas.service";
 import { agendamentoRotasService } from "@/features/agenda/services/agendamento-rotas.service";
 
-import type { Rota } from "@/types/rota";
-import { AgendamentoRotaItem } from "@/types";
+import { DIAS_SEMANA_UTEIS } from "@/features/agenda/constants/agenda.constants";
+import type { AgendamentoRota } from "@/features/agenda/types/agendamento";
+import type { Rota } from "@/features/rotas/types/rota";
+import type { DiaSemana, TipoTrajeto } from "@/types/transporte";
 
-export type TipoTrajeto = "ENTRADA" | "SAIDA";
-
-export interface DiaSemanaOption {
-  readonly label: string;
-  readonly value: number;
-}
-
-export const DIAS_SEMANA: readonly DiaSemanaOption[] = [
-  { label: "Segunda-feira", value: 1 },
-  { label: "Terça-feira", value: 2 },
-  { label: "Quarta-feira", value: 3 },
-  { label: "Quinta-feira", value: 4 },
-  { label: "Sexta-feira", value: 5 },
-] as const;
-
-type AgendamentoKey = `${number}_${TipoTrajeto}`;
+type AgendamentoKey = `${DiaSemana}_${TipoTrajeto}`;
 
 function normalizarTipoTrajeto(tipo: string): TipoTrajeto {
   const normalizado = String(tipo).toUpperCase();
@@ -70,16 +57,16 @@ export function GradeSemanalRotas({
     useState<Rota[]>([]);
 
   const [agendamentos, setAgendamentos] = useState<
-    Record<string, AgendamentoRotaItem>
+    Record<string, AgendamentoRota>
   >({});
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
   const popularMapaAgendamentos = (
-    agendamentosData: AgendamentoRotaItem[]
-  ): Record<string, AgendamentoRotaItem> => {
-    const mapa: Record<string, AgendamentoRotaItem> = {};
+    agendamentosData: AgendamentoRota[]
+  ): Record<string, AgendamentoRota> => {
+    const mapa: Record<string, AgendamentoRota> = {};
 
     if (Array.isArray(agendamentosData)) {
       agendamentosData.forEach((item) => {
@@ -137,7 +124,7 @@ export function GradeSemanalRotas({
   }, [alunoId]);
 
   function handleRotaChange(
-    dia: number,
+    dia: DiaSemana,
     tipo: TipoTrajeto,
     rotaId: string
   ) {
@@ -169,26 +156,30 @@ export function GradeSemanalRotas({
         tipo_trajeto: tipo,
         rota_id: rotaId,
         horario: prev[key]?.horario || horarioPadrao,
-      },
+      } satisfies AgendamentoRota,
     }));
   }
 
   function handleHorarioChange(
-    dia: number,
+    dia: DiaSemana,
     tipo: TipoTrajeto,
     horario: string
   ) {
     const key: AgendamentoKey = `${dia}_${tipo}`;
 
-    if (!agendamentos[key]) return;
+    setAgendamentos((prev) => {
+      const atual = prev[key];
 
-    setAgendamentos((prev) => ({
-      ...prev,
-      [key]: {
-        ...prev[key],
-        horario,
-      },
-    }));
+      if (!atual) return prev;
+
+      return {
+        ...prev,
+        [key]: {
+          ...atual,
+          horario,
+        },
+      };
+    });
   }
 
   async function handleSalvar() {
@@ -265,7 +256,7 @@ export function GradeSemanalRotas({
         }
       >
         <div className="space-y-4">
-          {DIAS_SEMANA.map((dia) => {
+          {DIAS_SEMANA_UTEIS.map((dia) => {
             const keyEntrada: AgendamentoKey =
               `${dia.value}_ENTRADA`;
 

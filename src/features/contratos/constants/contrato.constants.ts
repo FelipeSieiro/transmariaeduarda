@@ -1,3 +1,5 @@
+import type { SelectOption } from "@/types/ui";
+
 export enum FormaPagamento {
   PIX = "PIX",
   DINHEIRO = "Dinheiro",
@@ -10,12 +12,6 @@ export enum StatusPagamento {
   PAGO = "pago",
   ATRASADO = "atrasado",
   CANCELADO = "cancelado",
-}
-
-// Interface genérica reutilizável para opções em Selects
-export interface SelectOption<T = string> {
-  readonly value: T;
-  readonly label: string;
 }
 
 // Arrays imutáveis para iteração direta
