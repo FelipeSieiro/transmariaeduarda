@@ -2,7 +2,13 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { Check, ChevronsUpDown, Calendar as CalendarIcon, UserPlus, Trash2 } from "lucide-react";
+import {
+  Check,
+  ChevronsUpDown,
+  Calendar as CalendarIcon,
+  UserPlus,
+  Trash2,
+} from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -30,7 +36,7 @@ import {
 } from "@/components/ui/command";
 
 import { criarAlunoCompleto } from "@/features/alunos/services/alunos.service";
-import { listarResponsaveis } from "@/features/responsaveis/services/responsaveis.service";
+import { responsaveisService } from "@/features/responsaveis/services/responsaveis.service";
 import { listarEscolas } from "@/services/escolas.service";
 import { listarRotas } from "@/features/rotas/services/rotas.service";
 import type { Responsavel, Escola, Rota } from "@/types";
@@ -117,7 +123,7 @@ export default function NovoAluno() {
 
   // Carrega Responsáveis, Escolas e Rotas em paralelo
   useEffect(() => {
-    Promise.all([listarResponsaveis(), listarEscolas(), listarRotas()])
+    Promise.all([responsaveisService.getAll(), listarEscolas(), listarRotas()])
       .then(([resp, esc, rot]) => {
         setResponsaveis(resp || []);
         setEscolas(esc || []);
@@ -154,7 +160,7 @@ export default function NovoAluno() {
 
   function alterarResponsavel(
     campo: keyof ResponsavelAluno,
-    valor: string | boolean
+    valor: string | boolean,
   ) {
     setResponsavelAtual((prev) => ({
       ...prev,
@@ -174,7 +180,7 @@ export default function NovoAluno() {
     }
 
     const existe = responsaveisSelecionados.some(
-      (item) => item.responsavel_id === responsavelAtual.responsavel_id
+      (item) => item.responsavel_id === responsavelAtual.responsavel_id,
     );
 
     if (existe) {
@@ -194,7 +200,7 @@ export default function NovoAluno() {
 
   function removerResponsavel(id: string) {
     setResponsaveisSelecionados((prev) =>
-      prev.filter((item) => item.responsavel_id !== id)
+      prev.filter((item) => item.responsavel_id !== id),
     );
   }
 
@@ -227,7 +233,9 @@ export default function NovoAluno() {
 
       const listaResponsaveisCompletos = responsaveisSelecionados
         .map((item) => {
-          const respObj = responsaveis.find((r) => r.id === item.responsavel_id);
+          const respObj = responsaveis.find(
+            (r) => r.id === item.responsavel_id,
+          );
           if (!respObj) return null;
           return {
             nome: respObj.nome,
@@ -396,10 +404,7 @@ export default function NovoAluno() {
             </Select>
           </div>
 
-          <Select
-            value={form.turno}
-            onValueChange={(v) => alterar("turno", v)}
-          >
+          <Select value={form.turno} onValueChange={(v) => alterar("turno", v)}>
             <SelectTrigger className="rounded-xl">
               <SelectValue placeholder="Selecione o turno" />
             </SelectTrigger>
@@ -467,7 +472,7 @@ export default function NovoAluno() {
                 >
                   {responsavelAtual.responsavel_id
                     ? responsaveis.find(
-                        (r) => r.id === responsavelAtual.responsavel_id
+                        (r) => r.id === responsavelAtual.responsavel_id,
                       )?.nome
                     : "Selecionar responsável..."}
                   <ChevronsUpDown className="ml-2 size-4 shrink-0 opacity-50" />
@@ -496,7 +501,7 @@ export default function NovoAluno() {
                               "mr-2 size-4",
                               responsavelAtual.responsavel_id === item.id
                                 ? "opacity-100"
-                                : "opacity-0"
+                                : "opacity-0",
                             )}
                           />
                           {item.nome}
@@ -532,7 +537,10 @@ export default function NovoAluno() {
                   type="checkbox"
                   checked={responsavelAtual.responsavel_financeiro}
                   onChange={(e) =>
-                    alterarResponsavel("responsavel_financeiro", e.target.checked)
+                    alterarResponsavel(
+                      "responsavel_financeiro",
+                      e.target.checked,
+                    )
                   }
                   className="rounded border-border size-4 accent-primary"
                 />
@@ -544,7 +552,10 @@ export default function NovoAluno() {
                   type="checkbox"
                   checked={responsavelAtual.responsavel_emergencia}
                   onChange={(e) =>
-                    alterarResponsavel("responsavel_emergencia", e.target.checked)
+                    alterarResponsavel(
+                      "responsavel_emergencia",
+                      e.target.checked,
+                    )
                   }
                   className="rounded border-border size-4 accent-primary"
                 />
@@ -567,7 +578,7 @@ export default function NovoAluno() {
             <div className="space-y-2 pt-2 border-t border-border">
               {responsaveisSelecionados.map((item) => {
                 const respObj = responsaveis.find(
-                  (r) => r.id === item.responsavel_id
+                  (r) => r.id === item.responsavel_id,
                 );
                 return (
                   <div
@@ -577,7 +588,9 @@ export default function NovoAluno() {
                     <div className="space-y-0.5">
                       <p className="text-sm font-medium text-foreground">
                         {respObj?.nome ?? "Responsável"} —{" "}
-                        <span className="text-muted-foreground">{item.parentesco}</span>
+                        <span className="text-muted-foreground">
+                          {item.parentesco}
+                        </span>
                       </p>
                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
                         {item.responsavel_financeiro && (
@@ -610,7 +623,10 @@ export default function NovoAluno() {
         </div>
       </SectionCard>
 
-      <SectionCard title="Endereço" description="Localização e dados residenciais do aluno">
+      <SectionCard
+        title="Endereço"
+        description="Localização e dados residenciais do aluno"
+      >
         <div className="grid gap-4">
           <div className="grid gap-4 md:grid-cols-2">
             <Input
@@ -657,7 +673,10 @@ export default function NovoAluno() {
         </div>
       </SectionCard>
 
-      <SectionCard title="Contrato" description="Dados comerciais e financeiros do aluno">
+      <SectionCard
+        title="Contrato"
+        description="Dados comerciais e financeiros do aluno"
+      >
         <div className="grid gap-4">
           <Input
             placeholder="Número do contrato (Gerado automaticamente)"
@@ -740,11 +759,11 @@ export default function NovoAluno() {
         </div>
       </SectionCard>
 
-      <SectionCard title="Status" description="Controle de ativação do cadastro">
-        <Select
-          value={form.status}
-          onValueChange={(v) => alterar("status", v)}
-        >
+      <SectionCard
+        title="Status"
+        description="Controle de ativação do cadastro"
+      >
+        <Select value={form.status} onValueChange={(v) => alterar("status", v)}>
           <SelectTrigger className="rounded-xl">
             <SelectValue placeholder="Status" />
           </SelectTrigger>

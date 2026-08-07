@@ -1,53 +1,22 @@
-// cspell:disable-next-line
 import api from "@/config/api";
-import type { ApiResponse, Responsavel } from "@/types";
+import { ENDPOINTS } from "@/constants/endpoints";
+import { createCrudService } from "@/services/http/create-crud-service";
+import type { Responsavel } from "@/features/responsaveis/types/responsavel";
+import type { ApiResponse } from "@/types/shared";
 
-export async function listarResponsaveis(): Promise<Responsavel[]> {
-  const response = await api.get<ApiResponse<Responsavel[]>>("/responsaveis");
-  return response.data.data;
-}
+const crud = createCrudService<Responsavel, Partial<Responsavel>>(
+  ENDPOINTS.RESPONSAVEIS,
+);
 
-export async function buscarResponsavel(id: string): Promise<Responsavel> {
-  const response = await api.get<ApiResponse<Responsavel>>(`/responsaveis/${id}`);
-  return response.data.data;
-}
-
-export async function criarResponsavel(
-  responsavel: Partial<Responsavel>
-): Promise<Responsavel> {
+// A criação pode responder com um array de um item, dependendo do endpoint.
+async function create(payload: Partial<Responsavel>): Promise<Responsavel> {
   const response = await api.post<ApiResponse<Responsavel | Responsavel[]>>(
-    "/responsaveis",
-    responsavel
+    ENDPOINTS.RESPONSAVEIS,
+    payload,
   );
   const data = response.data.data;
 
-  return Array.isArray(data) ? data[0] : data;
+  return Array.isArray(data) ? (data[0] as Responsavel) : data;
 }
 
-export async function atualizarResponsavel(
-  id: string,
-  responsavel: Partial<Responsavel>
-): Promise<Responsavel> {
-  const response = await api.put<ApiResponse<Responsavel>>(
-    `/responsaveis/${id}`,
-    responsavel
-  );
-  return response.data.data;
-}
-
-export async function removerResponsavel(id: string): Promise<void> {
-  await api.delete<ApiResponse<unknown>>(`/responsaveis/${id}`);
-}
-
-export const responsaveisService = {
-  getAll: listarResponsaveis,
-  listar: listarResponsaveis,
-  getById: buscarResponsavel,
-  buscarPorId: buscarResponsavel,
-  create: criarResponsavel,
-  criar: criarResponsavel,
-  update: atualizarResponsavel,
-  atualizar: atualizarResponsavel,
-  delete: removerResponsavel,
-  remover: removerResponsavel,
-};
+export const responsaveisService = { ...crud, create };

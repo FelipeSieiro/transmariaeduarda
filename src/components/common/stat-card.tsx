@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -13,7 +14,7 @@ const tones: Record<StatCardTone, string> = {
 
 interface StatCardProps {
   label: string;
-  value: string | number;
+  value: ReactNode;
   icon: LucideIcon;
   tone?: StatCardTone;
 }

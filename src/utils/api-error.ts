@@ -1,16 +1,22 @@
 import { isAxiosError } from "axios";
 
+type ApiErrorMessage = string | string[] | undefined;
+
 interface ApiErrorBody {
-  message?: string;
-  error?: string;
+  message?: ApiErrorMessage;
+  error?: ApiErrorMessage;
+}
+
+function normalize(valor: ApiErrorMessage): string | null {
+  if (Array.isArray(valor)) return valor.length > 0 ? valor.join(", ") : null;
+  return valor || null;
 }
 
 // Extrai a mensagem enviada pela API, com fallback amigável.
 export function getApiErrorMessage(error: unknown, fallback: string): string {
   if (isAxiosError<ApiErrorBody>(error)) {
-    return (
-      error.response?.data?.message ?? error.response?.data?.error ?? fallback
-    );
+    const body = error.response?.data;
+    return normalize(body?.message) ?? normalize(body?.error) ?? fallback;
   }
 
   if (error instanceof Error && error.message) {
