@@ -22,9 +22,14 @@ function getIniciais(nome?: string): string {
 }
 
 export function AlunoHeader({ aluno, onContratoClick }: AlunoHeaderProps) {
-  const nomeEscola = typeof aluno.escolas === "string"
-    ? aluno.escolas
-    : aluno.escola?.nome ?? aluno.escolas?.nome ?? aluno.escola_nome ?? "Escola não informada";
+
+  const dados = aluno.data || aluno;
+
+  const nomeEscola =
+      typeof dados.escola === "string"
+        ? dados.escola
+        : dados.escola?.nome ?? dados.escolas?.nome ?? "Escola não informada";
+
 
   const nomeRota = typeof aluno.rota === "string"
     ? aluno.rota
