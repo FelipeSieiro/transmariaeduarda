@@ -8,7 +8,18 @@ import {
   Calendar as CalendarIcon,
   UserPlus,
   Trash2,
+  Plus,
 } from "lucide-react";
+
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -40,6 +51,7 @@ import { responsaveisService } from "@/features/responsaveis/services/responsave
 import { listarEscolas } from "@/services/escolas.service";
 import { listarRotas } from "@/features/rotas/services/rotas.service";
 import type { Responsavel, Escola, Rota } from "@/types";
+import { toResponsavelPayload } from "@/features/responsaveis/mappers/responsavel.mapper";
 
 import {
   SERIES,
@@ -84,6 +96,23 @@ export default function NovoAluno() {
   >([]);
 
   const [openComboboxResponsavel, setOpenComboboxResponsavel] = useState(false);
+  const [openModalNovoResponsavel, setOpenModalNovoResponsavel] = useState(false);
+  const [novoResponsavel, setNovoResponsavel] = useState({
+    nome: "",
+    cpf: "",
+    telefone: "",
+    email: "",
+    observacoes: "",
+    endereco: {
+      cidade: "",
+      bairro: "",
+      logradouro: "",
+      numero: "",
+      complemento: "",
+      cep: "",
+    },
+  });
+  const [criandoResponsavel, setCriandoResponsavel] = useState(false);
 
   const [responsavelAtual, setResponsavelAtual] = useState<ResponsavelAluno>({
     responsavel_id: "",
@@ -99,7 +128,6 @@ export default function NovoAluno() {
     data_nascimento: "",
     data_inicio: "",
     escola_id: "",
-    rota_id: "",
     turno: "",
     cidade: "",
     bairro: "",
@@ -204,6 +232,68 @@ export default function NovoAluno() {
     );
   }
 
+  async function criarNovoResponsavel() {
+    if (!novoResponsavel.nome.trim()) {
+      toast.error("Informe o nome do responsável");
+      return;
+    }
+
+    if (!novoResponsavel.cpf.trim()) {
+      toast.error("Informe o CPF do responsável");
+      return;
+    }
+
+    try {
+      setCriandoResponsavel(true);
+      const novo = await responsaveisService.create(
+        toResponsavelPayload({
+          nome: novoResponsavel.nome,
+          cpf: novoResponsavel.cpf,
+          telefone: novoResponsavel.telefone,
+          email: novoResponsavel.email,
+          observacoes: novoResponsavel.observacoes,
+          endereco: novoResponsavel.endereco,
+        })
+      );
+
+      // Atualiza a lista de responsáveis disponíveis
+      setResponsaveis((prev) => [...prev, novo]);
+
+      // Seleciona automaticamente o novo responsável
+      setResponsavelAtual({
+        responsavel_id: novo.id,
+        parentesco: "",
+        responsavel_financeiro: false,
+        responsavel_emergencia: false,
+      });
+
+      // Limpa o formulário e fecha o modal
+      setNovoResponsavel({
+        nome: "",
+        cpf: "",
+        telefone: "",
+        email: "",
+        observacoes: "",
+        endereco: {
+          cidade: "",
+          bairro: "",
+          logradouro: "",
+          numero: "",
+          complemento: "",
+          cep: "",
+        },
+      });
+      setOpenModalNovoResponsavel(false);
+
+      toast.success("Responsável criado com sucesso");
+    } catch (error) {
+      console.error(error);
+      toast.error("Erro ao criar responsável");
+    } finally {
+      setCriandoResponsavel(false);
+    }
+  }
+
   async function salvar() {
     if (!form.nome) {
       toast.error("Informe o nome do aluno");
@@ -231,7 +321,38 @@ export default function NovoAluno() {
           ? form.matricula.trim()
           : crypto.randomUUID();
 
-      const listaResponsaveisCompletos = responsaveisSelecionados
+      const alunoPayload = {
+        ...form,
+        matricula: matriculaGerada,
+        foto_url: form.foto_url || undefined,
+        data_nascimento: form.data_nascimento || undefined,
+        data_inicio: form.data_inicio || undefined,
+        cidade: form.cidade || undefined,
+        bairro: form.bairro || undefined,
+        endereco: form.endereco || undefined,
+        numero: form.numero || undefined,
+        complemento: form.complemento || undefined,
+        cep: form.cep || undefined,
+        serie: `${serie} - Turma ${turma}`,
+      };
+
+      const numeroContratoFinal =
+        contrato.numero || gerarNumeroContrato(form.nome);
+
+      const contratoPayload = numeroContratoFinal
+        ? {
+            numero: numeroContratoFinal,
+            data_inicio: contrato.data_inicio || undefined,
+            data_fim: contrato.data_fim || null,
+            valor_mensalidade: Number(contrato.valor_mensalidade) || 0,
+            dia_vencimento: Number(contrato.dia_vencimento) || 1,
+            forma_pagamento: contrato.forma_pagamento || undefined,
+            observacoes: contrato.observacoes || undefined,
+            status: contrato.status || "ativo",
+          }
+        : undefined;
+
+      const responsaveisPayload = responsaveisSelecionados
         .map((item) => {
           const respObj = responsaveis.find(
             (r) => r.id === item.responsavel_id,
@@ -251,42 +372,9 @@ export default function NovoAluno() {
         })
         .filter(Boolean);
 
-      const alunoPayload = {
-        ...form,
-        matricula: matriculaGerada,
-        foto_url: form.foto_url || undefined,
-        data_nascimento: form.data_nascimento || undefined,
-        data_inicio: form.data_inicio || undefined,
-        rota_id: form.rota_id || undefined,
-        cidade: form.cidade || undefined,
-        bairro: form.bairro || undefined,
-        endereco: form.endereco || undefined,
-        numero: form.numero || undefined,
-        complemento: form.complemento || undefined,
-        cep: form.cep || undefined,
-        serie: `${serie} - Turma ${turma}`,
-        aluno_responsavel: responsaveisSelecionados,
-      };
-
-      const numeroContratoFinal =
-        contrato.numero || gerarNumeroContrato(form.nome);
-
-      const contratoPayload = numeroContratoFinal
-        ? {
-            numero: numeroContratoFinal,
-            data_inicio: contrato.data_inicio || undefined,
-            data_fim: contrato.data_fim || null,
-            valor_mensalidade: Number(contrato.valor_mensalidade) || 0,
-            dia_vencimento: Number(contrato.dia_vencimento) || 1,
-            forma_pagamento: contrato.forma_pagamento || undefined,
-            observacoes: contrato.observacoes || undefined,
-            status: contrato.status || "ativo",
-          }
-        : undefined;
-
       const payload = {
         aluno: alunoPayload,
-        responsaveis: listaResponsaveisCompletos,
+        responsaveis: responsaveisPayload,
         contrato: contratoPayload,
       };
 
@@ -417,39 +505,21 @@ export default function NovoAluno() {
             </SelectContent>
           </Select>
 
-          <div className="grid gap-4 md:grid-cols-2">
-            <Select
-              value={form.escola_id}
-              onValueChange={(v) => alterar("escola_id", v)}
-            >
-              <SelectTrigger className="rounded-xl">
-                <SelectValue placeholder="Selecione a escola" />
-              </SelectTrigger>
-              <SelectContent className="rounded-xl">
-                {escolas.map((item) => (
-                  <SelectItem key={item.id} value={item.id}>
-                    {item.nome}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Select
-              value={form.rota_id}
-              onValueChange={(v) => alterar("rota_id", v)}
-            >
-              <SelectTrigger className="rounded-xl">
-                <SelectValue placeholder="Selecione a rota principal" />
-              </SelectTrigger>
-              <SelectContent className="rounded-xl">
-                {rotas.map((item) => (
-                  <SelectItem key={item.id} value={item.id}>
-                    {item.nome} {item.codigo ? `(${item.codigo})` : ""}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <Select
+            value={form.escola_id}
+            onValueChange={(v) => alterar("escola_id", v)}
+          >
+            <SelectTrigger className="rounded-xl">
+              <SelectValue placeholder="Selecione a escola" />
+            </SelectTrigger>
+            <SelectContent className="rounded-xl">
+              {escolas.map((item) => (
+                <SelectItem key={item.id} value={item.id}>
+                  {item.nome}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </SectionCard>
 
@@ -458,7 +528,7 @@ export default function NovoAluno() {
         description="Associe um ou mais responsáveis ao aluno"
       >
         <div className="grid gap-4">
-          <div className="grid gap-3 md:grid-cols-2">
+          <div className="grid gap-3 md:grid-cols-[1fr_auto]">
             <Popover
               open={openComboboxResponsavel}
               onOpenChange={setOpenComboboxResponsavel}
@@ -513,22 +583,183 @@ export default function NovoAluno() {
               </PopoverContent>
             </Popover>
 
-            <Select
-              value={responsavelAtual.parentesco}
-              onValueChange={(v) => alterarResponsavel("parentesco", v)}
-            >
-              <SelectTrigger className="rounded-xl">
-                <SelectValue placeholder="Selecione o parentesco" />
-              </SelectTrigger>
-              <SelectContent className="rounded-xl">
-                {PARENTESCOS.map((item) => (
-                  <SelectItem key={item} value={item}>
-                    {item}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Dialog open={openModalNovoResponsavel} onOpenChange={setOpenModalNovoResponsavel}>
+              <DialogTrigger asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="rounded-xl h-10 gap-2"
+                >
+                  <Plus className="size-4" />
+                  <span className="hidden sm:inline">Novo</span>
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>Cadastrar novo responsável</DialogTitle>
+                  <DialogDescription>
+                    Preencha os dados do responsável para associá-lo ao aluno
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Nome Completo *</label>
+                      <Input
+                        placeholder="Ex: Ana Maria Souza"
+                        value={novoResponsavel.nome}
+                        onChange={(e) => setNovoResponsavel({ ...novoResponsavel, nome: e.target.value })}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">CPF *</label>
+                      <Input
+                        placeholder="000.000.000-00"
+                        value={novoResponsavel.cpf}
+                        onChange={(e) => setNovoResponsavel({ ...novoResponsavel, cpf: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Telefone</label>
+                      <Input
+                        placeholder="(11) 99999-9999"
+                        value={novoResponsavel.telefone}
+                        onChange={(e) => setNovoResponsavel({ ...novoResponsavel, telefone: e.target.value })}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">E-mail</label>
+                      <Input
+                        type="email"
+                        placeholder="exemplo@email.com"
+                        value={novoResponsavel.email}
+                        onChange={(e) => setNovoResponsavel({ ...novoResponsavel, email: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                  <div className="border-t border-border/60 pt-4">
+                    <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Endereço
+                    </h3>
+                    <div className="grid gap-4">
+                      <div className="grid gap-4 md:grid-cols-2">
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">Cidade</label>
+                          <Input
+                            placeholder="Ex: São Paulo"
+                            value={novoResponsavel.endereco.cidade}
+                            onChange={(e) => setNovoResponsavel({
+                              ...novoResponsavel,
+                              endereco: { ...novoResponsavel.endereco, cidade: e.target.value }
+                            })}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">Bairro</label>
+                          <Input
+                            placeholder="Ex: Centro"
+                            value={novoResponsavel.endereco.bairro}
+                            onChange={(e) => setNovoResponsavel({
+                              ...novoResponsavel,
+                              endereco: { ...novoResponsavel.endereco, bairro: e.target.value }
+                            })}
+                          />
+                        </div>
+                      </div>
+                      <div className="grid gap-4 md:grid-cols-3">
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">Rua / Logradouro</label>
+                          <Input
+                            placeholder="Ex: Rua das Flores"
+                            value={novoResponsavel.endereco.logradouro}
+                            onChange={(e) => setNovoResponsavel({
+                              ...novoResponsavel,
+                              endereco: { ...novoResponsavel.endereco, logradouro: e.target.value }
+                            })}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">Número</label>
+                          <Input
+                            placeholder="Ex: 123"
+                            value={novoResponsavel.endereco.numero}
+                            onChange={(e) => setNovoResponsavel({
+                              ...novoResponsavel,
+                              endereco: { ...novoResponsavel.endereco, numero: e.target.value }
+                            })}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">CEP</label>
+                          <Input
+                            placeholder="Ex: 00000-000"
+                            value={novoResponsavel.endereco.cep}
+                            onChange={(e) => setNovoResponsavel({
+                              ...novoResponsavel,
+                              endereco: { ...novoResponsavel.endereco, cep: e.target.value }
+                            })}
+                          />
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Complemento (opcional)</label>
+                        <Input
+                          placeholder="Ex: Apto 101"
+                          value={novoResponsavel.endereco.complemento}
+                          onChange={(e) => setNovoResponsavel({
+                            ...novoResponsavel,
+                            endereco: { ...novoResponsavel.endereco, complemento: e.target.value }
+                          })}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Observações</label>
+                    <Input
+                      placeholder="Informações adicionais..."
+                      value={novoResponsavel.observacoes}
+                      onChange={(e) => setNovoResponsavel({ ...novoResponsavel, observacoes: e.target.value })}
+                    />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setOpenModalNovoResponsavel(false)}
+                  >
+                    Cancelar
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={criarNovoResponsavel}
+                    disabled={criandoResponsavel}
+                  >
+                    {criandoResponsavel ? "Criando..." : "Criar responsável"}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
+
+          <Select
+            value={responsavelAtual.parentesco}
+            onValueChange={(v) => alterarResponsavel("parentesco", v)}
+          >
+            <SelectTrigger className="rounded-xl">
+              <SelectValue placeholder="Selecione o parentesco" />
+            </SelectTrigger>
+            <SelectContent className="rounded-xl">
+              {PARENTESCOS.map((item) => (
+                <SelectItem key={item} value={item}>
+                  {item}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
           <div className="flex items-center justify-between flex-wrap gap-4 pt-1">
             <div className="flex items-center gap-6">
