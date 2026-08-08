@@ -6,6 +6,7 @@ export interface Responsavel {
   email?: string | null;
   endereco?: string | null;
   observacoes?: string | null;
+  foto_url?: string | null;
 }
 
 export interface ResponsavelDetalhe {

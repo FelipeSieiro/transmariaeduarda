@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { buscarAluno } from "@/features/alunos/services/alunos.service";
-import { buscarContratoPorAluno } from "@/features/contratos/services/contratos.service";
 import { adaptarAlunoDetalhe } from "@/features/alunos/adapters/alunoDetalhe.adapter";
 
 import {
@@ -17,6 +16,7 @@ interface UseAlunoDetalheResult {
   aluno: AlunoDetalhe | null;
   alunoOriginal: any | null;
   contrato: Contrato | null;
+  contratos: Contrato[];
   carregando: boolean;
   erro: boolean;
 }
@@ -26,11 +26,15 @@ export function useAlunoDetalhe(alunoId?: string): UseAlunoDetalheResult {
   const [alunoOriginal, setAlunoOriginal] = useState<any | null>(null);
   const [carregando, setCarregando] = useState(true);
   const [contrato, setContrato] = useState<Contrato | null>(null);
+  const [contratos, setContratos] = useState<Contrato[]>([]);
   const [erro, setErro] = useState(false);
 
   useEffect(() => {
     async function carregarDados() {
-      if (!alunoId) return;
+      if (!alunoId) {
+        setCarregando(false);
+        return;
+      }
 
       setCarregando(true);
       setErro(false);
@@ -45,8 +49,6 @@ export function useAlunoDetalhe(alunoId?: string): UseAlunoDetalheResult {
         setAluno(alunoData);
         setAlunoOriginal(response);
       } catch (error) {
-        console.error("Erro ao buscar aluno API:", error);
-
         const alunoMock = alunosMock.find(
           (item) => item.id === alunoId
         );
@@ -65,10 +67,14 @@ export function useAlunoDetalhe(alunoId?: string): UseAlunoDetalheResult {
       }
 
       try {
-        const contratoApi = await buscarContratoPorAluno(alunoId);
-        setContrato(contratoApi);
+        // Usar os contratos que já vêm no objeto do aluno (alunoOriginal)
+        const contratosDoAluno = alunoRaw?.contratos || [];
+        setContratos(contratosDoAluno);
+        // Manter compatibilidade com o contrato único (pegar o primeiro ativo)
+        const contratoAtivo = contratosDoAluno.find((c: any) => c.status?.toLowerCase() === "ativo") || contratosDoAluno[0] || null;
+        setContrato(contratoAtivo);
       } catch (error) {
-        console.error("Erro ao buscar contrato:", error);
+        setContratos([]);
         setContrato(null);
       } finally {
         setCarregando(false);
@@ -78,5 +84,5 @@ export function useAlunoDetalhe(alunoId?: string): UseAlunoDetalheResult {
     carregarDados();
   }, [alunoId]);
 
-  return { aluno, alunoOriginal, contrato, carregando, erro };
+  return { aluno, alunoOriginal, contrato, contratos, carregando, erro };
 }

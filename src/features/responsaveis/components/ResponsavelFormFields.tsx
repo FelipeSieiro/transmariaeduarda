@@ -6,6 +6,7 @@ import type {
   EnderecoFormValues,
   ResponsavelFormValues,
 } from "@/features/responsaveis/adapters/responsavel.mapper";
+import { onlyDigits, formatCPF, formatPhone } from "@/utils/format-text";
 
 interface ResponsavelFormFieldsProps {
   values: ResponsavelFormValues;
@@ -42,10 +43,11 @@ export function ResponsavelFormFields({
         <FormField label="CPF" required>
           <Input
             placeholder="000.000.000-00"
-            value={values.cpf}
-            onChange={(event) => setField("cpf", event.target.value)}
+            value={formatCPF(values.cpf)}
+            onChange={(event) => setField("cpf", onlyDigits(event.target.value))}
             className="h-10 rounded-xl"
             disabled={disabled}
+            maxLength={14}
           />
         </FormField>
       </div>
@@ -54,10 +56,11 @@ export function ResponsavelFormFields({
         <FormField label="Telefone">
           <Input
             placeholder="(11) 99999-9999"
-            value={values.telefone}
-            onChange={(event) => setField("telefone", event.target.value)}
+            value={formatPhone(values.telefone)}
+            onChange={(event) => setField("telefone", onlyDigits(event.target.value))}
             className="h-10 rounded-xl"
             disabled={disabled}
+            maxLength={15}
           />
         </FormField>
 

@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { StatusPill } from "@/components/ui-kit/primitives";
 import type { Aluno } from "@/features/alunos/types/alunos";
+import { formatPhone } from "@/utils/format-text";
 
 interface AlunoHeaderProps {
   readonly aluno: Aluno | any;
@@ -28,6 +29,7 @@ export function AlunoHeader({ aluno, onContratoClick }: AlunoHeaderProps) {
   const vinculos = aluno.aluno_responsavel || aluno.alunos_responsaveis || [];
   const primeiroResponsavel = vinculos[0]?.responsaveis || vinculos[0]?.responsavel;
   const telefoneContato = primeiroResponsavel?.telefone;
+  const telefoneFormatado = formatPhone(telefoneContato);
 
   const handleContatar = () => {
     if (telefoneContato) {
@@ -71,7 +73,7 @@ export function AlunoHeader({ aluno, onContratoClick }: AlunoHeaderProps) {
             variant="outline"
             className="rounded-xl gap-2 w-full sm:w-auto justify-center"
             onClick={handleContatar}
-            title={telefoneContato ? `Ligar para ${telefoneContato}` : "Sem telefone"}
+            title={telefoneContato ? `Ligar para ${telefoneFormatado}` : "Sem telefone"}
           >
             <Phone className="size-4 shrink-0" />
             <span>Contatar</span>

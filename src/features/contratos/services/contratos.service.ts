@@ -7,7 +7,7 @@ const baseService = createCrudService<Contrato, CriarContratoPayload>("/contrato
 
 async function buscarContratoPorAlunoId(
   alunoId: string
-): Promise<Contrato | null> {
+): Promise<Contrato[]> {
   const response = await api.get<ApiResponse<Contrato[]>>("/contratos", {
     params: { aluno_id: alunoId },
   });
@@ -15,10 +15,10 @@ async function buscarContratoPorAlunoId(
   const contratos = response.data.data;
 
   if (!contratos || contratos.length === 0) {
-    return null;
+    return [];
   }
 
-  return contratos[0] || null;
+  return contratos;
 }
 
 export const contratosService = {

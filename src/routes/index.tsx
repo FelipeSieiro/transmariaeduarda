@@ -1,5 +1,5 @@
 import { lazy, Suspense, type ReactNode } from "react";
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, Navigate } from "react-router-dom";
 
 import { PageLoader } from "@/components/common/page-loader";
 import { ROUTES } from "@/constants/routes";
@@ -37,9 +37,6 @@ const NovoResponsavel = lazy(
 );
 const EditarResponsavel = lazy(
   () => import("@/features/responsaveis/pages/EditarResponsavel"),
-);
-const ResponsavelDetalhe = lazy(
-  () => import("@/features/responsaveis/pages/ResponsavelDetalhe"),
 );
 const ResponsavelDetalhe = lazy(
   () => import("@/features/responsaveis/pages/ResponsavelDetalhe"),
@@ -95,6 +92,7 @@ export const router = createBrowserRouter([
       </PrivateRoute>
     ),
     children: [
+      { path: "/", element: <Navigate to={ROUTES.DASHBOARD} replace /> },
       { path: ROUTES.DASHBOARD, element: suspended(<Dashboard />) },
 
       { path: ROUTES.ALUNOS, element: suspended(<Alunos />) },

@@ -7,6 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import { SectionCard } from "@/components/ui-kit/primitives";
 import type { Aluno } from "@/features/alunos/types/alunos";
 import type { AlunoResponsavelVinculo } from "@/features/responsaveis/types/responsavel";
+import { formatPhone, formatEmail } from "@/utils/format-text";
 
 interface AlunoResponsaveisProps {
   readonly aluno: Aluno | any;
@@ -16,8 +17,10 @@ function getIniciais(nome?: string): string {
   if (!nome) return "RS";
   const partes = nome.trim().split(" ").filter(Boolean);
   if (partes.length === 0) return "RS";
-  if (partes.length === 1) return partes[0].substring(0, 2).toUpperCase();
-  return (partes[0][0] + partes[partes.length - 1][0]).toUpperCase();
+  if (partes.length === 1) return partes[0]?.substring(0, 2).toUpperCase() || "RS";
+  const primeiraLetra = partes[0]?.[0] || "";
+  const ultimaLetra = partes[partes.length - 1]?.[0] || "";
+  return (primeiraLetra + ultimaLetra).toUpperCase() || "RS";
 }
 
 export function AlunoResponsaveis({ aluno }: AlunoResponsaveisProps) {
@@ -38,6 +41,8 @@ export function AlunoResponsaveis({ aluno }: AlunoResponsaveisProps) {
 
             const key = responsavel.id || `${responsavel.nome}-${index}`;
             const telefoneLimpo = responsavel.telefone ? responsavel.telefone.replace(/\D/g, "") : "";
+            const telefoneFormatado = formatPhone(responsavel.telefone);
+            const emailFormatado = formatEmail(responsavel.email);
 
             return (
               <div key={key} className="space-y-3">
@@ -46,7 +51,6 @@ export function AlunoResponsaveis({ aluno }: AlunoResponsaveisProps) {
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div className="flex min-w-0 items-center gap-3">
                     <Avatar className="size-10 shrink-0 border border-border">
-                      <AvatarImage src={responsavel.foto_url || undefined} alt={responsavel.nome} />
                       <AvatarFallback className="bg-primary/10 text-primary font-semibold text-xs">
                         {getIniciais(responsavel.nome)}
                       </AvatarFallback>
@@ -89,7 +93,7 @@ export function AlunoResponsaveis({ aluno }: AlunoResponsaveisProps) {
                       title="Ligar para este número"
                     >
                       <Phone className="size-3.5 shrink-0 text-primary" />
-                      <span>{responsavel.telefone}</span>
+                      <span>{telefoneFormatado}</span>
                     </a>
                   )}
                   {responsavel.email && (
@@ -99,7 +103,7 @@ export function AlunoResponsaveis({ aluno }: AlunoResponsaveisProps) {
                       title="Enviar e-mail"
                     >
                       <Mail className="size-3.5 shrink-0 text-primary" />
-                      <span className="truncate">{responsavel.email}</span>
+                      <span className="truncate">{emailFormatado}</span>
                     </a>
                   )}
                   {responsavel.endereco && (

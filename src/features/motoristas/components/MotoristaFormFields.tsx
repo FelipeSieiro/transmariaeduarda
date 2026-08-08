@@ -6,6 +6,7 @@ import {
   STATUS_MOTORISTA,
 } from "@/features/motoristas/constants/motorista.constants";
 import type { MotoristaFormValues } from "@/features/motoristas/hooks/use-motorista-form";
+import { onlyDigits, formatCPF, formatPhone } from "@/utils/format-text";
 
 interface MotoristaFormFieldsProps {
   values: MotoristaFormValues;
@@ -36,21 +37,23 @@ export function MotoristaFormFields({
       <div className="grid gap-4 md:grid-cols-2">
         <FormField label="CPF">
           <Input
-            value={values.cpf}
-            onChange={(event) => setField("cpf", event.target.value)}
+            value={formatCPF(values.cpf)}
+            onChange={(event) => setField("cpf", onlyDigits(event.target.value))}
             placeholder="000.000.000-00"
             className="h-10 rounded-xl"
             disabled={disabled}
+            maxLength={14}
           />
         </FormField>
 
         <FormField label="Telefone">
           <Input
-            value={values.telefone}
-            onChange={(event) => setField("telefone", event.target.value)}
+            value={formatPhone(values.telefone)}
+            onChange={(event) => setField("telefone", onlyDigits(event.target.value))}
             placeholder="(11) 99999-9999"
             className="h-10 rounded-xl"
             disabled={disabled}
+            maxLength={15}
           />
         </FormField>
       </div>

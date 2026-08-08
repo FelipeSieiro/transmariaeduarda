@@ -29,9 +29,14 @@ import { AlunoDetalheErro } from "@/features/alunos/components/AlunoDetalheErro"
 import { AlunoDetalheBackButton } from "@/features/alunos/components/AlunoDetalheBackButton";
 
 export default function AlunoDetalhe() {
-  const { alunoId } = useParams();
-  const { aluno, alunoOriginal, contrato, carregando, erro } = useAlunoDetalhe(alunoId);
+  const { id } = useParams();
+  const { aluno, alunoOriginal, contrato, contratos, carregando, erro } = useAlunoDetalhe(id);
   const historicoCompleto = useHistoricoCompleto(aluno, contrato);
+
+  // Log para debug dos dados recebidos
+  console.log("AlunoDetalhe - contratos recebidos:", contratos);
+  console.log("AlunoDetalhe - contrato ativo:", contrato);
+  console.log("AlunoDetalhe - alunoOriginal:", alunoOriginal);
 
   if (carregando) {
     return <AlunoDetalheLoading />;
@@ -130,9 +135,9 @@ export default function AlunoDetalhe() {
           value="transporte"
           className="mt-4"
         >
-          {alunoId && (
+          {id && (
             <GradeSemanalRotas
-              alunoId={alunoId}
+              alunoId={id}
               nomeRotaPrincipal={(aluno as any).rota}
             />
           )}
@@ -142,7 +147,7 @@ export default function AlunoDetalhe() {
           value="contrato"
           className="mt-4"
         >
-          <AlunoContrato contrato={contrato} />
+          <AlunoContrato contrato={contrato} contratos={contratos} />
         </TabsContent>
 
         <TabsContent
