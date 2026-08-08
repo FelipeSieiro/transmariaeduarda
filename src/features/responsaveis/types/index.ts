@@ -1,0 +1,1 @@
+export type { Responsavel, ResponsavelDetalhe, AlunoResponsavelVinculo, PayloadResponsavelVinculo } from "./responsavel";

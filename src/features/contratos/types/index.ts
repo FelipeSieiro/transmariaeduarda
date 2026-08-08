@@ -1,0 +1,1 @@
+export type { Contrato, ContratoDetalhe, CriarContratoPayload, HistoricoItemDetalhe } from "./contrato";

@@ -4,7 +4,7 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { SectionCard } from "@/components/ui-kit/primitives";
-import type { DocumentoAluno } from "@/types";
+import type { DocumentoAluno } from "@/features/alunos/types/aluno-detalhes";
 
 interface AlunoDocumentosProps {
   readonly documentos?: readonly DocumentoAluno[];

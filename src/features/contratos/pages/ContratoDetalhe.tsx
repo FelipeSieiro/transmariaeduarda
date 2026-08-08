@@ -12,7 +12,7 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { buscarContrato } from "@/features/contratos/services/contratos.service";
-import type { Contrato } from "@/types";
+import type { Contrato } from "@/features/contratos/types/contrato";
 
 function Campo({ label, value }: { label: string; value: string }) {
   return (
@@ -117,14 +117,14 @@ export default function ContratoDetalhe() {
           </div>
 
           <div className="space-y-4 pt-2 border-t border-border/40">
-            <Campo label="Número" value={contrato.numero} />
+            <Campo label="Número" value={contrato.numero || "-"} />
             <Campo
               label="Valor mensalidade"
-              value={moeda(Number(contrato.valor_mensalidade))}
+              value={moeda(Number(contrato.valor_mensalidade || 0))}
             />
             <Campo
               label="Dia de vencimento"
-              value={`Dia ${contrato.dia_vencimento}`}
+              value={`Dia ${contrato.dia_vencimento || "-"}`}
             />
             <Campo
               label="Forma de pagamento"
@@ -171,7 +171,7 @@ export default function ContratoDetalhe() {
               </div>
               <span className="text-xs font-medium text-foreground">Período</span>
             </div>
-            <Campo label="Início" value={contrato.data_inicio} />
+            <Campo label="Início" value={contrato.data_inicio || "-"} />
             <Campo label="Fim" value={contrato.data_fim ?? "Indeterminado"} />
           </div>
         </div>

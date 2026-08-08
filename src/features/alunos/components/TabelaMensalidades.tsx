@@ -34,7 +34,7 @@ import {
   registrarPagamento,
 } from "@/features/alunos/services/mensalidades.service";
 import { FORMAS_PAGAMENTO } from "@/constants";
-import type { Mensalidade } from "@/types";
+import type { Mensalidade } from "@/features/alunos/types/mensalidade";
 
 interface Props {
   readonly contratoId: string;
@@ -98,9 +98,10 @@ export function TabelaMensalidades({ contratoId }: Props) {
 
     try {
       setProcessando(true);
+      const dataPagamento = new Date().toISOString().split("T")[0] || new Date().toISOString();
       await registrarPagamento(mensalidadeSelecionada.id, {
         forma_pagamento: formaPagamento,
-        data_pagamento: new Date().toISOString().split("T")[0],
+        data_pagamento: dataPagamento,
       });
 
       toast.success("Pagamento registrado com sucesso!");

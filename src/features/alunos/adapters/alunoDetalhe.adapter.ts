@@ -1,10 +1,9 @@
+import type { Aluno, AlunoDetalhe } from "@/features/alunos/types/alunos";
 import type {
-  Aluno,
-  AlunoDetalhe,
   AlunoResponsavelVinculo,
-  HistoricoItemDetalhe,
   ResponsavelDetalhe,
-} from "@/types";
+} from "@/features/responsaveis/types/responsavel";
+import type { HistoricoItemDetalhe } from "@/features/contratos/types/contrato";
 
 // --- Funções Auxiliares ---
 

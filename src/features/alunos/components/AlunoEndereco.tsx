@@ -3,32 +3,23 @@ import { ExternalLink, Home, MapPin, Navigation } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { SectionCard } from "@/components/ui-kit/primitives";
-import type { Aluno } from "@/types";
+import type { Aluno } from "@/features/alunos/types/alunos";
 
 interface AlunoEnderecoProps {
-  readonly aluno: Aluno;
+  readonly aluno: Aluno | any;
 }
 
 export function AlunoEndereco({ aluno }: AlunoEnderecoProps) {
-  // Extrai informações tanto se endereco for objeto quanto se for campo solto no aluno
-  const enderecoObj = typeof aluno.endereco === "object" && aluno.endereco !== null ? aluno.endereco : null;
+  // Usa campos diretos do tipo Aluno
+  const logradouro = aluno.endereco ? `${aluno.endereco}${aluno.numero ? `, ${aluno.numero}` : ""}${aluno.complemento ? ` - ${aluno.complemento}` : ""}` : null;
+  
+  const bairro = aluno.bairro || "";
+  const cidade = aluno.cidade || "";
+  const cep = aluno.cep || "";
 
-  const logradouro = enderecoObj
-    ? `${enderecoObj.logradouro || enderecoObj.rua || ""}, ${enderecoObj.numero || "S/N"}${
-        enderecoObj.complemento ? ` - ${enderecoObj.complemento}` : ""
-      }`
-    : typeof aluno.endereco === "string"
-    ? aluno.endereco
-    : null;
+  const cidadeCep = [cidade, cep ? `CEP ${cep}` : ""].filter(Boolean).join(" · ");
 
-  const bairro = enderecoObj?.bairro ?? aluno.bairro ?? "";
-  const cidade = enderecoObj?.cidade ?? aluno.cidade ?? "";
-  const estado = enderecoObj?.uf ?? enderecoObj?.estado ?? aluno.estado ?? "";
-  const cep = enderecoObj?.cep ?? aluno.cep ?? "";
-
-  const cidadeEstadoCep = [cidade, estado].filter(Boolean).join(" - ") + (cep ? ` · CEP ${cep}` : "");
-
-  const enderecoCompletoFormatado = [logradouro, bairro, cidade, estado]
+  const enderecoCompletoFormatado = [logradouro, bairro, cidade]
     .filter(Boolean)
     .join(", ");
 
@@ -76,7 +67,7 @@ export function AlunoEndereco({ aluno }: AlunoEnderecoProps) {
                 {logradouro || "Logradouro não informado"}
               </p>
               <p className="text-xs text-muted-foreground">
-                {bairro ? `Bairro ${bairro}` : ""} {cidadeEstadoCep ? `· ${cidadeEstadoCep}` : ""}
+                {bairro ? `Bairro ${bairro}` : ""} {cidadeCep ? `· ${cidadeCep}` : ""}
               </p>
             </div>
           </div>

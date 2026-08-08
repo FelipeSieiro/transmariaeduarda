@@ -50,7 +50,9 @@ import { criarAlunoCompleto } from "@/features/alunos/services/alunos.service";
 import { responsaveisService } from "@/features/responsaveis/services/responsaveis.service";
 import { listarEscolas } from "@/services/escolas.service";
 import { listarRotas } from "@/features/rotas/services/rotas.service";
-import type { Responsavel, Escola, Rota } from "@/types";
+import type { Responsavel } from "@/features/responsaveis/types/responsavel";
+import type { Escola } from "@/features/escolas/types/escola";
+import type { Rota } from "@/features/rotas/types/rota";
 import { toResponsavelPayload } from "@/features/responsaveis/mappers/responsavel.mapper";
 
 import {

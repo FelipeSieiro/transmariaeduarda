@@ -1,5 +1,6 @@
 import api from "@/config/api";
-import type { ApiResponse, Mensalidade, PagarMensalidadePayload } from "@/types";
+import type { ApiResponse } from "@/types/shared";
+import type { Mensalidade, PagarMensalidadePayload } from "@/features/alunos/types/mensalidade";
 
 // Buscar mensalidades por Contrato ID
 export async function buscarMensalidadesPorContrato(

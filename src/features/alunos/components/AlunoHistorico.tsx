@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 
 import { SectionCard } from "@/components/ui-kit/primitives";
-import type { EventoHistorico } from "@/types";
+import type { EventoHistorico } from "@/features/alunos/types/aluno-detalhes";
 
 interface AlunoHistoricoProps {
   readonly historico?: readonly EventoHistorico[];
@@ -50,14 +50,16 @@ function obterTimestamp(item: EventoHistorico): number {
     const partesData = item.data.split("/");
     if (partesData.length === 3) {
       const [dia, mes, ano] = partesData.map(Number);
-      let hora = 0;
-      let min = 0;
-      if (item.hora) {
-        const partesHora = item.hora.split(":");
-        hora = Number(partesHora[0]) || 0;
-        min = Number(partesHora[1]) || 0;
+      if (dia && mes && ano) {
+        let hora = 0;
+        let min = 0;
+        if (item.hora) {
+          const partesHora = item.hora.split(":");
+          hora = Number(partesHora[0]) || 0;
+          min = Number(partesHora[1]) || 0;
+        }
+        return new Date(ano, mes - 1, dia, hora, min).getTime();
       }
-      return new Date(ano, mes - 1, dia, hora, min).getTime();
     }
   }
 
@@ -66,7 +68,8 @@ function obterTimestamp(item: EventoHistorico): number {
 
 function formatarDataHoraExibicao(item: EventoHistorico): { dataStr: string; horaStr?: string } {
   if (item.data) {
-    return { dataStr: item.data, horaStr: item.hora };
+    const horaStr = item.hora ? item.hora : undefined;
+    return { dataStr: item.data, horaStr };
   }
 
   if (item.created_at) {
@@ -86,7 +89,7 @@ function formatarDataHoraExibicao(item: EventoHistorico): { dataStr: string; hor
     }
   }
 
-  return { dataStr: "-" };
+  return { dataStr: "-", horaStr: undefined };
 }
 
 export function AlunoHistorico({ historico = [] }: AlunoHistoricoProps) {
@@ -115,7 +118,8 @@ export function AlunoHistorico({ historico = [] }: AlunoHistoricoProps) {
     >
       <div className="relative border-l-2 border-border/70 ml-4 pl-6 space-y-4 py-1">
         {historicoOrdenado.map((h, index) => {
-          const config = (h.tipo && ICONES_TIPO[h.tipo]) || ICONES_TIPO.sistema;
+          const config = (h.tipo && ICONES_TIPO[h.tipo]) || ICONES_TIPO['sistema'];
+          if (!config) return null;
           const IconComponent = config.icon;
           const { dataStr, horaStr } = formatarDataHoraExibicao(h);
 

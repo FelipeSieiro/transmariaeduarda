@@ -1,4 +1,4 @@
-import type { EscolaResumida } from "@/types/escola";
+import type { EscolaResumida } from "@/features/escolas/types/escola";
 import type { Mensalidade } from "@/features/alunos/types/mensalidade";
 import type { RotaResumida } from "@/features/rotas/types/rota";
 

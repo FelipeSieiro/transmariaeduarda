@@ -6,10 +6,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { StatusPill } from "@/components/ui-kit/primitives";
-import type { Aluno } from "@/types";
+import type { Aluno } from "@/features/alunos/types/alunos";
 
 interface AlunoHeaderProps {
-  readonly aluno: Aluno;
+  readonly aluno: Aluno | any;
   readonly onContratoClick?: () => void;
 }
 
@@ -22,16 +22,12 @@ function getIniciais(nome?: string): string {
 }
 
 export function AlunoHeader({ aluno, onContratoClick }: AlunoHeaderProps) {
-
-  const dados = aluno.data || aluno;
-
-  const nomeEscola =
-      typeof dados.escola === "string"
-        ? dados.escola
-        : dados.escola?.nome ?? dados.escolas?.nome ?? "Escola não informada";
-
-
-  const telefoneContato = aluno.telefone || aluno.responsaveis?.[0]?.telefone;
+  const nomeEscola = aluno.escolas?.nome || aluno.escola || "Escola não informada";
+  
+  // Tenta obter telefone dos responsáveis
+  const vinculos = aluno.aluno_responsavel || aluno.alunos_responsaveis || [];
+  const primeiroResponsavel = vinculos[0]?.responsaveis || vinculos[0]?.responsavel;
+  const telefoneContato = primeiroResponsavel?.telefone;
 
   const handleContatar = () => {
     if (telefoneContato) {
@@ -42,7 +38,7 @@ export function AlunoHeader({ aluno, onContratoClick }: AlunoHeaderProps) {
   };
 
   const statusNormalizado = aluno.status?.toLowerCase() === "ativo" ? "ativo" : "inativo";
-  const pagamentoNormalizado = aluno.pagamento || aluno.status_pagamento || "regular";
+  const fotoUrl = aluno.foto_url || aluno.foto || aluno.avatar_url || undefined;
 
   return (
     <section className="surface-card overflow-hidden rounded-2xl border border-border bg-card">
@@ -53,7 +49,7 @@ export function AlunoHeader({ aluno, onContratoClick }: AlunoHeaderProps) {
         {/* Bloco do Avatar e Informações do Aluno */}
         <div className="flex flex-col sm:flex-row items-start sm:items-end gap-4">
           <Avatar className="-mt-10 size-20 sm:size-24 shrink-0 border-4 border-card shadow-md">
-            <AvatarImage src={aluno.foto || aluno.avatar_url} alt={aluno.nome} />
+            <AvatarImage src={fotoUrl} alt={aluno.nome} />
             <AvatarFallback className="bg-primary/10 text-primary font-semibold text-xl">
               {getIniciais(aluno.nome)}
             </AvatarFallback>

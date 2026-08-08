@@ -52,6 +52,7 @@ export default function NovoContrato() {
   const [dataFim, setDataFim] = useState("");
   const [status, setStatus] = useState("ativo");
   const [observacoes, setObservacoes] = useState("");
+  const [formaPagamento, setFormaPagamento] = useState("mensal");
 
   const [alunos, setAlunos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -108,8 +109,10 @@ export default function NovoContrato() {
             setNumero(contrato.numero || "");
             setValorMensalidade(contrato.valor_mensalidade ? String(contrato.valor_mensalidade) : "");
             setDiaVencimento(contrato.dia_vencimento ? String(contrato.dia_vencimento) : "");
-            setDataInicio(contrato.data_inicio ? contrato.data_inicio.split("T")[0] : "");
-            setDataFim(contrato.data_fim ? contrato.data_fim.split("T")[0] : "");
+            const dataInicio = contrato.data_inicio ? contrato.data_inicio.split("T")[0] : "";
+            setDataInicio(dataInicio || "");
+            const dataFim = contrato.data_fim ? contrato.data_fim.split("T")[0] : "";
+            setDataFim(dataFim || "");
             setStatus(contrato.status ? contrato.status.toLowerCase() : "ativo");
             setObservacoes(contrato.observacoes || "");
 
@@ -177,15 +180,22 @@ export default function NovoContrato() {
         observacoes: observacoes.trim() || null,
       };
 
+      // Adiciona forma_pagamento ao payload
+      const payloadCompleto = {
+        ...payload,
+        forma_pagamento: formaPagamento || "mensal",
+        data_inicio: payload.data_inicio || "",
+      };
+
       if (isEditing && id) {
         if (typeof (contratosService as any).atualizarContrato === "function") {
-          await (contratosService as any).atualizarContrato(id, payload);
+          await (contratosService as any).atualizarContrato(id, payloadCompleto);
         } else if (typeof (contratosService as any).update === "function") {
-          await (contratosService as any).update(id, payload);
+          await (contratosService as any).update(id, payloadCompleto);
         }
         toast.success("Contrato atualizado com sucesso");
       } else {
-        await contratosService.criarContrato(payload);
+        await contratosService.criarContrato(payloadCompleto);
         toast.success("Contrato cadastrado com sucesso");
       }
 

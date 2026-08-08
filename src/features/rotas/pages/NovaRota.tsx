@@ -31,7 +31,7 @@ import type { Motorista } from "@/features/motoristas/types/motorista";
 import { veiculosService } from "@/features/veiculos/services/veiculos.service";
 import type { Veiculo } from "@/features/veiculos/types/veiculos";
 import { listarEscolas } from "@/services/escolas.service";
-import type { Escola } from "@/types/escola";
+import type { Escola } from "@/features/escolas/types/escola";
 
 export default function NovaRota() {
   const { id } = useParams<{ id: string }>();
@@ -173,13 +173,14 @@ export default function NovaRota() {
         horario_retorno: horarioRetorno.trim()
           ? formatarHorario(horarioRetorno)
           : null,
-        bairro: bairro.trim() || null,
         escola_id: !escolaId || escolaId === "none" ? null : escolaId,
         motorista_id:
           !motoristaId || motoristaId === "unassigned" ? null : motoristaId,
         veiculo_id: !veiculoId || veiculoId === "unassigned" ? null : veiculoId,
         status: status.toUpperCase(),
         descricao: descricao.trim() || null,
+        nome: nome.trim(),
+        bairro: bairro.trim() || null,
       };
 
       if (isEditing && id) {

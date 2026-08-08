@@ -1,5 +1,6 @@
 import api from "@/config/api";
-import type { ApiResponse, Escola } from "@/types";
+import type { ApiResponse } from "@/types/shared";
+import type { Escola } from "@/features/escolas/types/escola";
 
 export async function listarEscolas(): Promise<Escola[]> {
   const response = await api.get<ApiResponse<Escola[]> | Escola[]>("/escolas");

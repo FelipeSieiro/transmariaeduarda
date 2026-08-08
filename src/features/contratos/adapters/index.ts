@@ -1,0 +1,1 @@
+export { ContratoMapper } from "./contrato.mapper";

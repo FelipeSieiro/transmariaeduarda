@@ -5,10 +5,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { SectionCard } from "@/components/ui-kit/primitives";
-import type { Aluno, Responsavel } from "@/types";
+import type { Aluno } from "@/features/alunos/types/alunos";
+import type { AlunoResponsavelVinculo } from "@/features/responsaveis/types/responsavel";
 
 interface AlunoResponsaveisProps {
-  readonly aluno: Aluno;
+  readonly aluno: Aluno | any;
 }
 
 function getIniciais(nome?: string): string {
@@ -20,24 +21,9 @@ function getIniciais(nome?: string): string {
 }
 
 export function AlunoResponsaveis({ aluno }: AlunoResponsaveisProps) {
-  // Normaliza a lista de responsáveis suportando tanto múltiplos quanto o formato legado/único
-  const listaResponsaveis: readonly Responsavel[] =
-    aluno.responsaveis && aluno.responsaveis.length > 0
-      ? aluno.responsaveis
-      : aluno.responsavel
-        ? [
-            {
-              id: "1",
-              nome: aluno.responsavel,
-              parentesco: aluno.parentesco || "Responsável",
-              telefone: aluno.telefone,
-              email: aluno.email,
-              endereco: aluno.enderecoResponsavel || aluno.endereco,
-              responsavel_financeiro: true,
-              responsavel_emergencia: true,
-            },
-          ]
-        : [];
+  // Usa a estrutura real do tipo Aluno com vinculos de responsáveis
+  const vinculos: AlunoResponsavelVinculo[] = 
+    aluno.aluno_responsavel || aluno.alunos_responsaveis || [];
 
   return (
     <SectionCard
@@ -45,10 +31,13 @@ export function AlunoResponsaveis({ aluno }: AlunoResponsaveisProps) {
       description="Contatos autorizados cadastrados"
     >
       <div className="space-y-5">
-        {listaResponsaveis.length > 0 ? (
-          listaResponsaveis.map((resp, index) => {
-            const key = resp.id || `${resp.nome}-${index}`;
-            const telefoneLimpo = resp.telefone ? resp.telefone.replace(/\D/g, "") : "";
+        {vinculos.length > 0 ? (
+          vinculos.map((vinculo, index) => {
+            const responsavel = vinculo.responsaveis || vinculo.responsavel;
+            if (!responsavel) return null;
+
+            const key = responsavel.id || `${responsavel.nome}-${index}`;
+            const telefoneLimpo = responsavel.telefone ? responsavel.telefone.replace(/\D/g, "") : "";
 
             return (
               <div key={key} className="space-y-3">
@@ -57,23 +46,23 @@ export function AlunoResponsaveis({ aluno }: AlunoResponsaveisProps) {
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div className="flex min-w-0 items-center gap-3">
                     <Avatar className="size-10 shrink-0 border border-border">
-                      <AvatarImage src={resp.foto || resp.avatar_url} alt={resp.nome} />
+                      <AvatarImage src={responsavel.foto_url || undefined} alt={responsavel.nome} />
                       <AvatarFallback className="bg-primary/10 text-primary font-semibold text-xs">
-                        {getIniciais(resp.nome)}
+                        {getIniciais(responsavel.nome)}
                       </AvatarFallback>
                     </Avatar>
                     <div className="min-w-0">
                       <p className="truncate text-sm font-medium text-foreground">
-                        {resp.nome}
+                        {responsavel.nome}
                       </p>
                       <p className="truncate text-xs text-muted-foreground capitalize">
-                        {resp.parentesco || "Responsável"}
+                        {vinculo.parentesco || "Responsável"}
                       </p>
                     </div>
                   </div>
 
                   <div className="flex shrink-0 flex-col items-end gap-1">
-                    {resp.responsavel_financeiro && (
+                    {vinculo.responsavel_financeiro && (
                       <Badge
                         variant="outline"
                         className="border-emerald-500/30 bg-emerald-500/10 px-1.5 py-0 text-[10px] font-medium text-emerald-600 dark:text-emerald-400"
@@ -81,7 +70,7 @@ export function AlunoResponsaveis({ aluno }: AlunoResponsaveisProps) {
                         Financeiro
                       </Badge>
                     )}
-                    {resp.responsavel_emergencia && (
+                    {vinculo.responsavel_emergencia && (
                       <Badge
                         variant="outline"
                         className="border-amber-500/30 bg-amber-500/10 px-1.5 py-0 text-[10px] font-medium text-amber-600 dark:text-amber-400"
@@ -93,30 +82,30 @@ export function AlunoResponsaveis({ aluno }: AlunoResponsaveisProps) {
                 </div>
 
                 <div className="space-y-1.5 pl-1 text-xs text-muted-foreground">
-                  {resp.telefone && (
+                  {responsavel.telefone && (
                     <a
                       href={`tel:${telefoneLimpo}`}
                       className="flex items-center gap-2 transition-colors hover:text-foreground w-fit"
                       title="Ligar para este número"
                     >
                       <Phone className="size-3.5 shrink-0 text-primary" />
-                      <span>{resp.telefone}</span>
+                      <span>{responsavel.telefone}</span>
                     </a>
                   )}
-                  {resp.email && (
+                  {responsavel.email && (
                     <a
-                      href={`mailto:${resp.email}`}
+                      href={`mailto:${responsavel.email}`}
                       className="flex min-w-0 items-center gap-2 transition-colors hover:text-foreground w-fit max-w-full"
                       title="Enviar e-mail"
                     >
                       <Mail className="size-3.5 shrink-0 text-primary" />
-                      <span className="truncate">{resp.email}</span>
+                      <span className="truncate">{responsavel.email}</span>
                     </a>
                   )}
-                  {resp.endereco && (
+                  {responsavel.endereco && (
                     <div className="flex items-center gap-2 text-muted-foreground/90">
                       <MapPin className="size-3.5 shrink-0 text-primary" />
-                      <span className="truncate">{resp.endereco}</span>
+                      <span className="truncate">{responsavel.endereco}</span>
                     </div>
                   )}
                 </div>

@@ -1,5 +1,6 @@
 import api from "@/config/api";
-import type { ApiResponse, Contrato, CriarContratoPayload } from "@/types";
+import type { ApiResponse } from "@/types/shared";
+import type { Contrato, CriarContratoPayload } from "@/features/contratos/types/contrato";
 
 export async function listarContratos(): Promise<Contrato[]> {
   const response = await api.get<ApiResponse<Contrato[]>>("/contratos");
@@ -24,7 +25,7 @@ export async function buscarContratoPorAluno(
     return null;
   }
 
-  return contratos[0];
+  return contratos[0] || null;
 }
 
 export async function criarContrato(

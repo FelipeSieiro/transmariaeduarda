@@ -1,0 +1,1 @@
+export type { Rota, RotaResumida, CreateRotaDTO, UpdateRotaDTO } from "./rota";

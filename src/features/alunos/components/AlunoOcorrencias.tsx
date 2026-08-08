@@ -2,7 +2,7 @@
 import { AlertCircle, CheckCircle2, MessageSquareWarning, ShieldAlert } from "lucide-react";
 
 import { SectionCard } from "@/components/ui-kit/primitives";
-import type { OcorrenciaAluno } from "@/types";
+import type { OcorrenciaAluno } from "@/features/alunos/types/aluno-detalhes";
 
 interface AlunoOcorrenciasProps {
   readonly ocorrencias?: readonly OcorrenciaAluno[];

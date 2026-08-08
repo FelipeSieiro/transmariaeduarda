@@ -1,0 +1,1 @@
+export type { AgendamentoPayloadItem } from "./agendamento";

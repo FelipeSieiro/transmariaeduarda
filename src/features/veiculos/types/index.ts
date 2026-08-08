@@ -1,0 +1,1 @@
+export type { Veiculo, StatusVeiculo, CreateVeiculoDTO, UpdateVeiculoDTO } from "./veiculos";

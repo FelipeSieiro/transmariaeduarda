@@ -5,7 +5,7 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { SectionCard } from "@/components/ui-kit/primitives";
-import type { FotoAluno } from "@/types";
+import type { FotoAluno } from "@/features/alunos/types/aluno-detalhes";
 
 interface AlunoFotosProps {
   readonly fotos?: readonly FotoAluno[];
@@ -105,7 +105,7 @@ export function AlunoFotos({
                       variant="destructive"
                       size="icon"
                       className="size-8 rounded-lg"
-                      onClick={(e) => handleDelete(e, foto.id)}
+                      onClick={(e) => handleDelete(e, foto.id!)}
                       title="Excluir foto"
                     >
                       <Trash2 className="size-4" />

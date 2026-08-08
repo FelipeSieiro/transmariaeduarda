@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/table";
 
 import { listarContratos } from "@/features/contratos/services/contratos.service";
-import type { Contrato } from "@/types";
+import type { Contrato } from "@/features/contratos/types/contrato";
 
 function moeda(valor: number) {
   return valor.toLocaleString("pt-BR", {

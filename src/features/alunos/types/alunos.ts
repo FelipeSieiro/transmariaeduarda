@@ -1,5 +1,5 @@
 import type { Contrato, ContratoDetalhe, HistoricoItemDetalhe } from "@/features/contratos/types/contrato";
-import type { EscolaResumida } from "@/types/escola";
+import type { EscolaResumida } from "@/features/escolas/types/escola";
 import type { Mensalidade } from "./mensalidade";
 import type {
   AlunoResponsavelVinculo,

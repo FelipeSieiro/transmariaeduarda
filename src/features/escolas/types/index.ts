@@ -1,0 +1,1 @@
+export type { Escola, EscolaResumida } from "./escola";

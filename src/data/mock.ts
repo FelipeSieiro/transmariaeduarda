@@ -1,9 +1,10 @@
 // Mock data layer — substitui futuras chamadas REST sem refatoração de UI.
+// Nota: Os tipos aqui são temporários para mock. Use os tipos das features para produção.
 
-export type StatusAluno = "ativo" | "inativo" | "suspenso";
-export type StatusPagamento = "pago" | "pendente" | "atrasado";
+export type StatusAlunoMock = "ativo" | "inativo" | "suspenso";
+export type StatusPagamentoMock = "pago" | "pendente" | "atrasado";
 
-export interface Aluno {
+export interface AlunoMock {
   id: string;
   nome: string;
   foto: string;
@@ -23,8 +24,8 @@ export interface Aluno {
   veiculo: string;
   rota: string;
   mensalidade: number;
-  status: StatusAluno;
-  pagamento: StatusPagamento;
+  status: StatusAlunoMock;
+  pagamento: StatusPagamentoMock;
   desde: string;
   contrato: {
     numero: string;
@@ -38,7 +39,7 @@ export interface Aluno {
     competencia: string;
     vencimento: string;
     valor: number;
-    status: StatusPagamento;
+    status: StatusPagamentoMock;
     pagoEm: string | null;
     forma: string;
   }>;
@@ -86,9 +87,9 @@ function pick<T>(arr: T[], i: number): T {
 
 const meses = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
 
-export const alunos: Aluno[] = nomes.map((nome, i) => {
-  const status: StatusAluno = i % 11 === 0 ? "inativo" : i % 17 === 0 ? "suspenso" : "ativo";
-  const pagamento: StatusPagamento = i % 7 === 0 ? "atrasado" : i % 3 === 0 ? "pendente" : "pago";
+export const alunos: AlunoMock[] = nomes.map((nome, i) => {
+  const status: StatusAlunoMock = i % 11 === 0 ? "inativo" : i % 17 === 0 ? "suspenso" : "ativo";
+  const pagamento: StatusPagamentoMock = i % 7 === 0 ? "atrasado" : i % 3 === 0 ? "pendente" : "pago";
   const mensalidade = 320 + (i % 6) * 45;
   const bairro = pick(bairros, i);
   const responsavel = pick(responsaveis, i);
@@ -127,7 +128,7 @@ export const alunos: Aluno[] = nomes.map((nome, i) => {
       competencia: `${m}/2026`,
       vencimento: `0${5 + (i % 3) * 2}/${String(k + 1).padStart(2, "0")}/2026`,
       valor: mensalidade,
-      status: (k > 5 ? pagamento : "pago") as StatusPagamento,
+      status: (k > 5 ? pagamento : "pago") as StatusPagamentoMock,
       pagoEm: k > 5 && pagamento !== "pago" ? null : `0${(k % 6) + 2}/${String(k + 1).padStart(2, "0")}/2026`,
       forma: pick(formas, i + k),
     })),

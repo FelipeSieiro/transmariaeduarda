@@ -1,24 +1,9 @@
-// src/pages/AlunoDetalhe.tsx
+import { useParams } from "react-router-dom";
+import { Bus } from "lucide-react";
 
-import { useEffect, useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, Bus } from "lucide-react";
-import { toast } from "sonner";
+import { useAlunoDetalhe } from "@/features/alunos/hooks/useAlunoDetalhe";
+import { useHistoricoCompleto } from "@/features/alunos/hooks/useHistoricoCompleto";
 
-import { buscarAluno } from "@/features/alunos/services/alunos.service";
-import { buscarContratoPorAluno } from "@/features/contratos/services/contratos.service";
-
-import { adaptarAlunoDetalhe } from "@/features/alunos/adapters/alunoDetalhe.adapter";
-
-import {
-  type Aluno,
-  alunos as alunosMock,
-  brlExato,
-} from "@/data/mock";
-
-import type { Contrato } from "@/types";
-
-import { Button } from "@/components/ui/button";
 import {
   Tabs,
   TabsContent,
@@ -35,233 +20,37 @@ import { AlunoResponsaveis } from "@/features/alunos/components/AlunoResponsavei
 import { AlunoContrato } from "@/features/alunos/components/AlunoContrato";
 import { TabelaMensalidades } from "@/features/alunos/components/TabelaMensalidades";
 import { AlunoOcorrencias } from "@/features/alunos/components/AlunoOcorrencias";
-import {
-  AlunoHistorico,
-  type EventoHistorico,
-} from "@/features/alunos/components/AlunoHistorico";
+import { AlunoHistorico } from "@/features/alunos/components/AlunoHistorico";
 import { AlunoDocumentos } from "@/features/alunos/components/AlunoDocumentos";
 import { AlunoFotos } from "@/features/alunos/components/AlunoFotos";
 import { GradeSemanalRotas } from "@/features/agenda/components/GradeSemanalRotas";
-
-function converterParaTimestamp(dataStr?: string): number {
-  if (!dataStr) return 0;
-
-  if (dataStr.includes("-")) {
-    const timestamp = new Date(dataStr).getTime();
-    return Number.isNaN(timestamp) ? 0 : timestamp;
-  }
-
-  const partes = dataStr.split("/");
-
-  if (partes.length === 3) {
-    const [dia, mes, ano] = partes.map(Number);
-    return new Date(ano, mes - 1, dia).getTime();
-  }
-
-  return 0;
-}
+import { AlunoDetalheLoading } from "@/features/alunos/components/AlunoDetalheLoading";
+import { AlunoDetalheErro } from "@/features/alunos/components/AlunoDetalheErro";
+import { AlunoDetalheBackButton } from "@/features/alunos/components/AlunoDetalheBackButton";
 
 export default function AlunoDetalhe() {
   const { alunoId } = useParams();
-
-  const [aluno, setAluno] =
-    useState<Aluno | null>(null);
-
-  const [carregando, setCarregando] =
-    useState(true);
-
-  const [contrato, setContrato] =
-    useState<Contrato | null>(null);
-
-  useEffect(() => {
-    async function carregarDados() {
-      if (!alunoId) return;
-
-      let alunoData: Aluno | null = null;
-
-      try {
-        const response = await buscarAluno(alunoId);
-
-        alunoData =
-          adaptarAlunoDetalhe(response);
-
-        setAluno(alunoData);
-      } catch (error) {
-        console.error(
-          "Erro ao buscar aluno API:",
-          error
-        );
-
-        const alunoMock = alunosMock.find(
-          (item) => item.id === alunoId
-        );
-
-        if (alunoMock) {
-          alunoData = alunoMock;
-          setAluno(alunoMock);
-        } else {
-          toast.error(
-            "Não foi possível carregar os dados do aluno."
-          );
-        }
-      }
-
-      try {
-        const contratoApi =
-          await buscarContratoPorAluno(alunoId);
-
-        setContrato(contratoApi);
-      } catch (error) {
-        console.error(
-          "Erro ao buscar contrato:",
-          error
-        );
-
-        setContrato(null);
-      } finally {
-        setCarregando(false);
-      }
-    }
-
-    carregarDados();
-  }, [alunoId]);
-
-  const historicoCompleto = useMemo(() => {
-    if (!aluno) return [];
-
-    const eventos: EventoHistorico[] = [];
-
-    if (aluno.desde) {
-      eventos.push({
-        id: `cad-${aluno.id}`,
-        data: aluno.desde,
-        tipo: "cadastro",
-        titulo: "Aluno Matriculado",
-        descricao: `Cadastro inicial realizado para a escola ${aluno.escola} (${aluno.serie} - ${aluno.turno})`,
-      });
-    }
-
-    const listaResponsaveis =
-      aluno.responsaveis &&
-      aluno.responsaveis.length > 0
-        ? aluno.responsaveis
-        : aluno.responsavel
-        ? [
-            {
-              nome: aluno.responsavel,
-              parentesco: aluno.parentesco,
-            },
-          ]
-        : [];
-        
-    listaResponsaveis.forEach((resp, idx) => {
-      eventos.push({
-        id: `resp-${idx}`,
-        data: aluno.desde || "—",
-        tipo: "responsavel",
-        titulo: `Responsável Vinculado: ${resp.nome}`,
-        descricao: `Grau de parentesco: ${
-          resp.parentesco || "Responsável legal"
-        }`,
-      });
-    });
-
-    if (contrato) {
-      eventos.push({
-        id: `cnt-${contrato.id}`,
-        data: contrato.data_inicio,
-        tipo: "contrato",
-        titulo: `Contrato ${contrato.numero} Vinculado`,
-        descricao: `Valor mensal de ${brlExato(
-          contrato.valor_mensalidade
-        )} com vencimento no dia ${
-          contrato.dia_vencimento
-        } (${contrato.forma_pagamento})`,
-      });
-    }
-
-    (aluno.ocorrencias || []).forEach((oc, idx) => {
-      eventos.push({
-        id: `oc-${idx}`,
-        data: oc.data,
-        tipo: "ocorrencia",
-        titulo: `Ocorrência: ${oc.tipo}`,
-        descricao: oc.descricao,
-      });
-    });
-
-    (aluno.historico || []).forEach((h, idx) => {
-      eventos.push({
-        id: `sys-${idx}`,
-        data: h.data,
-        tipo: "sistema",
-        titulo: h.evento,
-      });
-    });
-
-    return eventos.sort(
-      (a, b) =>
-        converterParaTimestamp(b.data) -
-        converterParaTimestamp(a.data)
-    );
-  }, [aluno, contrato]);
+  const { aluno, contrato, carregando, erro } = useAlunoDetalhe(alunoId);
+  const historicoCompleto = useHistoricoCompleto(aluno, contrato);
 
   if (carregando) {
-    return (
-      <div className="mx-auto flex min-h-[50vh] items-center justify-center px-4">
-        <div className="text-center animate-pulse">
-          <p className="text-xs text-muted-foreground">
-            Carregando detalhes do aluno...
-          </p>
-        </div>
-      </div>
-    );
+    return <AlunoDetalheLoading />;
   }
 
-  if (!aluno) {
-    return (
-      <div className="mx-auto flex min-h-[60vh] max-w-xl flex-col items-center justify-center space-y-4 px-4 text-center">
-        <h1 className="text-lg font-semibold tracking-tight text-foreground">
-          Aluno não encontrado
-        </h1>
-
-        <p className="text-xs text-muted-foreground">
-          Verifique a URL ou volte para a lista geral de alunos.
-        </p>
-
-        <Button
-          asChild
-          size="sm"
-          className="h-9 rounded-lg text-xs"
-        >
-          <Link to="/alunos">
-            Voltar para alunos
-          </Link>
-        </Button>
-      </div>
-    );
+  if (!aluno || erro) {
+    return <AlunoDetalheErro />;
   }
 
   return (
     <div className="mx-auto w-full max-w-6xl space-y-6 py-2">
-      <Button
-        asChild
-        variant="ghost"
-        size="sm"
-        className="w-fit h-8 rounded-lg text-xs text-muted-foreground hover:text-foreground px-2"
-      >
-        <Link to="/alunos">
-          <ArrowLeft className="mr-1.5 size-3.5 opacity-70" />
-          Voltar para alunos
-        </Link>
-      </Button>
+      <AlunoDetalheBackButton />
 
-      <AlunoHeader aluno={aluno} />
+      <AlunoHeader aluno={aluno as any} />
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-        <AlunoDadosPessoais aluno={aluno} />
-        <AlunoEndereco aluno={aluno} />
-        <AlunoResponsaveis aluno={aluno} />
+        <AlunoDadosPessoais aluno={aluno as any} />
+        <AlunoEndereco aluno={aluno as any} />
+        <AlunoResponsaveis aluno={aluno as any} />
       </div>
 
       <Tabs
@@ -344,7 +133,7 @@ export default function AlunoDetalhe() {
           {alunoId && (
             <GradeSemanalRotas
               alunoId={alunoId}
-              nomeRotaPrincipal={aluno.rota}
+              nomeRotaPrincipal={(aluno as any).rota}
             />
           )}
         </TabsContent>
@@ -381,7 +170,7 @@ export default function AlunoDetalhe() {
           className="mt-4"
         >
           <AlunoOcorrencias
-            ocorrencias={aluno.ocorrencias}
+            ocorrencias={(aluno as any).ocorrencias}
           />
         </TabsContent>
 
@@ -399,7 +188,7 @@ export default function AlunoDetalhe() {
           className="mt-4"
         >
           <AlunoDocumentos
-            documentos={aluno.documentos}
+            documentos={(aluno as any).documentos}
           />
         </TabsContent>
 

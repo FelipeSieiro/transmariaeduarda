@@ -46,7 +46,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { listarAlunos, removerAluno } from "@/features/alunos/services/alunos.service";
-import type { Aluno } from "@/types";
+import type { Aluno } from "@/features/alunos/types/alunos";
 
 const PAGE_SIZE = 8;
 const TODOS = "__todos__";

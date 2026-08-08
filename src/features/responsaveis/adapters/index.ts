@@ -1,0 +1,1 @@
+export { ResponsavelMapper } from "./responsavel.mapper";
