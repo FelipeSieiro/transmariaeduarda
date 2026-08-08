@@ -31,10 +31,6 @@ export function AlunoHeader({ aluno, onContratoClick }: AlunoHeaderProps) {
         : dados.escola?.nome ?? dados.escolas?.nome ?? "Escola não informada";
 
 
-  const nomeRota = typeof aluno.rota === "string"
-    ? aluno.rota
-    : aluno.rota_obj?.nome ?? aluno.rota_nome ?? "Sem Rota";
-
   const telefoneContato = aluno.telefone || aluno.responsaveis?.[0]?.telefone;
 
   const handleContatar = () => {
@@ -70,15 +66,6 @@ export function AlunoHeader({ aluno, onContratoClick }: AlunoHeaderProps) {
             <p className="text-xs sm:text-sm text-muted-foreground line-clamp-1 sm:truncate mt-0.5">
               {nomeEscola} · {aluno.serie || "Série N/I"} · {aluno.turno || "Turno N/I"}
             </p>
-            <div className="mt-2.5 flex flex-wrap items-center gap-2">
-              <StatusPill status={statusNormalizado} />
-              <StatusPill status={pagamentoNormalizado} />
-              {nomeRota && (
-                <Badge variant="secondary" className="rounded-md font-normal text-xs">
-                  {nomeRota}
-                </Badge>
-              )}
-            </div>
           </div>
         </div>
 
