@@ -1,25 +1,20 @@
-// src/pages/RotaDetalhes.tsx
 import { useEffect, useState } from "react";
-import { useNavigate, useParams, Link } from "react-router-dom";
-import {
-  ArrowLeft,
-  Bus,
-  Clock,
-  Edit,
-  MapPin,
-  Trash2,
-  UserCheck,
-} from "lucide-react";
+import { useNavigate, useParams } from "react-router-dom";
+import { Edit, Route, Trash2, Clock, MapPin, UserCheck, Bus } from "lucide-react";
 import { toast } from "sonner";
 
-import { StatusPill } from "@/components/ui-kit/primitives";
+import { ConfirmDialog } from "@/components/common/confirm-dialog";
+import { DetailSkeleton } from "@/components/common/detail-skeleton";
+import { FieldValue } from "@/components/common/field-value";
+import { DetailPageHeader } from "@/components/common/page-header";
+import { SectionCard, StatusPill } from "@/components/ui-kit/primitives";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-
+import { ROUTES } from "@/constants/routes";
 import { rotasService } from "@/features/rotas/services/rotas.service";
 import { motoristasService } from "@/features/motoristas/services/motoristas.service";
 import { veiculosService } from "@/features/veiculos/services/veiculos.service";
 import type { Rota } from "@/features/rotas/types/rota";
+import { useDisclosure } from "@/hooks/use-disclosure";
 
 export default function RotaDetalhes() {
   const { id } = useParams<{ id: string }>();
@@ -29,6 +24,7 @@ export default function RotaDetalhes() {
   const [nomeMotorista, setNomeMotorista] = useState<string | null>(null);
   const [nomeVeiculo, setNomeVeiculo] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const exclusao = useDisclosure();
 
   useEffect(() => {
     if (!id) return;
@@ -40,7 +36,7 @@ export default function RotaDetalhes() {
 
         if (!dadosRota) {
           toast.error("Rota não encontrada");
-          navigate("/rotas");
+          navigate(ROUTES.ROTAS);
           return;
         }
 
@@ -76,187 +72,139 @@ export default function RotaDetalhes() {
   }, [id, navigate]);
 
   async function handleExcluir() {
-    if (!id || !window.confirm("Tem certeza que deseja excluir esta rota?")) {
-      return;
-    }
+    if (!id) return;
 
     try {
       await rotasService.delete(id);
       toast.success("Rota excluída com sucesso");
-      navigate("/rotas");
+      navigate(ROUTES.ROTAS);
     } catch (error) {
       console.error(error);
       toast.error("Erro ao excluir rota");
     }
   }
 
-  if (loading) {
-    return (
-      <div className="mx-auto max-w-4xl space-y-6 py-2">
-        <Skeleton className="h-9 w-32 rounded-lg" />
-        <Skeleton className="h-48 rounded-xl" />
-      </div>
-    );
-  }
-
+  if (loading) return <DetailSkeleton />;
   if (!rota) return null;
 
+  const formatarHorario = (horario?: string | null) => {
+    if (!horario) return "—";
+    return horario.slice(0, 5);
+  };
+
   return (
-    <div className="mx-auto max-w-4xl space-y-6 py-2">
-      {/* Header Minimalista */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border/40 pb-6">
-        <div className="flex items-center gap-3">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="size-8 rounded-lg text-muted-foreground hover:text-foreground"
-            onClick={() => navigate("/rotas")}
-          >
-            <ArrowLeft className="size-4" />
-          </Button>
-
-          <div>
-            <div className="flex items-center gap-2.5">
-              <h1 className="text-xl font-semibold tracking-tight text-foreground">
-                {rota.nome}
-              </h1>
-              <StatusPill status={rota.status ? rota.status.toLowerCase() : "ativa"} />
-            </div>
-            <p className="text-xs text-muted-foreground font-mono mt-0.5">
-              ID: {rota.id}
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            className="h-9 rounded-lg text-xs"
-            asChild
-          >
-            <Link to={`/rotas/${rota.id}/editar`}>
-              <Edit className="size-3.5 mr-1.5 opacity-70" />
+    <div className="mx-auto max-w-4xl space-y-6">
+      <DetailPageHeader
+        title={rota.nome}
+        subtitle={
+          <span className="font-mono text-xs text-muted-foreground">
+            ID: {rota.id}
+          </span>
+        }
+        icon={Route}
+        backTo={ROUTES.ROTAS}
+        actions={
+          <>
+            <Button
+              variant="outline"
+              className="rounded-xl"
+              onClick={() => navigate(ROUTES.ROTA_EDITAR(rota.id))}
+            >
+              <Edit className="mr-2 size-4" />
               Editar
-            </Link>
-          </Button>
+            </Button>
+            <Button
+              variant="destructive"
+              className="rounded-xl shadow-none"
+              onClick={exclusao.open}
+            >
+              <Trash2 className="mr-2 size-4" />
+              Excluir
+            </Button>
+          </>
+        }
+      />
 
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-9 rounded-lg text-xs text-destructive hover:text-destructive hover:bg-destructive/10"
-            onClick={handleExcluir}
-          >
-            <Trash2 className="size-3.5 mr-1.5" />
-            Excluir
-          </Button>
-        </div>
-      </div>
-
-      {/* Grid Minimalista de Conteúdo */}
-      <div className="grid gap-6 md:grid-cols-3">
-        {/* Informações Principais */}
-        <div className="md:col-span-2 rounded-xl border border-border/60 bg-card/50 p-6 space-y-6">
-          <div>
-            <h2 className="text-sm font-medium text-foreground">Informações da Rota</h2>
-            <p className="text-xs text-muted-foreground mt-0.5">Visão geral e horários do trajeto</p>
+      <SectionCard
+        title="Informações da Rota"
+        description="Visão geral e horários do trajeto"
+      >
+        <div className="grid gap-6 md:grid-cols-2">
+          <div className="space-y-0.5">
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Status
+            </p>
+            <div className="pt-1">
+              <StatusPill active={rota.status?.toLowerCase() === "ativa"} />
+            </div>
           </div>
-
-          <div className="grid gap-6 sm:grid-cols-2 pt-2 border-t border-border/40">
-            <div className="space-y-1">
-              <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground/70">
-                Nome da Rota
-              </span>
-              <p className="text-xs font-medium text-foreground">{rota.nome}</p>
-            </div>
-
-            <div className="space-y-1">
-              <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground/70">
-                Bairro / Região
-              </span>
-              <div className="flex items-center gap-1.5 text-xs font-medium text-foreground">
-                <MapPin className="size-3.5 text-muted-foreground/70" />
-                {rota.bairro || "Não informado"}
-              </div>
-            </div>
-
-            <div className="space-y-1">
-              <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground/70">
-                Horário de Saída
-              </span>
-              <div className="flex items-center gap-1.5 text-xs font-medium text-foreground">
-                <Clock className="size-3.5 text-muted-foreground/70" />
-                {rota.horario_saida ? rota.horario_saida.slice(0, 5) : "—"}
-              </div>
-            </div>
-
-            <div className="space-y-1">
-              <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground/70">
-                Horário de Retorno
-              </span>
-              <div className="flex items-center gap-1.5 text-xs font-medium text-foreground">
-                <Clock className="size-3.5 text-muted-foreground/70" />
-                {rota.horario_retorno ? rota.horario_retorno.slice(0, 5) : "—"}
-              </div>
-            </div>
-
-            <div className="sm:col-span-2 space-y-1 pt-2">
-              <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground/70">
-                Descrição / Observações
-              </span>
-              <p className="text-xs text-muted-foreground/90 leading-relaxed">
-                {rota.descricao || "Nenhuma descrição informada."}
-              </p>
-            </div>
+          <div className="flex items-start gap-3">
+            <span className="mt-0.5 inline-flex rounded-xl bg-muted/60 p-2 text-muted-foreground">
+              <MapPin className="size-4" />
+            </span>
+            <FieldValue label="Bairro/Região" value={rota.bairro || "Não informado"} />
+          </div>
+          <div className="flex items-start gap-3">
+            <span className="mt-0.5 inline-flex rounded-xl bg-muted/60 p-2 text-muted-foreground">
+              <Clock className="size-4" />
+            </span>
+            <FieldValue
+              label="Horário de Saída"
+              value={formatarHorario(rota.horario_saida)}
+            />
+          </div>
+          <div className="flex items-start gap-3">
+            <span className="mt-0.5 inline-flex rounded-xl bg-muted/60 p-2 text-muted-foreground">
+              <Clock className="size-4" />
+            </span>
+            <FieldValue
+              label="Horário de Retorno"
+              value={formatarHorario(rota.horario_retorno)}
+            />
           </div>
         </div>
+      </SectionCard>
 
-        {/* Alocações */}
-        <div className="rounded-xl border border-border/60 bg-card/50 p-6 space-y-6">
-          <div>
-            <h2 className="text-sm font-medium text-foreground">Alocações</h2>
-            <p className="text-xs text-muted-foreground mt-0.5">Equipe e veículo</p>
+      <SectionCard title="Alocações" description="Equipe e veículo">
+        <div className="grid gap-6 md:grid-cols-2">
+          <div className="flex items-start gap-3">
+            <span className="mt-0.5 inline-flex rounded-xl bg-muted/60 p-2 text-muted-foreground">
+              <UserCheck className="size-4" />
+            </span>
+            <FieldValue
+              label="Motorista"
+              value={nomeMotorista || "Não vinculado"}
+            />
           </div>
-
-          <div className="space-y-4 pt-2 border-t border-border/40">
-            <div className="flex items-start gap-3">
-              <div className="grid size-7 shrink-0 place-items-center rounded-md bg-muted/50 text-muted-foreground mt-0.5">
-                <UserCheck className="size-3.5" />
-              </div>
-              <div className="space-y-0.5">
-                <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground/70 block">
-                  Motorista
-                </span>
-                <p className="text-xs font-medium text-foreground">
-                  {nomeMotorista || (rota.motorista_id ? "Carregando..." : "Sem motorista")}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3">
-              <div className="grid size-7 shrink-0 place-items-center rounded-md bg-muted/50 text-muted-foreground mt-0.5">
-                <Bus className="size-3.5" />
-              </div>
-              <div className="space-y-0.5">
-                <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground/70 block">
-                  Veículo
-                </span>
-                <p className="text-xs font-medium text-foreground">
-                  {nomeVeiculo || (rota.veiculo_id ? "Carregando..." : "Sem veículo")}
-                </p>
-              </div>
-            </div>
-
-            {rota.created_at && (
-              <div className="pt-4 border-t border-border/40">
-                <span className="text-[10px] text-muted-foreground/70 block">
-                  Cadastrado em {new Date(rota.created_at).toLocaleDateString("pt-BR")}
-                </span>
-              </div>
-            )}
+          <div className="flex items-start gap-3">
+            <span className="mt-0.5 inline-flex rounded-xl bg-muted/60 p-2 text-muted-foreground">
+              <Bus className="size-4" />
+            </span>
+            <FieldValue
+              label="Veículo"
+              value={nomeVeiculo || "Não vinculado"}
+            />
           </div>
         </div>
-      </div>
+      </SectionCard>
+
+      {rota.descricao && (
+        <SectionCard title="Descrição" description="Observações sobre a rota">
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            {rota.descricao}
+          </p>
+        </SectionCard>
+      )}
+
+      <ConfirmDialog
+        open={exclusao.isOpen}
+        onOpenChange={(aberto) => (aberto ? exclusao.open() : exclusao.close())}
+        title="Excluir rota"
+        description="Tem certeza que deseja excluir esta rota? Esta ação não pode ser desfeita."
+        confirmLabel="Excluir"
+        destructive
+        onConfirm={handleExcluir}
+      />
     </div>
   );
 }

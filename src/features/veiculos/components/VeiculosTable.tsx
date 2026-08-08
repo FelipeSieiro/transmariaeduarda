@@ -49,7 +49,8 @@ export function VeiculosTable({ veiculos, onDelete }: VeiculosTableProps) {
         {veiculos.map((veiculo) => (
           <TableRow
             key={veiculo.id}
-            className="group border-border/40 transition-colors"
+            className="group border-border/40 transition-colors cursor-pointer hover:bg-muted/30"
+            onClick={() => navigate(ROUTES.VEICULO_DETALHE(veiculo.id))}
           >
             <TableCell className="py-3 pl-4">
               <div className="flex items-center gap-3">
@@ -85,9 +86,8 @@ export function VeiculosTable({ veiculos, onDelete }: VeiculosTableProps) {
               />
             </TableCell>
 
-            <TableCell className="py-3 pr-4 text-right">
+            <TableCell className="py-3 pr-4 text-right" onClick={(e) => e.stopPropagation()}>
               <RowActions
-                onView={() => navigate(ROUTES.VEICULO_DETALHE(veiculo.id))}
                 onEdit={() => navigate(ROUTES.VEICULO_EDITAR(veiculo.id))}
                 onDelete={() => onDelete(veiculo)}
               />

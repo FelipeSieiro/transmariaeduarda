@@ -11,16 +11,14 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ROUTES } from "@/constants/routes";
+import type { Rota } from "@/features/rotas/types/rota";
 
-import { formatCurrency } from "@/utils/format-currency";
-import type { Contrato } from "@/features/contratos/types/contrato";
-
-interface ContratosTableProps {
-  contratos: readonly Contrato[];
-  onDelete: (contrato: Contrato) => void;
+interface RotasTableProps {
+  rotas: readonly Rota[];
+  onDelete: (rota: Rota) => void;
 }
 
-export function ContratosTable({ contratos, onDelete }: ContratosTableProps) {
+export function RotasTable({ rotas, onDelete }: RotasTableProps) {
   const navigate = useNavigate();
 
   return (
@@ -28,19 +26,13 @@ export function ContratosTable({ contratos, onDelete }: ContratosTableProps) {
       <TableHeader>
         <TableRow className="border-border/40 hover:bg-transparent">
           <TableHead className="pl-4 text-xs font-medium text-muted-foreground">
-            Número
+            Nome
           </TableHead>
           <TableHead className="text-xs font-medium text-muted-foreground">
-            Aluno
+            Descrição
           </TableHead>
           <TableHead className="text-xs font-medium text-muted-foreground">
-            Escola
-          </TableHead>
-          <TableHead className="text-xs font-medium text-muted-foreground">
-            Mensalidade
-          </TableHead>
-          <TableHead className="text-xs font-medium text-muted-foreground">
-            Vencimento
+            Bairro
           </TableHead>
           <TableHead className="text-xs font-medium text-muted-foreground">
             Status
@@ -50,33 +42,25 @@ export function ContratosTable({ contratos, onDelete }: ContratosTableProps) {
       </TableHeader>
 
       <TableBody>
-        {contratos.map((contrato) => {
-          const isAtivo = contrato.status?.toUpperCase() === "ATIVO";
+        {rotas.map((rota) => {
+          const isAtivo = rota.status?.toLowerCase() === "ativa";
 
           return (
             <TableRow
-              key={contrato.id}
+              key={rota.id}
               className="border-border/40 transition-colors group cursor-pointer hover:bg-muted/30"
-              onClick={() => navigate(ROUTES.CONTRATO_DETALHE(contrato.id))}
+              onClick={() => navigate(ROUTES.ROTA_DETALHE(rota.id))}
             >
               <TableCell className="pl-4 py-3 font-medium text-xs text-foreground">
-                {contrato.numero}
+                {rota.nome}
               </TableCell>
 
-              <TableCell className="py-3 text-xs text-foreground">
-                {contrato.alunos?.nome ?? "—"}
-              </TableCell>
-
-              <TableCell className="py-3 text-xs text-muted-foreground/80">
-                {contrato.alunos?.escolas?.nome ?? "—"}
-              </TableCell>
-
-              <TableCell className="py-3 text-xs font-medium text-foreground">
-                {formatCurrency(Number(contrato.valor_mensalidade))}
+              <TableCell className="py-3 text-xs text-muted-foreground/80 max-w-sm truncate">
+                {rota.descricao ?? "—"}
               </TableCell>
 
               <TableCell className="py-3 text-xs text-muted-foreground/80">
-                Dia {contrato.dia_vencimento}
+                {rota.bairro ?? "—"}
               </TableCell>
 
               <TableCell className="py-3">
@@ -85,8 +69,8 @@ export function ContratosTable({ contratos, onDelete }: ContratosTableProps) {
 
               <TableCell className="pr-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
                 <RowActions
-                  onEdit={() => navigate(ROUTES.CONTRATO_EDITAR(contrato.id))}
-                  onDelete={() => onDelete(contrato)}
+                  onEdit={() => navigate(ROUTES.ROTA_EDITAR(rota.id))}
+                  onDelete={() => onDelete(rota)}
                 />
               </TableCell>
             </TableRow>

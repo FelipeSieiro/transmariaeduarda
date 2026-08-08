@@ -12,6 +12,7 @@ import { useMotorista } from "@/features/motoristas/hooks/use-motorista";
 import { useDisclosure } from "@/hooks/use-disclosure";
 import { formatCurrency } from "@/utils/format-currency";
 import { formatDate } from "@/utils/format-date";
+import { formatCPF, formatPhone } from "@/utils/format-text";
 
 export default function MotoristaDetalhes() {
   const { id } = useParams<{ id: string }>();
@@ -71,10 +72,10 @@ export default function MotoristaDetalhes() {
             </div>
           </div>
 
-          <FieldValue label="CPF" value={motorista.cpf} />
-          <FieldValue label="Telefone" value={motorista.telefone} />
-          <FieldValue label="CNH" value={motorista.cnh} />
-          <FieldValue label="Categoria CNH" value={motorista.categoria_cnh} />
+          <FieldValue label="CPF" value={formatCPF(motorista.cpf) || "—"} />
+          <FieldValue label="Telefone" value={formatPhone(motorista.telefone) || "—"} />
+          <FieldValue label="CNH" value={motorista.cnh || "—"} />
+          <FieldValue label="Categoria CNH" value={motorista.categoria_cnh || "—"} />
           <FieldValue
             label="Salário"
             value={formatCurrency(motorista.salario)}

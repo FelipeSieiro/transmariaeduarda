@@ -3,6 +3,36 @@ export function onlyDigits(valor: string | null | undefined): string {
   return (valor ?? "").replace(/\D/g, "");
 }
 
+// Formata CPF: 12345678901 -> 123.456.789-01
+export function formatCPF(cpf: string | null | undefined): string {
+  const digits = onlyDigits(cpf);
+  if (digits.length !== 11) return cpf || "";
+
+  return digits.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+}
+
+// Formata telefone: 11987654321 -> (11) 98765-4321
+export function formatPhone(phone: string | null | undefined): string {
+  const digits = onlyDigits(phone);
+  if (digits.length === 0) return phone || "";
+
+  if (digits.length === 11) {
+    return digits.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
+  }
+
+  if (digits.length === 10) {
+    return digits.replace(/(\d{2})(\d{4})(\d{4})/, "($1) $2-$3");
+  }
+
+  return phone || "";
+}
+
+// Valida e formata email básico
+export function formatEmail(email: string | null | undefined): string {
+  if (!email) return "";
+  return email.toLowerCase().trim();
+}
+
 // Iniciais para avatares: "Maria Eduarda Silva" -> "MS"
 export function getInitials(nome?: string | null, fallback = "AL"): string {
   if (!nome) return fallback;

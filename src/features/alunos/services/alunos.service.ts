@@ -50,4 +50,4 @@ export const listarAlunos = baseService.getAll;
 export const buscarAluno = buscarAlunoComContratos;
 export const atualizarAluno = baseService.update;
 export const removerAluno = baseService.remove;
-export { obterAgendamentosRotasDoAluno };
+export { criarAlunoCompleto, obterAgendamentosRotasDoAluno };

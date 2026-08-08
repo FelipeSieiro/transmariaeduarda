@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/table";
 import { ROUTES } from "@/constants/routes";
 import type { Motorista } from "@/features/motoristas/types/motorista";
-import { getInitials } from "@/utils/format-text";
+import { getInitials, formatCPF, formatPhone } from "@/utils/format-text";
 
 interface MotoristasTableProps {
   motoristas: readonly Motorista[];
@@ -53,7 +53,8 @@ export function MotoristasTable({
         {motoristas.map((motorista) => (
           <TableRow
             key={motorista.id}
-            className="group border-border/40 transition-colors"
+            className="group border-border/40 transition-colors cursor-pointer hover:bg-muted/30"
+            onClick={() => navigate(ROUTES.MOTORISTA_DETALHE(motorista.id))}
           >
             <TableCell className="py-3 pl-4">
               <div className="flex items-center gap-3">
@@ -75,11 +76,11 @@ export function MotoristasTable({
             </TableCell>
 
             <TableCell className="py-3 font-mono text-xs text-muted-foreground/80">
-              {motorista.cpf ?? "—"}
+              {formatCPF(motorista.cpf) || "—"}
             </TableCell>
 
             <TableCell className="py-3 font-mono text-xs text-muted-foreground/80">
-              {motorista.telefone ?? "—"}
+              {formatPhone(motorista.telefone) || "—"}
             </TableCell>
 
             <TableCell className="py-3 text-xs text-muted-foreground/80">
@@ -96,9 +97,8 @@ export function MotoristasTable({
               <StatusPill status={motorista.status ?? "ativo"} />
             </TableCell>
 
-            <TableCell className="py-3 pr-4 text-right">
+            <TableCell className="py-3 pr-4 text-right" onClick={(e) => e.stopPropagation()}>
               <RowActions
-                onView={() => navigate(ROUTES.MOTORISTA_DETALHE(motorista.id))}
                 onEdit={() => navigate(ROUTES.MOTORISTA_EDITAR(motorista.id))}
                 onDelete={() => onDelete(motorista)}
               />

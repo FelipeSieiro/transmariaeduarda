@@ -12,5 +12,16 @@ export function useContratos() {
     { initialData: LISTA_VAZIA, errorMessage: "Erro ao carregar contratos" },
   );
 
-  return { contratos: data, loading, reload };
+  async function remover(id: string) {
+    try {
+      await contratosService.remove(id);
+      toast.success("Contrato excluído com sucesso");
+      reload();
+    } catch (error) {
+      toast.error("Erro ao excluir contrato");
+      throw error;
+    }
+  }
+
+  return { contratos: data, loading, reload, remover };
 }

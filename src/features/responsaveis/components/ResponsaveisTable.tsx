@@ -10,6 +10,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ROUTES } from "@/constants/routes";
+import { formatCPF, formatPhone, formatEmail } from "@/utils/format-text";
 import type { Responsavel } from "@/features/responsaveis/types/responsavel";
 
 interface ResponsaveisTableProps {
@@ -50,33 +51,31 @@ export function ResponsaveisTable({
         {responsaveis.map((responsavel) => (
           <TableRow
             key={responsavel.id}
-            className="group border-border/40 transition-colors"
+            className="group border-border/40 transition-colors cursor-pointer hover:bg-muted/30"
+            onClick={() => navigate(ROUTES.RESPONSAVEL_DETALHE(responsavel.id))}
           >
             <TableCell className="py-3 pl-4 text-xs font-medium text-foreground">
               {responsavel.nome}
             </TableCell>
 
             <TableCell className="py-3 font-mono text-xs text-muted-foreground/80">
-              {responsavel.cpf ?? "—"}
+              {formatCPF(responsavel.cpf) || "—"}
             </TableCell>
 
             <TableCell className="py-3 font-mono text-xs text-muted-foreground/80">
-              {responsavel.telefone ?? "—"}
+              {formatPhone(responsavel.telefone) || "—"}
             </TableCell>
 
             <TableCell className="py-3 text-xs text-muted-foreground/80">
-              {responsavel.email ?? "—"}
+              {formatEmail(responsavel.email) || "—"}
             </TableCell>
 
             <TableCell className="max-w-xs truncate py-3 text-xs text-muted-foreground/80">
               {responsavel.endereco ?? "—"}
             </TableCell>
 
-            <TableCell className="py-3 pr-4 text-right">
+            <TableCell className="py-3 pr-4 text-right" onClick={(e) => e.stopPropagation()}>
               <RowActions
-                onView={() =>
-                  navigate(ROUTES.RESPONSAVEL_DETALHE(responsavel.id))
-                }
                 onEdit={() =>
                   navigate(ROUTES.RESPONSAVEL_EDITAR(responsavel.id))
                 }

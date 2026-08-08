@@ -7,7 +7,7 @@ import type { Veiculo } from "@/features/veiculos/types/veiculos";
 
 // Carrega um veículo e resolve o nome do motorista vinculado.
 export function useVeiculo(id: string | undefined) {
-  const { data: veiculo, loading } = useAsyncData<Veiculo | null>(
+  const { data: veiculo, loading, reload } = useAsyncData<Veiculo | null>(
     () => veiculosService.getById(id as string),
     {
       initialData: null,
@@ -31,5 +31,10 @@ export function useVeiculo(id: string | undefined) {
       .catch(() => setNomeMotorista(null));
   }, [motoristaId]);
 
-  return { veiculo, nomeMotorista, loading };
+  async function remover() {
+    if (!id) return;
+    await veiculosService.remove(id);
+  }
+
+  return { veiculo, nomeMotorista, loading, reload, remover };
 }

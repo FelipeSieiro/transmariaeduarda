@@ -1,14 +1,9 @@
-import { Link } from "react-router-dom";
-import { MapPin, MoreHorizontal } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { MapPin } from "lucide-react";
 
+import { RowActions } from "@/components/common/row-actions";
 import { StatusPill } from "@/components/ui-kit/primitives";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
   Table,
   TableBody,
@@ -17,6 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { ROUTES } from "@/constants/routes";
 
 import { getInitials } from "@/utils/format-text";
 import type { Aluno } from "@/features/alunos/types/alunos";
@@ -40,6 +36,8 @@ function formatarMatricula(aluno: Aluno): string {
 }
 
 export function AlunosTable({ alunos, onDelete }: AlunosTableProps) {
+  const navigate = useNavigate();
+
   return (
     <Table>
       <TableHeader>
@@ -65,7 +63,11 @@ export function AlunosTable({ alunos, onDelete }: AlunosTableProps) {
           const isAtivo = aluno.status?.toLowerCase() === "ativo";
 
           return (
-            <TableRow key={aluno.id} className="border-border/40 transition-colors group">
+            <TableRow
+              key={aluno.id}
+              className="border-border/40 transition-colors group cursor-pointer hover:bg-muted/30"
+              onClick={() => navigate(ROUTES.ALUNO_DETALHE(aluno.id))}
+            >
               <TableCell className="pl-4 py-3">
                 <div className="flex items-center gap-3">
                   <Avatar className="size-8">
@@ -98,28 +100,11 @@ export function AlunosTable({ alunos, onDelete }: AlunosTableProps) {
                 <StatusPill active={isAtivo} />
               </TableCell>
 
-              <TableCell className="pr-4 py-3 text-right">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <button className="size-7 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50 flex items-center justify-center">
-                      <MoreHorizontal className="size-3.5" />
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-32">
-                    <DropdownMenuItem asChild>
-                      <Link to={`/alunos/${aluno.id}`}>Ver detalhes</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to={`/alunos/${aluno.id}/editar`}>Editar</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => onDelete(aluno)}
-                      className="text-destructive focus:text-destructive"
-                    >
-                      Excluir
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+              <TableCell className="pr-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
+                <RowActions
+                  onEdit={() => navigate(ROUTES.ALUNO_EDITAR(aluno.id))}
+                  onDelete={() => onDelete(aluno)}
+                />
               </TableCell>
             </TableRow>
           );

@@ -1,14 +1,18 @@
 import { useNavigate } from "react-router-dom";
-import { Plus } from "lucide-react";
+import { Download, Plus } from "lucide-react";
+import { toast } from "sonner";
 
+import { ConfirmDialog } from "@/components/common/confirm-dialog";
 import { ListToolbar } from "@/components/common/list-toolbar";
 import { ListPageHeader } from "@/components/common/page-header";
+import { PaginationControls } from "@/components/common/pagination-controls";
 import { TableCard } from "@/components/common/table-card";
 import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/constants/routes";
 import { ContratosTable } from "@/features/contratos/components/ContratosTable";
 import { useContratos } from "@/features/contratos/hooks/use-contratos";
 import type { Contrato } from "@/features/contratos/types/contrato";
+import { useConfirm } from "@/hooks/use-confirm";
 import { useListControls } from "@/hooks/use-list-controls";
 
 type OrdemContrato = "numero" | "aluno";
@@ -20,7 +24,7 @@ const ORDENADORES: Record<OrdemContrato, (a: Contrato, b: Contrato) => number> =
 
 export default function Contratos() {
   const navigate = useNavigate();
-  const { contratos, loading } = useContratos();
+  const { contratos, loading, remover } = useContratos();
 
   const lista = useListControls<Contrato, OrdemContrato>(contratos, {
     searchFields: (contrato) => [
@@ -32,6 +36,10 @@ export default function Contratos() {
     initialSort: "numero",
   });
 
+  const exclusao = useConfirm<Contrato>(
+    (contrato) => void remover(contrato.id),
+  );
+
   return (
     <div className="mx-auto max-w-6xl space-y-6 py-2">
       <ListPageHeader
@@ -42,14 +50,26 @@ export default function Contratos() {
             : "contratos cadastrados"
         }`}
         actions={
-          <Button
-            size="sm"
-            className="h-9 rounded-lg text-xs"
-            onClick={() => navigate(ROUTES.CONTRATO_NOVO)}
-          >
-            <Plus className="mr-1.5 size-3.5" />
-            Novo contrato
-          </Button>
+          <>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-9 rounded-lg text-xs"
+              onClick={() => toast.success("Exportação iniciada")}
+            >
+              <Download className="mr-1.5 size-3.5 opacity-70" />
+              Exportar
+            </Button>
+
+            <Button
+              size="sm"
+              className="h-9 rounded-lg text-xs"
+              onClick={() => navigate(ROUTES.CONTRATO_NOVO)}
+            >
+              <Plus className="mr-1.5 size-3.5" />
+              Novo contrato
+            </Button>
+          </>
         }
       />
 
@@ -70,8 +90,27 @@ export default function Contratos() {
         emptyMessage="Nenhum contrato encontrado."
         loading={loading}
       >
-        <ContratosTable contratos={lista.visible} />
+        <ContratosTable contratos={lista.visible} onDelete={exclusao.request} />
       </TableCard>
+
+      <PaginationControls
+        page={lista.page}
+        totalPages={lista.totalPages}
+        onPrevious={lista.previousPage}
+        onNext={lista.nextPage}
+      />
+
+      <ConfirmDialog
+        open={exclusao.isOpen}
+        onOpenChange={exclusao.setOpen}
+        title="Excluir contrato"
+        description={`Tem certeza que deseja excluir o contrato ${
+          exclusao.target?.numero ?? "este contrato"
+        }? Esta ação não pode ser desfeita.`}
+        confirmLabel="Excluir"
+        destructive
+        onConfirm={exclusao.confirm}
+      />
     </div>
   );
 }

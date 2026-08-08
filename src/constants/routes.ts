@@ -13,6 +13,7 @@ export const ROUTES = {
   CONTRATOS: "/contratos",
   CONTRATO_NOVO: "/contratos/novo",
   CONTRATO_DETALHE: (id: string) => `/contratos/${id}`,
+  CONTRATO_EDITAR: (id: string) => `/contratos/${id}/editar`,
 
   RESPONSAVEIS: "/responsaveis",
   RESPONSAVEL_NOVO: "/responsaveis/novo",

@@ -42,7 +42,11 @@ export function useResponsavelForm() {
     }));
   }
 
-  async function submit() {
+  function initialize(dados: Partial<ResponsavelFormValues>) {
+    setValues((atual) => ({ ...atual, ...dados }));
+  }
+
+  async function submit(id?: string) {
     if (!values.nome.trim()) {
       toast.error("Informe o nome completo do responsável");
       return;
@@ -55,16 +59,23 @@ export function useResponsavelForm() {
 
     try {
       setSubmitting(true);
-      await responsaveisService.create(ResponsavelMapper.toResponsavelPayload(values));
-      toast.success("Responsável cadastrado com sucesso");
+      const payload = ResponsavelMapper.toResponsavelPayload(values);
+
+      if (id) {
+        await responsaveisService.update(id, payload);
+        toast.success("Responsável atualizado com sucesso");
+      } else {
+        await responsaveisService.create(payload);
+        toast.success("Responsável cadastrado com sucesso");
+      }
       navigate(ROUTES.RESPONSAVEIS);
     } catch (error) {
       console.error(error);
-      toast.error("Erro ao cadastrar responsável");
+      toast.error(id ? "Erro ao atualizar responsável" : "Erro ao cadastrar responsável");
     } finally {
       setSubmitting(false);
     }
   }
 
-  return { values, setField, setEnderecoField, submitting, submit };
+  return { values, setField, setEnderecoField, submitting, submit, initialize };
 }

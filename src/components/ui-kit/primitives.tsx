@@ -79,18 +79,23 @@ const statusStyles: Record<string, string> = {
   pago: "bg-success/12 text-success",
   pendente: "bg-warning/15 text-warning",
   atrasado: "bg-destructive/12 text-destructive",
+  ativa: "bg-success/12 text-success",
+  inativa: "bg-muted text-muted-foreground",
 };
 
-export function StatusPill({ status }: { status: string }) {
+export function StatusPill({ status, active }: { status?: string; active?: boolean }) {
+  const computedStatus = active !== undefined ? (active ? "ativo" : "inativo") : status;
+  const normalizedStatus = computedStatus?.toLowerCase() ?? "inativo";
+
   return (
     <span
       className={cn(
         "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium capitalize",
-        statusStyles[status] ?? "bg-muted text-muted-foreground",
+        statusStyles[normalizedStatus] ?? "bg-muted text-muted-foreground",
       )}
     >
       <span className="size-1.5 rounded-full bg-current" />
-      {status}
+      {normalizedStatus}
     </span>
   );
 }
