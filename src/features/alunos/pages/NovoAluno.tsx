@@ -53,7 +53,7 @@ import { listarRotas } from "@/features/rotas/services/rotas.service";
 import type { Responsavel } from "@/features/responsaveis/types/responsavel";
 import type { Escola } from "@/features/escolas/types/escola";
 import type { Rota } from "@/features/rotas/types/rota";
-import { toResponsavelPayload } from "@/features/responsaveis/mappers/responsavel.mapper";
+import { ResponsavelMapper } from "@/features/responsaveis/adapters/responsavel.mapper";
 
 import {
   SERIES,
@@ -248,7 +248,7 @@ export default function NovoAluno() {
     try {
       setCriandoResponsavel(true);
       const novo = await responsaveisService.create(
-        toResponsavelPayload({
+        ResponsavelMapper.toResponsavelPayload({
           nome: novoResponsavel.nome,
           cpf: novoResponsavel.cpf,
           telefone: novoResponsavel.telefone,

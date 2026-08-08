@@ -1,5 +1,5 @@
 import { Input } from "@/components/ui/input";
-import type { EnderecoFormValues } from "@/features/responsaveis/mappers/responsavel.mapper";
+import type { EnderecoFormValues } from "@/features/responsaveis/adapters/responsavel.mapper";
 
 interface EnderecoFieldsProps {
   values: EnderecoFormValues;

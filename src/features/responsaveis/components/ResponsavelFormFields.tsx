@@ -5,7 +5,7 @@ import { EnderecoFields } from "@/features/responsaveis/components/EnderecoField
 import type {
   EnderecoFormValues,
   ResponsavelFormValues,
-} from "@/features/responsaveis/mappers/responsavel.mapper";
+} from "@/features/responsaveis/adapters/responsavel.mapper";
 
 interface ResponsavelFormFieldsProps {
   values: ResponsavelFormValues;

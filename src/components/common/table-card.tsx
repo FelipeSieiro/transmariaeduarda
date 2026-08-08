@@ -7,6 +7,7 @@ interface TableCardProps {
   // Mensagem exibida quando a listagem está vazia.
   emptyMessage: string;
   isEmpty: boolean;
+  loading?: boolean;
   children: ReactNode;
 }
 
@@ -16,6 +17,7 @@ export function TableCard({
   action,
   emptyMessage,
   isEmpty,
+  loading = false,
   children,
 }: TableCardProps) {
   return (
@@ -27,7 +29,11 @@ export function TableCard({
         {action}
       </div>
 
-      {isEmpty ? (
+      {loading ? (
+        <div className="p-12 text-center text-xs text-muted-foreground animate-pulse">
+          Carregando...
+        </div>
+      ) : isEmpty ? (
         <div className="p-12 text-center text-xs text-muted-foreground">
           {emptyMessage}
         </div>

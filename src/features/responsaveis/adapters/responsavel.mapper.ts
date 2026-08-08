@@ -1,5 +1,23 @@
 import type { Responsavel } from "@/features/responsaveis/types/responsavel";
 
+export interface EnderecoFormValues {
+  cidade: string;
+  bairro: string;
+  logradouro: string;
+  numero: string;
+  complemento: string;
+  cep: string;
+}
+
+export interface ResponsavelFormValues {
+  nome: string;
+  cpf: string;
+  telefone: string;
+  email: string;
+  observacoes: string;
+  endereco: EnderecoFormValues;
+}
+
 /**
  * Mapper para conversão de dados de responsáveis entre API e UI
  */
@@ -17,10 +35,8 @@ export class ResponsavelMapper {
   static formatTelefone(telefone?: string | null): string {
     if (!telefone) return "-";
     
-    // Remove caracteres não numéricos
     const numeros = telefone.replace(/\D/g, "");
     
-    // Formata como (XX) XXXXX-XXXX ou (XX) XXXX-XXXX
     if (numeros.length === 11) {
       return `(${numeros.slice(0, 2)}) ${numeros.slice(2, 7)}-${numeros.slice(7)}`;
     }
@@ -50,6 +66,33 @@ export class ResponsavelMapper {
       .join(" - ");
     
     return [partes, local].filter(Boolean).join(" - ") || "-";
+  }
+
+  /**
+   * Junta os campos de endereço em uma única string, no formato aceito pela API.
+   */
+  static formatEnderecoFromForm(endereco: EnderecoFormValues): string {
+    const partes: string[] = [];
+    const logradouro = endereco.logradouro.trim();
+    const numero = endereco.numero.trim();
+
+    if (logradouro) {
+      partes.push(numero ? `${logradouro}, ${numero}` : logradouro);
+    }
+
+    for (const campo of [
+      endereco.complemento,
+      endereco.bairro,
+      endereco.cidade,
+    ]) {
+      if (campo.trim()) partes.push(campo.trim());
+    }
+
+    if (endereco.cep.trim()) {
+      partes.push(`CEP: ${endereco.cep.trim()}`);
+    }
+
+    return partes.join(" - ");
   }
 
   /**
@@ -86,5 +129,23 @@ export class ResponsavelMapper {
    */
   static isEmergencia(responsavelEmergencia?: boolean | null): boolean {
     return Boolean(responsavelEmergencia);
+  }
+
+  /**
+   * Converte valores do formulário para payload da API
+   */
+  static toResponsavelPayload(
+    values: ResponsavelFormValues,
+  ): Partial<Responsavel> {
+    const endereco = this.formatEnderecoFromForm(values.endereco);
+
+    return {
+      nome: values.nome,
+      cpf: values.cpf,
+      telefone: values.telefone,
+      email: values.email,
+      ...(endereco ? { endereco } : {}),
+      ...(values.observacoes ? { observacoes: values.observacoes } : {}),
+    };
   }
 }

@@ -1,62 +1,53 @@
-import api from "@/config/api";
 import type { AgendamentoRota } from "@/features/agenda/types/agendamento";
 import type { Aluno, CadastroAlunoCompleto } from "@/features/alunos/types/alunos";
-import type { ApiResponse } from "@/types/shared";
+import { createCrudService } from "@/services/http/create-crud-service";
 import { agendamentoRotasService } from "@/features/agenda/services/agendamento-rotas.service";
 
-export async function criarAluno(aluno: Partial<Aluno>): Promise<Aluno> {
-  const response = await api.post<ApiResponse<Aluno>>("/alunos", aluno);
-  return response.data.data;
-}
+const baseService = createCrudService<Aluno, Partial<Aluno>>("/alunos");
 
-export async function criarAlunoCompleto(
+async function criarAlunoCompleto(
   payload: CadastroAlunoCompleto
 ): Promise<Aluno> {
-  const response = await api.post<ApiResponse<Aluno>>("/alunos/completo", payload);
-  return response.data.data;
+  return baseService.create(payload);
 }
 
-export async function listarAlunos(): Promise<Aluno[]> {
-  const response = await api.get<ApiResponse<Aluno[]>>("/alunos");
-  return response.data.data;
-}
-
-export async function buscarAluno(id: string): Promise<Aluno> {
-  const response = await api.get<ApiResponse<Aluno>>(`/alunos/${id}`);
-  const aluno = response.data.data;
+async function buscarAlunoComContratos(id: string): Promise<Aluno> {
+  const aluno = await baseService.getById(id);
 
   if (aluno.contratos && aluno.contratos.length > 0) {
-    aluno.contrato = aluno.contratos[0];
-    aluno.mensalidades = aluno.contratos[0].mensalidades ?? [];
+    const primeiroContrato = aluno.contratos[0];
+    if (primeiroContrato) {
+      aluno.contrato = primeiroContrato;
+      aluno.mensalidades = primeiroContrato.mensalidades ?? [];
+    }
   }
 
   return aluno;
 }
 
-export async function atualizarAluno(
-  id: string,
-  aluno: Partial<Aluno>
-): Promise<Aluno> {
-  const response = await api.put<ApiResponse<Aluno>>(`/alunos/${id}`, aluno);
-  return response.data.data;
-}
-
-export async function removerAluno(id: string): Promise<void> {
-  await api.delete<ApiResponse<unknown>>(`/alunos/${id}`);
-}
-
-export async function obterAgendamentosRotasDoAluno(
+async function obterAgendamentosRotasDoAluno(
   alunoId: string
 ): Promise<AgendamentoRota[]> {
   return agendamentoRotasService.getByAlunoId(alunoId);
 }
 
 export const alunosService = {
-  criarAluno,
+  ...baseService,
+  getAll: baseService.getAll,
+  getById: buscarAlunoComContratos,
+  create: baseService.create,
+  update: baseService.update,
+  remove: baseService.remove,
   criarAlunoCompleto,
-  listarAlunos,
-  buscarAluno,
-  atualizarAluno,
-  removerAluno,
+  listarAlunos: baseService.getAll,
+  buscarAluno: buscarAlunoComContratos,
+  atualizarAluno: baseService.update,
+  removerAluno: baseService.remove,
   obterAgendamentosRotasDoAluno,
 };
+
+export const listarAlunos = baseService.getAll;
+export const buscarAluno = buscarAlunoComContratos;
+export const atualizarAluno = baseService.update;
+export const removerAluno = baseService.remove;
+export { obterAgendamentosRotasDoAluno };

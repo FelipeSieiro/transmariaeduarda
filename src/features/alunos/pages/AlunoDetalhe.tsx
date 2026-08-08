@@ -30,7 +30,7 @@ import { AlunoDetalheBackButton } from "@/features/alunos/components/AlunoDetalh
 
 export default function AlunoDetalhe() {
   const { alunoId } = useParams();
-  const { aluno, contrato, carregando, erro } = useAlunoDetalhe(alunoId);
+  const { aluno, alunoOriginal, contrato, carregando, erro } = useAlunoDetalhe(alunoId);
   const historicoCompleto = useHistoricoCompleto(aluno, contrato);
 
   if (carregando) {
@@ -50,7 +50,7 @@ export default function AlunoDetalhe() {
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
         <AlunoDadosPessoais aluno={aluno as any} />
         <AlunoEndereco aluno={aluno as any} />
-        <AlunoResponsaveis aluno={aluno as any} />
+        <AlunoResponsaveis aluno={alunoOriginal || aluno} />
       </div>
 
       <Tabs

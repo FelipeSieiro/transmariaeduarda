@@ -4,14 +4,10 @@ import { toast } from "sonner";
 
 import { ROUTES } from "@/constants/routes";
 import { useFormState } from "@/hooks/use-form-state";
-import {
-  toResponsavelPayload,
-  type EnderecoFormValues,
-  type ResponsavelFormValues,
-} from "@/features/responsaveis/mappers/responsavel.mapper";
+import { ResponsavelMapper } from "@/features/responsaveis/adapters/responsavel.mapper";
 import { responsaveisService } from "@/features/responsaveis/services/responsaveis.service";
 
-const VALORES_INICIAIS: ResponsavelFormValues = {
+const VALORES_INICIAIS = {
   nome: "",
   cpf: "",
   telefone: "",
@@ -26,6 +22,9 @@ const VALORES_INICIAIS: ResponsavelFormValues = {
     cep: "",
   },
 };
+
+type ResponsavelFormValues = typeof VALORES_INICIAIS;
+type EnderecoFormValues = ResponsavelFormValues["endereco"];
 
 // Estado e submissão do cadastro de responsável.
 export function useResponsavelForm() {
@@ -56,7 +55,7 @@ export function useResponsavelForm() {
 
     try {
       setSubmitting(true);
-      await responsaveisService.create(toResponsavelPayload(values));
+      await responsaveisService.create(ResponsavelMapper.toResponsavelPayload(values));
       toast.success("Responsável cadastrado com sucesso");
       navigate(ROUTES.RESPONSAVEIS);
     } catch (error) {

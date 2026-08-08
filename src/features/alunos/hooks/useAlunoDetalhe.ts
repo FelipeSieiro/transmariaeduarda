@@ -15,6 +15,7 @@ import type { AlunoDetalhe } from "@/features/alunos/types/alunos";
 
 interface UseAlunoDetalheResult {
   aluno: AlunoDetalhe | null;
+  alunoOriginal: any | null;
   contrato: Contrato | null;
   carregando: boolean;
   erro: boolean;
@@ -22,6 +23,7 @@ interface UseAlunoDetalheResult {
 
 export function useAlunoDetalhe(alunoId?: string): UseAlunoDetalheResult {
   const [aluno, setAluno] = useState<AlunoDetalhe | null>(null);
+  const [alunoOriginal, setAlunoOriginal] = useState<any | null>(null);
   const [carregando, setCarregando] = useState(true);
   const [contrato, setContrato] = useState<Contrato | null>(null);
   const [erro, setErro] = useState(false);
@@ -34,11 +36,14 @@ export function useAlunoDetalhe(alunoId?: string): UseAlunoDetalheResult {
       setErro(false);
 
       let alunoData: AlunoDetalhe | null = null;
+      let alunoRaw: any = null;
 
       try {
         const response = await buscarAluno(alunoId);
+        alunoRaw = response;
         alunoData = adaptarAlunoDetalhe(response);
         setAluno(alunoData);
+        setAlunoOriginal(response);
       } catch (error) {
         console.error("Erro ao buscar aluno API:", error);
 
@@ -48,7 +53,9 @@ export function useAlunoDetalhe(alunoId?: string): UseAlunoDetalheResult {
 
         if (alunoMock) {
           alunoData = alunoMock as unknown as AlunoDetalhe;
+          alunoRaw = alunoMock;
           setAluno(alunoData);
+          setAlunoOriginal(alunoMock);
         } else {
           toast.error(
             "Não foi possível carregar os dados do aluno."
@@ -71,5 +78,5 @@ export function useAlunoDetalhe(alunoId?: string): UseAlunoDetalheResult {
     carregarDados();
   }, [alunoId]);
 
-  return { aluno, contrato, carregando, erro };
+  return { aluno, alunoOriginal, contrato, carregando, erro };
 }
